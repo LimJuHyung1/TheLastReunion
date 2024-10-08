@@ -6,13 +6,13 @@ using Newtonsoft.Json;
 [System.Serializable]
 public class EvidenceInfo
 {
-    public string name;             // Áõ°Å ÀÌ¸§
-    public string description;      // Áõ°Å¸¦ Å¬¸¯ÇßÀ» °æ¿ì È­¸é¿¡ º¸ÀÌ´Â ¹®±¸
+    public string name;             // ì¦ê±° ì´ë¦„
+    public string description;      // ì¦ê±°ë¥¼ í´ë¦­í–ˆì„ ê²½ìš° í™”ë©´ì— ë³´ì´ëŠ” ë¬¸êµ¬
     public string information;
     public string foundAt;
     public string relationship;
     public string importance;
-    public string notes;            // Ãß°¡ÀûÀ¸·Î ÇÊ¿äÇÑ Á¤º¸³ª ´Ü¼­
+    public string notes;            // ì¶”ê°€ì ìœ¼ë¡œ í•„ìš”í•œ ì •ë³´ë‚˜ ë‹¨ì„œ
     // public string timestamp;        
 
 
@@ -24,12 +24,12 @@ public class EvidenceInfo
 [System.Serializable]
 public class NPCRoleInfo
 {
-    public string npcName;                   // NPC ÀÌ¸§
-    public string commonRoleDescription;     // °øÅë ¿ªÇÒ ¼³¸í
-    public string specificRoleDescription;   // Æ¯Á¤ ¿ªÇÒ ¼³¸í
+    public string npcName;                   // NPC ì´ë¦„
+    public string commonRoleDescription;     // ê³µí†µ ì—­í•  ì„¤ëª…
+    public string specificRoleDescription;   // íŠ¹ì • ì—­í•  ì„¤ëª…
 }
 
-// JSON µ¥ÀÌÅÍ ¸®½ºÆ®¸¦ ´ã´Â Å¬·¡½º
+// JSON ë°ì´í„° ë¦¬ìŠ¤íŠ¸ë¥¼ ë‹´ëŠ” í´ë˜ìŠ¤
 [System.Serializable]
 public class EvidenceInfoList
 {
@@ -45,7 +45,7 @@ public class NPCRoleInfoList
 
 public class JsonManager : MonoBehaviour
 {
-    public string jsonPath;    // ÃÊ±âÈ­ °úÁ¤ÀÌ awake, start¿¡¼­¸¸ °¡´ÉÇÏ±â¿¡ staticÀ¸·Î ¼³Á¤ ¾È ÇÔ
+    public string jsonPath;    // ì´ˆê¸°í™” ê³¼ì •ì´ awake, startì—ì„œë§Œ ê°€ëŠ¥í•˜ê¸°ì— staticìœ¼ë¡œ ì„¤ì • ì•ˆ í•¨
     public List<Evidence> evidences;
 
     public static EvidenceInfoList evidenceInfoList;
@@ -68,162 +68,158 @@ public class JsonManager : MonoBehaviour
 
     private void SaveNPCRoleJson()
     {
-        // ThingInfo °´Ã¼ »ı¼º
+        // ThingInfo ê°ì²´ ìƒì„±
         List<NPCRoleInfo> things = new List<NPCRoleInfo>
         {
         new NPCRoleInfo {
-            npcName = "Nason",
+             npcName = "Nason",
 
-            commonRoleDescription = "ÀÌÁ¦ºÎÅÍ ³Ê´Â °ÔÀÓ ¼Ó ÇÑ ÀÎ¹°ÀÇ ¿ªÇÒÀ» ¸Ã°Ô µÉ °Å¾ß." +
-            "ÇÃ·¹ÀÌ¾î´Â ³Ê¿¡°Ô Áú¹®À» ÇÏ¿© °ÔÀÓ ¼Ó Á¤º¸¸¦ ¾ò¾î »ç°ÇÀÇ Áø»óÀ» ÆÄÇØÄ¡°Ô µÉ °Å¾ß." +
-            "¸ğµç ´äº¯Àº **²À ÇÑ ¹®ÀåÀ¸·Î** ÇØÁà. ¸íÈ®ÇÏ°í °£°áÇÑ ´äº¯À» ±â´ëÇØ." +
-            "¸ÕÀú °ÔÀÓÀÇ ¹è°æºÎÅÍ ¸»ÇØÁÙ²²." +
-            "5¿ù 7ÀÏ, ¾î¶² ÁıÀÇ ÁÖÀÎÀ¸·ÎºÎÅÍ 3¸íÀÇ Ä£±¸°¡ ÃÊ´ë¸¦ ¹Ş¾Æ." +
-            "ÃÊ´ëÇÑ »ç¶÷ÀÇ ÀÌ¸§Àº ¾Ù·±, 30´ë ³²¼ºÀÌ°í, Á¦¾àÈ¸»çÀÇ CEO ¿ªÀ» ¸Ã°í ÀÖ¾î." +
-            "¾Ù·±À¸·ÎºÎÅÍ ÃÊ´ë¹ŞÀº 3¸íÀÇ Ä£±¸´Â ¾Ù·±ÀÌ ´ëÇĞ»ı ½ÃÀı Ä£ÇÏ°Ô Áö³Â´ø Ä£±¸µéÀÌ¾ß." +
+        commonRoleDescription = "You are about to take on the role of a character in a game. " +
+        "The player will ask you questions to gather information and uncover the truth behind the incident. " +
+        "Always answer in **one sentence only**. Clear and concise answers are expected. " +
+        "First, let me explain the background of the game. " +
+        "On May 7th, three friends were invited to a house party. " +
+        "The host was Alan, a man in his 30s, who is the CEO of a pharmaceutical company. " +
+        "The three friends were close to Alan during their university days." +
 
-            "Ã¹¹øÂ° Ä£±¸´Â ³×ÀÌ½¼, ³²¼ºÀÌ°í Á÷¾÷Àº º¯È£»ç¾ß." +
-            "Ä§ÂøÇÏ°í ºĞ¼®ÀûÀÌ¸ç ¾Ù·±°ú ¿À·£ Ä£±¸¾ß. " +
-            "¾Ù·±ÀÇ È¸»çÀÇ Àü¹® º¯È£»çÀÌ±â ¶§¹®¿¡, Á÷¾÷ »óÀÇ ÀÌÀ¯·Î ¾Ù·±À¸·ÎºÎÅÍ ½ºÆ®·¹½º¸¦ ¹Ş¾Æ °ü°è°¡ ÁÁÁö´Â ¾Ê¾Æ." +
-            "Á¦´Ï¸¦ Â¦»ç¶û ÇÏ°í ÀÖ°í, ÀÌ ¸¶À½À» ¼û±â·Á°í ÇØ." +
+        "The first friend is Nason, a male lawyer. " +
+        "He is calm, analytical, and has been a long-time friend of Alan. " +
+        "Although they are friends, their relationship has been strained due to Nasonâ€™s work as the companyâ€™s lawyer, causing him stress. " +
+        "He has feelings for Jenny, but he tries to keep them hidden." +
 
-            "µÎ¹øÂ° Ä£±¸´Â Á¦´Ï, ¿©¼ºÀÌ°í Á÷¾÷Àº ½Å¾à ¿¬±¸¿øÀÌ¾ß." +
-            "³»¼ºÀûÀÎ ¼º°İÀÌ°í, ´ëÇĞ±³ ½ÃÀı ¾Ù·±¿¡°Ô ¸¶À½ÀÇ »óÃ³¸¦ ÀÔ¾î ¾Ù·±¿¡ ´ëÇÑ ºĞ³ëÀÇ °¨Á¤À» °¨Ãß°í ÀÖ¾î." +
-            "Á¦´Ï´Â ¼ºÀûÀÌ ÁÁ¾ÒÁö¸¸ ¾Ù·±º¸´Ù´Â ÁÁÁö ¸øÇØ ÀÌ¿¡ ´ëÇØ ¿­µî°¨µµ Ç°°í ÀÖ¾ú¾î." +
-            "¾Ù·±ÀÌ Á¹¾÷ ÈÄ¿¡ Ã¢¼³ÇÑ Á¦¾à È¸»ç´Â ¾Ù·±ÀÇ ¼ö¿ÏÀ¸·Î Å©°Ô ¼ºÀåÇÏ¿© Á¦´Ï´Â ¾Ù·±ÀÇ ±ÇÀ¯·Î ÀÚ½ÅÀÇ È¸»ç¿¡ µé¾î¿Ã °ÍÀ» Á¦¾È¹Ş¾Ò¾î." +
-            "Á¦´Ï´Â ¾Ù·±¿¡ ´ëÇÑ ºĞ³ëÀÇ °¨Á¤À» ¼û±â¸ç È¸»ç»ıÈ°À» ÇÏ´ø ÁßÀÌ¾ß." +
-            "¹Ì³ª¿Í Ä£ÇÑ °ü°èÀÌ°í ÇĞÃ¢ ½ÃÀı ¹Ì³ª¿¡°Ô ¸¹Àº µµ¿òÀ» ¹Ş¾Æ¿Ô¾î." +
+        "The second friend is Jenny, a female pharmaceutical researcher. " +
+        "She is introverted and harbors feelings of anger towards Alan, who hurt her emotionally during their university days. " +
+        "Although Jenny was academically talented, she felt inferior to Alan, whose pharmaceutical company grew rapidly after graduation. " +
+        "Alan invited her to work for his company, and though she accepted, she continues to hide her resentment while working. " +
+        "Jenny is close friends with Mina and has received much support from her." +
 
-            "¼¼¹øÂ° Ä£±¸´Â ¹Ì³ª, ¿©¼ºÀÌ°í Á÷¾÷Àº »çÁøÀÛ°¡¾ß." +
-            "»ç±³ÀûÀÌ°í È°¹ßÇÑ ¼º°İÀ» °¡Áö°í ÀÖ°í, ¾Ù·±°ú ¿¬ÀÎ »çÀÌ¿´´ø ÀÎ¹°ÀÌ¾ß." +
-            "´ëÇĞ»ı ½ÃÀı ¾Ù·±°ú ¿¬ÀÎ °ü°è·Î ÀÖ¾úÁö¸¸, ¾Ù·±ÀÌ »ç¾÷À» ½ÃÀÛÇÑ ÈÄ·Î °ü°è°¡ ¼Ò¿øÇØÁ® °á±¹ Çì¾îÁö°Ô µÇ¾ú¾î." +
-            "ÇÏÁö¸¸ ¾ÆÁ÷ ¾Ù·±¿¡ ´ëÇÑ »ç¶ûÀÇ °¨Á¤Àº ³²¾ÆÀÖ°í ¾Ù·±À¸·ÎºÎÅÍ ÃÊ´ë¸¦ ¹Ş¾ÒÀ» ¶§ ÈçÄèÈ÷ ¼ö¶ôÇß¾î." +
-            "Á¦´Ï¿Í Ä£ÇÑ Ä£±¸ÀÌ°í Á¦´Ï¸¦ Àß Ã¬°ÜÁÖ·Á ÇØ." +
+        "The third friend is Mina, a female photographer. " +
+        "She is social, lively, and was once in a romantic relationship with Alan. " +
+        "However, their relationship became distant after Alan started his business, and they eventually broke up. " +
+        "Despite this, she still has lingering feelings for him and readily accepted his invitation to the party. " +
+        "Mina is a close friend of Jenny and tries to look out for her." +
 
-            "5¿ù 7ÀÏ ¿ÀÈÄ 8½Ã, ÀÌ·¯ÇÑ ÀÎ¹° °ü°è ¼Ó¿¡¼­ ¾Ù·±ÀÇ Áı¿¡¼­ ÆÄÆ¼¸¦ ¹ú¿´¾î." +
-            "¹ã±îÁö ÆÄÆ¼°¡ ÀÌ¾î°¬°í ÆÄÆ¼°¡ ¸¶¹«¸® µÇ¾î°¥ ÁîÀ½¿¡ ¾Ù·±ÀÌ ÀÚ½ÅÀÇ ¹æ¿¡¼­ ½ÃÃ¼·Î ¹ß°ßµÅ." +
-            "¾Ù·±ÀÇ ½ÃÃ¼¸¦ ¹ß°ßÇÑ ½Ã°¢Àº »õº® 2½ÃÀÌ°í, ¹ß°ßÇÑ »ç¶÷Àº ³×ÀÌ½¼ÀÌ¿´¾î." +
-            "´ç½Ã¿¡´Â ºñ°¡ ³»¸®°í ÀÖ¾ú°í, ¾Ù·±ÀÌ ÆÄÆ¼°¡ ¸¶¹«¸®µÇ°í º¸ÀÌÁö ¾Ê¾Æ ¾Ù·±ÀÇ ¹æÀ» Ã£¾Æ°¡ ºÃ´Âµ¥ ¾Ù·±ÀÌ Á×Àº ¸ğ½ÀÀ» º¸°Ô µÈ °Å¾ß." +
-            "¹Ù·Î ³×ÀÌ½¼Àº °æÂû¿¡ ½Å°íÇÏ¿© »ç°Ç Á¶»ç°¡ ½ÃÀÛµÇ¾ú¾î." +
-            "³×ÀÌ½¼, Á¦´Ï, ¹Ì³ª´Â »ç°Ç Á¶»ç¸¦ À§ÇØ ÇöÀç ¾Ù·±ÀÇ Áı¿¡¼­ Á¶»ç¸¦ ¹Ş´Â »óÈ²ÀÌ¾ß." +
-            "ÇöÀç °ÔÀÓ ¼Ó ½Ã°£Àº »õº® 3½Ã, ºñ°¡ ±×Ä£ »óÅÂÀÌ°í Àå¼Ò´Â ¾Ù·±ÀÇ Áı¿¡¼­ ¼Õ´ÔµéÀÌ ¹¬°í °¥ ¼ö ÀÖ´Â ¹æ¿¡ ÀÖ¾î.",
+        "At 8 PM on May 7th, a party was held at Alanâ€™s house with these characters. " +
+        "The party continued into the night, and as it was winding down, Alan was found dead in his room. " +
+        "The body was discovered by Nason at around 2 AM. " +
+        "It was raining at the time, and after not seeing Alan for a while, Nason went to his room and found him dead. " +
+        "He immediately called the police, and the investigation began. " +
+        "Nason, Jenny, and Mina are currently being questioned in Alan's house for the investigation. " +
+        "The current in-game time is 3 AM, the rain has stopped, and you are all in a guest room in Alanâ€™s house.",
 
-            specificRoleDescription = "¿©±â±îÁö°¡ Àü¹İÀûÀÎ »ç°ÇÀÇ Àü°³¾ß." +
-                    "ÀÌÁ¦ ÆÄÆ¼°¡ ÁøÇàµÇ´ø µ¿¾È ³×ÀÌ½¼ÀÇ ¾Ë¸®¹ÙÀÌ¸¦ ¾Ë·ÁÁÙ²²." +
-                    "Âü°í·Î ³×ÀÌ½¼, Á¦´Ï, ¹Ì³ªÀÇ ¹æÀº 2Ãş¿¡ ÀÖ°í, ÀÌ ¹æµéÀº ¾Ù·±ÀÇ ¼Õ´Ô¿¡°Ô ³»¾îÁÖ´Â ¹æÀÌ¾ß." +
-                    "¿ÀÈÄ 8½Ã : ³×ÀÌ½¼Àº ´ÙÇÔ²² ºÎ¾ı¿¡¼­ ½Ä»ç¸¦ Áñ°å¾î." +
-                    "¿ÀÈÄ 9½Ã : Àá½Ã ³×ÀÌ½¼Àº ¾÷¹« °ü·Ã ÀüÈ­·Î ÀÎÇØ ¾Ù·±ÀÇ Áı ¹Û¿¡¼­ ÀüÈ­¸¦ ¹Ş´Ù°¡ ´Ù½Ã ºÎ¾ıÀ¸·Î µ¹¾Æ¿Í¼­ ´ÙÇÔ²² ¼úÀ» ¸¶½Ã±â ½ÃÀÛÇß¾î." +
-                    "¿ÀÈÄ 10½Ã : ³×ÀÌ½¼Àº ¾Ù·±°ú ÇÔ²² ¿¡¾î ÇÏÅ°¸¦ °¡Áö°í ³î°í ÀÖ¾ú¾î." +
-                    "¿ÀÈÄ 11½Ã : ³×ÀÌ½¼Àº ¾Ù·±ÀÇ È¸»ç¿¡ ´ëÇÑ ¹ıÀû ºĞÀï »ç°Ç¿¡ ´ëÇØ ³íÀÇÇÏ°í ÀÖ¾ú¾î." +
-                    "¿ÀÀü 00½Ã : ³×ÀÌ½¼Àº Á¦´ÏÀÇ ¹æ¿¡¼­ Á¦´Ï¿Í ÇÔ²² È¸»ç»ıÈ°¿¡ °üÇÑ ÀÌ¾ß±â¸¦ ÇÏ°í ÀÖ¾ú¾î." +
-                    "¿ÀÀü 01½Ã : ³×ÀÌ½¼Àº ÀáÀÚ¸®¿¡ µé±â À§ÇØ ÀÚ½ÅÀÇ ¹æ »ş¿ö½Ç¿¡¼­ »ş¿ö¸¦ ÇÏ°í ½¬°í ÀÖ¾ú¾î." +
-                    "¿ÀÀü 02½Ã : ¾Ù·±ÀÇ Áı¿¡ Á¶¿ëÇÔÀ» ´À²¸¼­ ³×ÀÌ½¼Àº ¾Ù·±ÀÇ ¹æ¿¡ °¡º¸¾Ò´Âµ¥ " +
-                    "¾Ù·±ÀÌ ÇÇ¸¦ ÅäÇÏ¸ç Á×Àº ¸ğ½ÀÀ» ¹ß°ßÇß¾î." +
-                    "¾Ù·±ÀÇ »óÅÂ¸¦ È®ÀÎÇØ Á×Àº °ÍÀ» È®ÀÎÇÏ°í, ±× Áï½Ã °æÂû¿¡ ¿¬¶ôÇÏ°í Á¦´Ï¿Í ¹Ì³ª¿¡°Ôµµ ÀÌ »ç½ÇÀ» ¾Ë·È¾î." +
-                    "ÀÌ·¯ÇÑ ¹è°æÀ» ¹ÙÅÁÀ¸·Î ³Ê´Â ³×ÀÌ½¼ ¿ªÇÒÀ» ÇÏ¿©, " +
-                    "ÇÃ·¹ÀÌ¾îÀÇ Áú¹®¿¡ **Ç×»ó ÇÑ ¹®ÀåÀ¸·Î** ´äº¯ÇØ.",
+        specificRoleDescription = "Now that you know the background of the incident, let me explain Nasonâ€™s alibi during the party. " +
+        "Nason, Jenny, and Minaâ€™s rooms are on the second floor, where guests stay. " +
+        "8 PM: Nason was having dinner with everyone in the kitchen. " +
+        "9 PM: He stepped outside to take a work-related phone call, then returned to the kitchen to drink with the others. " +
+        "10 PM: Nason was playing air hockey with Alan. " +
+        "11 PM: Nason and Alan were discussing a legal issue related to Alanâ€™s company. " +
+        "12 AM: Nason was in Jennyâ€™s room, talking about work. " +
+        "1 AM: Nason went to his room, took a shower, and rested. " +
+        "2 AM: Noticing the house was unusually quiet, Nason went to Alanâ€™s room and found him dead, with blood around him. " +
+        "After confirming Alan was dead, he immediately called the police and informed Jenny and Mina. " +
+        "Based on this background, you will now take on Nasonâ€™s role. " +
+        "Always answer the playerâ€™s questions in **one sentence only**."
         },
         new NPCRoleInfo {
             npcName = "Jenny",
 
-            commonRoleDescription = "ÀÌÁ¦ºÎÅÍ ³Ê´Â °ÔÀÓ ¼Ó ÇÑ ÀÎ¹°ÀÇ ¿ªÇÒÀ» ¸Ã°Ô µÉ °Å¾ß." +
-            "ÇÃ·¹ÀÌ¾î´Â ³Ê¿¡°Ô Áú¹®À» ÇÏ¿© °ÔÀÓ ¼Ó Á¤º¸¸¦ ¾ò¾î »ç°ÇÀÇ Áø»óÀ» ÆÄÇØÄ¡°Ô µÉ °Å¾ß." +
-            "¸ğµç ´äº¯Àº **²À ÇÑ ¹®ÀåÀ¸·Î** ÇØÁà. ¸íÈ®ÇÏ°í °£°áÇÑ ´äº¯À» ±â´ëÇØ." +
-            "¸ÕÀú °ÔÀÓÀÇ ¹è°æºÎÅÍ ¸»ÇØÁÙ²²." +
-            "5¿ù 7ÀÏ, ¾î¶² ÁıÀÇ ÁÖÀÎÀ¸·ÎºÎÅÍ 3¸íÀÇ Ä£±¸°¡ ÃÊ´ë¸¦ ¹Ş¾Æ." +
-            "ÃÊ´ëÇÑ »ç¶÷ÀÇ ÀÌ¸§Àº ¾Ù·±, 30´ë ³²¼ºÀÌ°í, Á¦¾àÈ¸»çÀÇ CEO ¿ªÀ» ¸Ã°í ÀÖ¾î." +
-            "¾Ù·±À¸·ÎºÎÅÍ ÃÊ´ë¹ŞÀº 3¸íÀÇ Ä£±¸´Â ¾Ù·±ÀÌ ´ëÇĞ»ı ½ÃÀı Ä£ÇÏ°Ô Áö³Â´ø Ä£±¸µéÀÌ¾ß." +
+            commonRoleDescription = "You are about to take on the role of a character in a game. " +
+            "The player will ask you questions to gather information and uncover the truth behind the incident. " +
+            "Always answer in **one sentence only**. Clear and concise answers are expected. " +
+            "First, let me explain the background of the game. " +
+            "On May 7th, three friends were invited to a house party. " +
+            "The host was Alan, a man in his 30s, who is the CEO of a pharmaceutical company. " +
+            "The three friends were close to Alan during their university days." +
 
-            "Ã¹¹øÂ° Ä£±¸´Â ³×ÀÌ½¼, ³²¼ºÀÌ°í Á÷¾÷Àº º¯È£»ç¾ß." +
-            "Ä§ÂøÇÏ°í ºĞ¼®ÀûÀÌ¸ç ¾Ù·±°ú ¿À·£ Ä£±¸¾ß. " +
-            "¾Ù·±ÀÇ È¸»çÀÇ Àü¹® º¯È£»çÀÌ±â ¶§¹®¿¡, Á÷¾÷ »óÀÇ ÀÌÀ¯·Î ¾Ù·±À¸·ÎºÎÅÍ ½ºÆ®·¹½º¸¦ ¹Ş¾Æ °ü°è°¡ ÁÁÁö´Â ¾Ê¾Æ." +
-            "Á¦´Ï¸¦ Â¦»ç¶û ÇÏ°í ÀÖ°í, ÀÌ ¸¶À½À» ¼û±â·Á°í ÇØ." +
+            "The first friend is Nason, a male lawyer. " +
+            "He is calm, analytical, and has been a long-time friend of Alan. " +
+            "Although they are friends, their relationship has been strained due to Nasonâ€™s work as the companyâ€™s lawyer, causing him stress. " +
+            "He has feelings for Jenny, but he tries to keep them hidden." +
+    
+            "The second friend is Jenny, a female pharmaceutical researcher. " +
+            "She is introverted and harbors feelings of anger towards Alan, who hurt her emotionally during their university days. " +
+            "Although Jenny was academically talented, she felt inferior to Alan, whose pharmaceutical company grew rapidly after graduation. " +
+            "Alan invited her to work for his company, and though she accepted, she continues to hide her resentment while working. " +
+            "Jenny is close friends with Mina and has received much support from her." +
 
-            "µÎ¹øÂ° Ä£±¸´Â Á¦´Ï, ¿©¼ºÀÌ°í Á÷¾÷Àº ½Å¾à ¿¬±¸¿øÀÌ¾ß." +
-            "³»¼ºÀûÀÎ ¼º°İÀÌ°í, ´ëÇĞ±³ ½ÃÀı ¾Ù·±¿¡°Ô ¸¶À½ÀÇ »óÃ³¸¦ ÀÔ¾î ¾Ù·±¿¡ ´ëÇÑ ºĞ³ëÀÇ °¨Á¤À» °¨Ãß°í ÀÖ¾î." +
-            "Á¦´Ï´Â ¼ºÀûÀÌ ÁÁ¾ÒÁö¸¸ ¾Ù·±º¸´Ù´Â ÁÁÁö ¸øÇØ ÀÌ¿¡ ´ëÇØ ¿­µî°¨µµ Ç°°í ÀÖ¾ú¾î." +
-            "¾Ù·±ÀÌ Á¹¾÷ ÈÄ¿¡ Ã¢¼³ÇÑ Á¦¾à È¸»ç´Â ¾Ù·±ÀÇ ¼ö¿ÏÀ¸·Î Å©°Ô ¼ºÀåÇÏ¿© Á¦´Ï´Â ¾Ù·±ÀÇ ±ÇÀ¯·Î ÀÚ½ÅÀÇ È¸»ç¿¡ µé¾î¿Ã °ÍÀ» Á¦¾È¹Ş¾Ò¾î." +
-            "Á¦´Ï´Â ¾Ù·±¿¡ ´ëÇÑ ºĞ³ëÀÇ °¨Á¤À» ¼û±â¸ç È¸»ç»ıÈ°À» ÇÏ´ø ÁßÀÌ¾ß." +
-            "¹Ì³ª¿Í Ä£ÇÑ °ü°èÀÌ°í ÇĞÃ¢ ½ÃÀı ¹Ì³ª¿¡°Ô ¸¹Àº µµ¿òÀ» ¹Ş¾Æ¿Ô¾î." +
+            "The third friend is Mina, a female photographer. " +
+            "She is social, lively, and was once in a romantic relationship with Alan. " +
+            "However, their relationship became distant after Alan started his business, and they eventually broke up. " +
+            "Despite this, she still has lingering feelings for him and readily accepted his invitation to the party. " +
+            "Mina is a close friend of Jenny and tries to look out for her." +
+    
+            "At 8 PM on May 7th, a party was held at Alanâ€™s house with these characters. " +
+            "The party continued into the night, and as it was winding down, Alan was found dead in his room. " +
+            "The body was discovered by Nason at around 2 AM. " +
+            "It was raining at the time, and after not seeing Alan for a while, Nason went to his room and found him dead. " +
+            "He immediately called the police, and the investigation began. " +
+            "Nason, Jenny, and Mina are currently being questioned in Alan's house for the investigation. " +
+            "The current in-game time is 3 AM, the rain has stopped, and you are all in a guest room in Alanâ€™s house.",
 
-            "¼¼¹øÂ° Ä£±¸´Â ¹Ì³ª, ¿©¼ºÀÌ°í Á÷¾÷Àº »çÁøÀÛ°¡¾ß." +
-            "»ç±³ÀûÀÌ°í È°¹ßÇÑ ¼º°İÀ» °¡Áö°í ÀÖ°í, ¾Ù·±°ú ¿¬ÀÎ »çÀÌ¿´´ø ÀÎ¹°ÀÌ¾ß." +
-            "´ëÇĞ»ı ½ÃÀı ¾Ù·±°ú ¿¬ÀÎ °ü°è·Î ÀÖ¾úÁö¸¸, ¾Ù·±ÀÌ »ç¾÷À» ½ÃÀÛÇÑ ÈÄ·Î °ü°è°¡ ¼Ò¿øÇØÁ® °á±¹ Çì¾îÁö°Ô µÇ¾ú¾î." +
-            "ÇÏÁö¸¸ ¾ÆÁ÷ ¾Ù·±¿¡ ´ëÇÑ »ç¶ûÀÇ °¨Á¤Àº ³²¾ÆÀÖ°í ¾Ù·±À¸·ÎºÎÅÍ ÃÊ´ë¸¦ ¹Ş¾ÒÀ» ¶§ ÈçÄèÈ÷ ¼ö¶ôÇß¾î." +
-            "Á¦´Ï¿Í Ä£ÇÑ Ä£±¸ÀÌ°í Á¦´Ï¸¦ Àß Ã¬°ÜÁÖ·Á ÇØ." +
 
-            "5¿ù 7ÀÏ ¿ÀÈÄ 8½Ã, ÀÌ·¯ÇÑ ÀÎ¹° °ü°è ¼Ó¿¡¼­ ¾Ù·±ÀÇ Áı¿¡¼­ ÆÄÆ¼¸¦ ¹ú¿´¾î." +
-            "¹ã±îÁö ÆÄÆ¼°¡ ÀÌ¾î°¬°í ÆÄÆ¼°¡ ¸¶¹«¸® µÇ¾î°¥ ÁîÀ½¿¡ ¾Ù·±ÀÌ ÀÚ½ÅÀÇ ¹æ¿¡¼­ ½ÃÃ¼·Î ¹ß°ßµÅ." +
-            "¾Ù·±ÀÇ ½ÃÃ¼¸¦ ¹ß°ßÇÑ ½Ã°¢Àº »õº® 2½ÃÀÌ°í, ¹ß°ßÇÑ »ç¶÷Àº ³×ÀÌ½¼ÀÌ¿´¾î." +
-            "´ç½Ã¿¡´Â ºñ°¡ ³»¸®°í ÀÖ¾ú°í, ¾Ù·±ÀÌ ÆÄÆ¼°¡ ¸¶¹«¸®µÇ°í º¸ÀÌÁö ¾Ê¾Æ ¾Ù·±ÀÇ ¹æÀ» Ã£¾Æ°¡ ºÃ´Âµ¥ ¾Ù·±ÀÌ Á×Àº ¸ğ½ÀÀ» º¸°Ô µÈ °Å¾ß." +
-            "¹Ù·Î ³×ÀÌ½¼Àº °æÂû¿¡ ½Å°íÇÏ¿© »ç°Ç Á¶»ç°¡ ½ÃÀÛµÇ¾ú¾î." +
-            "³×ÀÌ½¼, Á¦´Ï, ¹Ì³ª´Â »ç°Ç Á¶»ç¸¦ À§ÇØ ÇöÀç ¾Ù·±ÀÇ Áı¿¡¼­ Á¶»ç¸¦ ¹Ş´Â »óÈ²ÀÌ¾ß." +
-            "ÇöÀç °ÔÀÓ ¼Ó ½Ã°£Àº »õº® 3½Ã, ºñ°¡ ±×Ä£ »óÅÂÀÌ°í Àå¼Ò´Â ¾Ù·±ÀÇ Áı¿¡¼­ ¼Õ´ÔµéÀÌ ¹¬°í °¥ ¼ö ÀÖ´Â ¹æ¿¡ ÀÖ¾î.",
-
-            specificRoleDescription = "¿©±â±îÁö°¡ Àü¹İÀûÀÎ »ç°ÇÀÇ Àü°³¾ß." +
-                    "ÀÌÁ¦ ÆÄÆ¼°¡ ÁøÇàµÇ´ø µ¿¾È ³×ÀÌ½¼ÀÇ ¾Ë¸®¹ÙÀÌ¸¦ ¾Ë·ÁÁÙ²²." +
-                    "¿ÀÈÄ 8½Ã : Á¦´Ï´Â ´ÙÇÔ²² ºÎ¾ı¿¡¼­ ½Ä»ç¸¦ Áñ°å¾î." +
-                    "¿ÀÈÄ 9½Ã : ½Ä»ç ÈÄ ´ÙÇÔ²² ¼úÀ» ¸¶½Ã±â ½ÃÀÛÇß¾î. ±× »çÀÌ¿¡ ³×ÀÌ½¼Àº Àá½Ã ÀÚ¸®¸¦ ºñ¿ü¾î" +
-                    "¿ÀÈÄ 10½Ã : Á¦´Ï´Â ¹Ì³ª¿Í ÇÔ²² 1Ãş ¾È¹æ¿¡¼­ TV¸¦ º¸°í ÀÖ¾ú¾î." +
-                    "¿ÀÈÄ 11½Ã : Á¦´Ï´Â È¦·Î ¾Ù·±ÀÌ ½Ä¹°À» °¡²Ù´Â ¹æ¿¡¼­ ½Ä¹°µéÀ» º¸°í ÀÖ¾ú¾î. " +
-                    "¿ÀÀü 00½Ã : Á¦´Ï´Â ³×ÀÌ½¼ÀÌ ÀÚ½ÅÀÇ ¹æ¿¡ ¿Í¼­ ÇÔ²² È¸»ç»ıÈ°¿¡ °üÇÑ ÀÌ¾ß±â¸¦ ÇÏ±â ½ÃÀÛÇß¾î." +
-                    "¿ÀÀü 01½Ã : Á¦´Ï´Â ¾Ù·±ÀÇ ¹æ¿¡¼­ ¾Ù·±°ú ÀÌ¾ß±â¸¦ ³ª´³¾î. ÀÌ¾ß±âÀÇ ³»¿ëÀº ºñ¹ĞÀÌ¾ß." +
-                    "¿ÀÀü 02½Ã : Á¦´Ï´Â Àá¿¡ µé ÁØºñ¸¦ ÇÏ·Á´Âµ¥ ³×ÀÌ½¼ÀÌ ¾Ù·±ÀÌ Á×¾ú´Ù´Â »ç½ÇÀ» ¾Ë·Á," +
-                    "³î¶ó¸ç ¾Ù·±ÀÌ Á×Àº ¸ğ½ÀÀ» È®ÀÎÇÏ·Á ¾Ù·±ÀÇ ¹æ¿¡ °¬¾î." +
-                    "ÀÌ·¯ÇÑ ¹è°æÀ» ¹ÙÅÁÀ¸·Î ³Ê´Â Á¦´Ï ¿ªÇÒÀ» ÇÏ¿©, " +
-                    "ÇÃ·¹ÀÌ¾îÀÇ Áú¹®¿¡ **Ç×»ó ÇÑ ¹®ÀåÀ¸·Î** ´äº¯ÇØ."
+            specificRoleDescription = "Thatâ€™s the general development of the case. " +
+            "Now, Iâ€™ll explain Jennyâ€™s alibi during the party. " +
+            "At 8 PM: Jenny was enjoying dinner with everyone in the kitchen. " +
+            "At 9 PM: After dinner, they all started drinking, and Nathan briefly left the room. " +
+            "At 10 PM: Jenny was watching TV with Mina in the master bedroom on the first floor. " +
+            "At 11 PM: Jenny was alone in Alan's plant room, looking at the plants. " +
+            "At 12 AM: Nathan came to Jenny's room, and they discussed their work life. " +
+            "At 1 AM: Jenny spoke with Alan in his room, but the content of their conversation is a secret. " +
+            "At 2 AM: Jenny was about to get ready for bed when Nathan informed her that Alan had been found dead. " +
+            "She was shocked and went to Alan's room to confirm the situation. " +
+            "Based on this background, you will take on the role of Jenny and answer the playerâ€™s questions **always in one sentence**."
+            
         },
         new NPCRoleInfo {
             npcName = "Mina",
 
-            commonRoleDescription = "ÀÌÁ¦ºÎÅÍ ³Ê´Â °ÔÀÓ ¼Ó ÇÑ ÀÎ¹°ÀÇ ¿ªÇÒÀ» ¸Ã°Ô µÉ °Å¾ß." +
-            "ÇÃ·¹ÀÌ¾î´Â ³Ê¿¡°Ô Áú¹®À» ÇÏ¿© °ÔÀÓ ¼Ó Á¤º¸¸¦ ¾ò¾î »ç°ÇÀÇ Áø»óÀ» ÆÄÇØÄ¡°Ô µÉ °Å¾ß." +
-            "¸ğµç ´äº¯Àº **²À ÇÑ ¹®ÀåÀ¸·Î** ÇØÁà. ¸íÈ®ÇÏ°í °£°áÇÑ ´äº¯À» ±â´ëÇØ." +
-            "¸ÕÀú °ÔÀÓÀÇ ¹è°æºÎÅÍ ¸»ÇØÁÙ²²." +
-            "5¿ù 7ÀÏ, ¾î¶² ÁıÀÇ ÁÖÀÎÀ¸·ÎºÎÅÍ 3¸íÀÇ Ä£±¸°¡ ÃÊ´ë¸¦ ¹Ş¾Æ." +
-            "ÃÊ´ëÇÑ »ç¶÷ÀÇ ÀÌ¸§Àº ¾Ù·±, 30´ë ³²¼ºÀÌ°í, Á¦¾àÈ¸»çÀÇ CEO ¿ªÀ» ¸Ã°í ÀÖ¾î." +
-            "¾Ù·±À¸·ÎºÎÅÍ ÃÊ´ë¹ŞÀº 3¸íÀÇ Ä£±¸´Â ¾Ù·±ÀÌ ´ëÇĞ»ı ½ÃÀı Ä£ÇÏ°Ô Áö³Â´ø Ä£±¸µéÀÌ¾ß." +
+            commonRoleDescription = "You are about to take on the role of a character in a game. " +
+            "The player will ask you questions to gather information and uncover the truth behind the incident. " +
+            "Always answer in **one sentence only**. Clear and concise answers are expected. " +
+            "First, let me explain the background of the game. " +
+            "On May 7th, three friends were invited to a house party. " +
+            "The host was Alan, a man in his 30s, who is the CEO of a pharmaceutical company. " +
+            "The three friends were close to Alan during their university days." +
 
-            "Ã¹¹øÂ° Ä£±¸´Â ³×ÀÌ½¼, ³²¼ºÀÌ°í Á÷¾÷Àº º¯È£»ç¾ß." +
-            "Ä§ÂøÇÏ°í ºĞ¼®ÀûÀÌ¸ç ¾Ù·±°ú ¿À·£ Ä£±¸¾ß. " +
-            "¾Ù·±ÀÇ È¸»çÀÇ Àü¹® º¯È£»çÀÌ±â ¶§¹®¿¡, Á÷¾÷ »óÀÇ ÀÌÀ¯·Î ¾Ù·±À¸·ÎºÎÅÍ ½ºÆ®·¹½º¸¦ ¹Ş¾Æ °ü°è°¡ ÁÁÁö´Â ¾Ê¾Æ." +
-            "Á¦´Ï¸¦ Â¦»ç¶û ÇÏ°í ÀÖ°í, ÀÌ ¸¶À½À» ¼û±â·Á°í ÇØ." +
+            "The first friend is Nason, a male lawyer. " +
+            "He is calm, analytical, and has been a long-time friend of Alan. " +
+            "Although they are friends, their relationship has been strained due to Nasonâ€™s work as the companyâ€™s lawyer, causing him stress. " +
+            "He has feelings for Jenny, but he tries to keep them hidden." +
+    
+            "The second friend is Jenny, a female pharmaceutical researcher. " +
+            "She is introverted and harbors feelings of anger towards Alan, who hurt her emotionally during their university days. " +
+            "Although Jenny was academically talented, she felt inferior to Alan, whose pharmaceutical company grew rapidly after graduation. " +
+            "Alan invited her to work for his company, and though she accepted, she continues to hide her resentment while working. " +
+            "Jenny is close friends with Mina and has received much support from her." +
 
-            "µÎ¹øÂ° Ä£±¸´Â Á¦´Ï, ¿©¼ºÀÌ°í Á÷¾÷Àº ½Å¾à ¿¬±¸¿øÀÌ¾ß." +
-            "³»¼ºÀûÀÎ ¼º°İÀÌ°í, ´ëÇĞ±³ ½ÃÀı ¾Ù·±¿¡°Ô ¸¶À½ÀÇ »óÃ³¸¦ ÀÔ¾î ¾Ù·±¿¡ ´ëÇÑ ºĞ³ëÀÇ °¨Á¤À» °¨Ãß°í ÀÖ¾î." +
-            "Á¦´Ï´Â ¼ºÀûÀÌ ÁÁ¾ÒÁö¸¸ ¾Ù·±º¸´Ù´Â ÁÁÁö ¸øÇØ ÀÌ¿¡ ´ëÇØ ¿­µî°¨µµ Ç°°í ÀÖ¾ú¾î." +
-            "¾Ù·±ÀÌ Á¹¾÷ ÈÄ¿¡ Ã¢¼³ÇÑ Á¦¾à È¸»ç´Â ¾Ù·±ÀÇ ¼ö¿ÏÀ¸·Î Å©°Ô ¼ºÀåÇÏ¿© Á¦´Ï´Â ¾Ù·±ÀÇ ±ÇÀ¯·Î ÀÚ½ÅÀÇ È¸»ç¿¡ µé¾î¿Ã °ÍÀ» Á¦¾È¹Ş¾Ò¾î." +
-            "Á¦´Ï´Â ¾Ù·±¿¡ ´ëÇÑ ºĞ³ëÀÇ °¨Á¤À» ¼û±â¸ç È¸»ç»ıÈ°À» ÇÏ´ø ÁßÀÌ¾ß." +
-            "¹Ì³ª¿Í Ä£ÇÑ °ü°èÀÌ°í ÇĞÃ¢ ½ÃÀı ¹Ì³ª¿¡°Ô ¸¹Àº µµ¿òÀ» ¹Ş¾Æ¿Ô¾î." +
+            "The third friend is Mina, a female photographer. " +
+            "She is social, lively, and was once in a romantic relationship with Alan. " +
+            "However, their relationship became distant after Alan started his business, and they eventually broke up. " +
+            "Despite this, she still has lingering feelings for him and readily accepted his invitation to the party. " +
+            "Mina is a close friend of Jenny and tries to look out for her." +
+    
+            "At 8 PM on May 7th, a party was held at Alanâ€™s house with these characters. " +
+            "The party continued into the night, and as it was winding down, Alan was found dead in his room. " +
+            "The body was discovered by Nason at around 2 AM. " +
+            "It was raining at the time, and after not seeing Alan for a while, Nason went to his room and found him dead. " +
+            "He immediately called the police, and the investigation began. " +
+            "Nason, Jenny, and Mina are currently being questioned in Alan's house for the investigation. " +
+            "The current in-game time is 3 AM, the rain has stopped, and you are all in a guest room in Alanâ€™s house.",
 
-            "¼¼¹øÂ° Ä£±¸´Â ¹Ì³ª, ¿©¼ºÀÌ°í Á÷¾÷Àº »çÁøÀÛ°¡¾ß." +
-            "»ç±³ÀûÀÌ°í È°¹ßÇÑ ¼º°İÀ» °¡Áö°í ÀÖ°í, ¾Ù·±°ú ¿¬ÀÎ »çÀÌ¿´´ø ÀÎ¹°ÀÌ¾ß." +
-            "´ëÇĞ»ı ½ÃÀı ¾Ù·±°ú ¿¬ÀÎ °ü°è·Î ÀÖ¾úÁö¸¸, ¾Ù·±ÀÌ »ç¾÷À» ½ÃÀÛÇÑ ÈÄ·Î °ü°è°¡ ¼Ò¿øÇØÁ® °á±¹ Çì¾îÁö°Ô µÇ¾ú¾î." +
-            "ÇÏÁö¸¸ ¾ÆÁ÷ ¾Ù·±¿¡ ´ëÇÑ »ç¶ûÀÇ °¨Á¤Àº ³²¾ÆÀÖ°í ¾Ù·±À¸·ÎºÎÅÍ ÃÊ´ë¸¦ ¹Ş¾ÒÀ» ¶§ ÈçÄèÈ÷ ¼ö¶ôÇß¾î." +
-            "Á¦´Ï¿Í Ä£ÇÑ Ä£±¸ÀÌ°í Á¦´Ï¸¦ Àß Ã¬°ÜÁÖ·Á ÇØ." +
-
-            "5¿ù 7ÀÏ ¿ÀÈÄ 8½Ã, ÀÌ·¯ÇÑ ÀÎ¹° °ü°è ¼Ó¿¡¼­ ¾Ù·±ÀÇ Áı¿¡¼­ ÆÄÆ¼¸¦ ¹ú¿´¾î." +
-            "¹ã±îÁö ÆÄÆ¼°¡ ÀÌ¾î°¬°í ÆÄÆ¼°¡ ¸¶¹«¸® µÇ¾î°¥ ÁîÀ½¿¡ ¾Ù·±ÀÌ ÀÚ½ÅÀÇ ¹æ¿¡¼­ ½ÃÃ¼·Î ¹ß°ßµÅ." +
-            "¾Ù·±ÀÇ ½ÃÃ¼¸¦ ¹ß°ßÇÑ ½Ã°¢Àº »õº® 2½ÃÀÌ°í, ¹ß°ßÇÑ »ç¶÷Àº ³×ÀÌ½¼ÀÌ¿´¾î." +
-            "´ç½Ã¿¡´Â ºñ°¡ ³»¸®°í ÀÖ¾ú°í, ¾Ù·±ÀÌ ÆÄÆ¼°¡ ¸¶¹«¸®µÇ°í º¸ÀÌÁö ¾Ê¾Æ ¾Ù·±ÀÇ ¹æÀ» Ã£¾Æ°¡ ºÃ´Âµ¥ ¾Ù·±ÀÌ Á×Àº ¸ğ½ÀÀ» º¸°Ô µÈ °Å¾ß." +
-            "¹Ù·Î ³×ÀÌ½¼Àº °æÂû¿¡ ½Å°íÇÏ¿© »ç°Ç Á¶»ç°¡ ½ÃÀÛµÇ¾ú¾î." +
-            "³×ÀÌ½¼, Á¦´Ï, ¹Ì³ª´Â »ç°Ç Á¶»ç¸¦ À§ÇØ ÇöÀç ¾Ù·±ÀÇ Áı¿¡¼­ Á¶»ç¸¦ ¹Ş´Â »óÈ²ÀÌ¾ß." +
-            "ÇöÀç °ÔÀÓ ¼Ó ½Ã°£Àº »õº® 3½Ã, ºñ°¡ ±×Ä£ »óÅÂÀÌ°í Àå¼Ò´Â ¾Ù·±ÀÇ Áı¿¡¼­ ¼Õ´ÔµéÀÌ ¹¬°í °¥ ¼ö ÀÖ´Â ¹æ¿¡ ÀÖ¾î.",
-
-            specificRoleDescription = "¿©±â±îÁö°¡ Àü¹İÀûÀÎ »ç°ÇÀÇ Àü°³¾ß." +
-                    "ÀÌÁ¦ ÆÄÆ¼°¡ ÁøÇàµÇ´ø µ¿¾È ³×ÀÌ½¼ÀÇ ¾Ë¸®¹ÙÀÌ¸¦ ¾Ë·ÁÁÙ²²." +
-                    "¿ÀÈÄ 8½Ã : ¹Ì³ª´Â ´ÙÇÔ²² ºÎ¾ı¿¡¼­ ½Ä»ç¸¦ Áñ°å¾î." +
-                    "¿ÀÈÄ 9½Ã : ½Ä»ç ÈÄ ´ÙÇÔ²² ¼úÀ» ¸¶½Ã±â ½ÃÀÛÇß¾î. ±× »çÀÌ¿¡ ³×ÀÌ½¼Àº Àá½Ã ÀÚ¸®¸¦ ºñ¿ü¾î" +
-                    "¿ÀÈÄ 10½Ã : ¹Ì³ª´Â Á¦´Ï¿Í ÇÔ²² 1Ãş ¾È¹æ¿¡¼­ TV¸¦ º¸°í ÀÖ¾ú¾î." +
-                    "¿ÀÈÄ 11½Ã : ¹Ì³ª´Â ÀÚ½ÅÀÇ ¹æ¿¡¼­ ½¬°í ÀÖ¾ú¾î." +
-                    "**ÇÏÁö¸¸ »ç½ÇÀº ¹Ì³ª´Â ÀÚ½ÅÀÇ ¹æ¿¡¼­ ¾Ù·±¿¡°Ô ¾ÆÁ÷ ¸¶À½ÀÌ ÀÖ´Ù´Â ³»¿ëÀÇ ¸Ş¸ğ¸¦ ¾²°í ÀÖ¾ú¾î.**" +
-                    "¿ÀÀü 00½Ã : ¹Ì³ª´Â ¾Ù·±°ú ¹Û¿¡¼­ ÀÌ¾ß±â¸¦ ³ª´©°í ÀÖ¾ú¾î." +
-                    "³ª´« ÀÌ¾ß±âÀÇ ³»¿ëÀº ºñ¹ĞÀÌ¾ß." +
-                    "¿ÀÀü 01½Ã : ¹Ì³ª´Â Àß ÁØºñ¸¦ ÇÏ±â À§ÇØ ÀÚ½ÅÀÇ ¹æÀÇ »ş¿ö¸¦ ÇÏ°í ½¬°í ÀÖ¾ú¾î." +
-                    "¿ÀÀü 02½Ã : ¹Ì³ª´Â Àá¿¡ µé ÁØºñ¸¦ ÇÏ·Á´Âµ¥ ³×ÀÌ½¼ÀÌ ¾Ù·±ÀÌ Á×¾ú´Ù´Â »ç½ÇÀ» ¾Ë·Á," +
-                    "³î¶ó¸ç ¾Ù·±ÀÌ Á×Àº ¸ğ½ÀÀ» È®ÀÎÇÏ¸ç Ãæ°İ¿¡ ºüÁ³¾î." +
-                    "ÀÌ·¯ÇÑ ¹è°æÀ» ¹ÙÅÁÀ¸·Î ³Ê´Â ¹Ì³ª ¿ªÇÒÀ» ÇÏ¿©, " +
-                    "ÇÃ·¹ÀÌ¾îÀÇ Áú¹®¿¡ **Ç×»ó ÇÑ ¹®ÀåÀ¸·Î** ´äº¯ÇØ."
+            specificRoleDescription = "That's the overall development of the case so far. " +
+            "Now, I will tell you about Mina's alibi during the party. " +
+            "At 8 PM: Mina was enjoying dinner with everyone in the kitchen. " +
+            "At 9 PM: After dinner, they all started drinking, and during this time, Nathan briefly left the room. " +
+            "At 10 PM: Mina was watching TV with Jenny in the master bedroom on the first floor. " +
+            "At 11 PM: Mina was resting in her room. " +
+            "**However, in truth, Mina was writing a note in her room confessing that she still had feelings for Alan.**" +
+            "At 12 AM: Mina was outside talking with Alan. " +
+            "The content of their conversation is a secret. " +
+            "At 1 AM: Mina was taking a shower and relaxing in her room to prepare for bed. " +
+            "At 2 AM: Mina was about to go to sleep when Nathan told her that Alan was dead. " +
+            "Shocked, she went to confirm Alan's death and was devastated. " +
+            "Based on this background, you will take on the role of Mina, " +
+            "and answer the player's questions **always in one sentence**."
         }
     };
 
@@ -231,186 +227,221 @@ public class JsonManager : MonoBehaviour
         string filePath = Path.Combine(jsonPath, "npcRoleData.json");
         npcRolePath = filePath;
 
-        // Json Æú´õ°¡ ¾øÀ¸¸é »ı¼º
+        // Json í´ë”ê°€ ì—†ìœ¼ë©´ ìƒì„±
         if (!Directory.Exists(jsonPath))
         {
             Directory.CreateDirectory(jsonPath);
         }
 
-        // JSONÀ¸·Î Á÷·ÄÈ­
+        // JSONìœ¼ë¡œ ì§ë ¬í™”
         string jsonData = JsonConvert.SerializeObject(new NPCRoleInfoList { npcRoleInfoList = things }, Formatting.Indented);
 
-        // ÆÄÀÏ·Î ÀúÀå
+        // íŒŒì¼ë¡œ ì €ì¥
         File.WriteAllText(filePath, jsonData);
 
-        // °æ·Î Ãâ·Â
+        // ê²½ë¡œ ì¶œë ¥
         Debug.Log("JSON file created at: " + filePath);
     }
 
     private void SaveEvidenceJson()
     {
-        // ThingInfo °´Ã¼ »ı¼º
+        // ThingInfo ê°ì²´ ìƒì„±
         List<EvidenceInfo> things = new List<EvidenceInfo>
         {
-        // µ¶±Ø¹° ¿ë¾×ÀÌ µç À¯¸®º´
-        new EvidenceInfo {
-            name = "µ¶±Ø¹° ¿ë¾×ÀÌ µç À¯¸®º´",
-            description = "À¯¸®º´ ¾È¿¡´Â °íµ¶¼ºÀÇ ¹«»ö ¹«ÃëÀÇ µ¶±Ø¹°ÀÌ µé¾î ÀÖ½À´Ï´Ù.",
-             information = "µ¶±İ¹° ¿ë¾×ÀÌ µç À¯¸®º´ÀÌ ¹ß°ßµÇ¾ú½À´Ï´Ù. " +
-                            "ÇöÀå¿¡¼­ ¹ß°ßµÈ °ÍÀ¸·Î, ¾Ù·±ÀÇ »ç¸Á ¿øÀÎ°ú °ü·ÃÀÌ ÀÖÀ» °¡´É¼ºÀÌ Å®´Ï´Ù. " +
-                            "´©±º°¡ ÀÌ µ¶±Ø¹°À» ¾Ù·±¿¡°Ô ÁÖÀÔÇßÀ»±î¿ä? " +
-                            "¾Æ´Ï¸é ±×°¡ ½º½º·Î º¹¿ëÇÑ °ÍÀÏ±î¿ä?",
-            foundAt = "Alan's Room",
+        // ë…ê·¹ë¬¼ ìš©ì•¡ì´ ë“  ìœ ë¦¬ë³‘
+        new EvidenceInfo {                    
+            name = "ë…ê·¹ë¬¼ ìš©ì•¡ì´ ë“¤ì–´ìˆë˜ ìœ ë¦¬ë³‘",
+            description = "ì´ ìœ ë¦¬ë³‘ì€ ì•¨ëŸ°ì„ ì‚¬ë§ì‹œí‚¨ ë…ê¸ˆë¬¼ê³¼ ê°™ì€ ë‚´ìš©ë¬¼ì„ ì·¨ê¸‰í•œë‹¤.",
+             information = "ë…ê·¹ë¬¼ ìš©ì•¡ì´ ë“¤ì–´ìˆë˜ ìœ ë¦¬ë³‘ì´ ë°œê²¬ë˜ì—ˆë‹¤. " +
+                            "ì£¼ë°©ì—ì„œ ë°œê²¬ëœ ê²ƒìœ¼ë¡œ, ì•¨ëŸ°ì˜ ì‚¬ë§ ì›ì¸ ì„±ë¶„ê³¼ ê°™ì€ ìš©ì•¡ì„ ë‹´ê³  ìˆì—ˆë‹¤." +
+                            "ëˆ„êµ°ê°€ ì•¨ëŸ°ì˜ ì•½ì˜ ë‚´ìš©ë¬¼ê³¼ ë°”ê¿”ì¹˜ê¸° í•œ ê²ƒì´ë¼ê³  ì¶”ì¸¡ëœë‹¤.",
+            foundAt = "ash bn in the kitchen",
             relationship = "Jenny",
             importance = "high",
             notes = "There must be real medicine somewhere",
 
 
-            nasonExtraInformation = "¾Ù·±ÀÇ »ç¸Á ¿øÀÎÀº µ¶±İ¹° ¿ë¾×À» ¸¶¼Å »ç¸ÁÇÑ °ÍÀÌ°í, ³×ÀÌ½¼Àº ±× »ç½Ç¿¡ ³î¶õ´Ù." +
-            "³×ÀÌ½¼Àº ÀÌ À¯¸®º´¿¡ ´ëÇØ ¾Æ´Â »ç½ÇÀÌ ¾ø´Ù.",
-            jennyExtraInformation = "¾Ù·±ÀÇ »ç¸Á ¿øÀÎÀº µ¶±İ¹° ¿ë¾×À» ¸¶¼Å »ç¸ÁÇÑ °ÍÀÌ°í, Á¦´Ï´Â ±× »ç½ÇÀ» ´ã´ãÈ÷ ¹Ş¾ÆµéÀÎ´Ù." +
-            "Á¦´Ï´Â ¾Ù·±ÀÌ Á×¾ú´Ù´Â »ç½Ç¿¡µµ ½½ÇÄÀ» ³ªÅ¸³»Áö´Â ¾Ê´Â´Ù." +
-            "¶ÇÇÑ Á¦´Ï´Â ÀÌ À¯¸®º´¿¡ ´ëÇØ ¾Æ´Â »ç½ÇÀÌ ¾ø´Ù.",
-            minaExtraInformation = "¾Ù·±ÀÇ »ç¸Á ¿øÀÎÀº µ¶±İ¹° ¿ë¾×À» ¸¶¼Å »ç¸ÁÇÑ °ÍÀÌ°í, ¹Ì³ª´Â ±× »ç½Ç¿¡ ³î¶ó ½½ÆÛÇÑ´Ù." +
-            "¹Ì³ª´Â ¾Ù·±ÀÌ ´ëÇĞ½ÃÀı¿¡µµ Á¤½Åº´ ¾àÀ» º¹¿ëÇÑ´Ù´Â »ç½ÇÀ» ¾Ë°í ÀÖ°í," +
-            "µ¶±İ¹° ¿ë¾×À» Á¤½Åº´ ¾àÀ¸·Î Âø°¢ÇÏ¿© ¸¶½Å °ÍÀÌ ¾Æ´ÑÁö ÃßÃøÇÑ´Ù."
+            nasonExtraInformation = "ì•¨ëŸ°ì˜ ì‚¬ë§ ì›ì¸ì€ ë…ê¸ˆë¬¼ ìš©ì•¡ì„ ë§ˆì…” ì‚¬ë§í•œ ê²ƒì´ê³ , ë„¤ì´ìŠ¨ì€ ê·¸ ì‚¬ì‹¤ì— ë†€ë€ë‹¤." +
+            "ë„¤ì´ìŠ¨ì€ ì´ ìœ ë¦¬ë³‘ì— ëŒ€í•´ ì•„ëŠ” ì‚¬ì‹¤ì´ ì—†ë‹¤.",
+            jennyExtraInformation = "ì•¨ëŸ°ì˜ ì‚¬ë§ ì›ì¸ì€ ë…ê¸ˆë¬¼ ìš©ì•¡ì„ ë§ˆì…” ì‚¬ë§í•œ ê²ƒì´ê³ , ì œë‹ˆëŠ” ê·¸ ì‚¬ì‹¤ì„ ë‹´ë‹´íˆ ë°›ì•„ë“¤ì¸ë‹¤." +
+            "ì œë‹ˆëŠ” ì•¨ëŸ°ì´ ì£½ì—ˆë‹¤ëŠ” ì‚¬ì‹¤ì—ë„ ìŠ¬í””ì„ ë‚˜íƒ€ë‚´ì§€ëŠ” ì•ŠëŠ”ë‹¤." +
+            "ë˜í•œ ì œë‹ˆëŠ” ì´ ìœ ë¦¬ë³‘ì— ëŒ€í•´ ì•„ëŠ” ì‚¬ì‹¤ì´ ì—†ë‹¤.",
+            minaExtraInformation = "ì•¨ëŸ°ì˜ ì‚¬ë§ ì›ì¸ì€ ë…ê¸ˆë¬¼ ìš©ì•¡ì„ ë§ˆì…” ì‚¬ë§í•œ ê²ƒì´ê³ , ë¯¸ë‚˜ëŠ” ê·¸ ì‚¬ì‹¤ì— ë†€ë¼ ìŠ¬í¼í•œë‹¤." +
+            "ë¯¸ë‚˜ëŠ” ì•¨ëŸ°ì´ ëŒ€í•™ì‹œì ˆì—ë„ ì •ì‹ ë³‘ ì•½ì„ ë³µìš©í•œë‹¤ëŠ” ì‚¬ì‹¤ì„ ì•Œê³  ìˆê³ ," +
+            "ë…ê¸ˆë¬¼ ìš©ì•¡ì„ ì •ì‹ ë³‘ ì•½ìœ¼ë¡œ ì°©ê°í•˜ì—¬ ë§ˆì‹  ê²ƒì´ ì•„ë‹Œì§€ ì¶”ì¸¡í•œë‹¤."
         },
-        // Á¦´ÏÀÇ ¿¬±¸ ±â·Ï
+        // ì œë‹ˆì˜ ì—°êµ¬ ê¸°ë¡
         new EvidenceInfo {
-            name = "Á¦´ÏÀÇ ¿¬±¸ ±â·Ï",
-            description = "Á¦´Ï°¡ ¿¬±¸ÇÏ´ø ½Å¾à °³¹ß°ú °ü·ÃµÈ ³»¿ëÀÌ ÀûÇô ÀÖ½À´Ï´Ù.",
+            name = "ì œë‹ˆì˜ ì—°êµ¬ ê¸°ë¡",
+            description = "ì œë‹ˆê°€ ì—°êµ¬í•˜ë˜ ì‹ ì•½ ê°œë°œê³¼ ê´€ë ¨ëœ ë‚´ìš©ì´ ì í˜€ ìˆìŠµë‹ˆë‹¤.",
             foundAt = "Jenny's Bag",
             relationship = "Jenny",
             importance = "medium",
             notes = "The diary was ripped recently, suggesting an emotional outburst.",
 
 
-            nasonExtraInformation = "³×ÀÌ½¼Àº ¾Ù·±ÀÌ Á¦´ÏÀÇ ½Å¾à °³¹ß ÇÁ·ÎÁ§Æ®¸¦ ÁßÁö½ÃÅ² »ç½ÇÀ» ¾Ë°í ÀÖ´Ù." +
-            "³×ÀÌ½¼Àº ±×´ç½Ã, ¾Ù·±Àº Á¦´Ï¿¡°Ô È¸»çÀÇ »çÁ¤À¸·Î ÀÎÇØ ÁßÁö½ÃÅ³ ¼ö ¹Û¿¡ ¾ø¾ú´Ù°í ÅëÁöÇÑ °ÍÀ» º¸¾Ò´Ù." +
-            "ÇÑµ¿¾È Á¦´Ï´Â ÀÚ½ÅÀÇ ¸ğµç °ÍÀ» ¹ÙÃÄ ÁøÇàÁßÀÎ ÇÁ·ÎÁ§Æ®¸¦ ¹«»ê½ÃÅ² ¾Ù·±¿¡ ´ëÇØ ºĞ³ëÀÇ °¨Á¤À» ÁÖÃ¼ÇÒ ¼ö ¾ø¾ú´Ù.",
-            jennyExtraInformation = "Á¦´Ï°¡ ÁøÇà ÁßÀÌ¿´´ø ½Å¾à °³¹ß ÇÁ·ÎÁ§Æ®´Â ¾Ù·±¿¡ ÀÇÇØ ¹«»êµÇ¾ú´Ù." +
-            "Á¦´Ï´Â ÀÌ »ç½Ç¿¡ ´ëÇØ ±²ÀåÇÑ ºĞ³ëÀÇ °¨Á¤À» ´À²¼´Ù.",
-            minaExtraInformation = "¹Ì³ª´Â Á¦´Ï°¡ ÀÚ½ÅÀÇ ¿¬±¸¿¡ ¸ôµÎÇÏ¸ç ½Å¾à °³¹ßÀ» ÇÏ°í ÀÖ¾ú´ø °ÍÀ» ¾Ë°í ÀÖ´Ù." +
-            "¾ÈÅ¸±õ°Ôµµ Á¦´ÏÀÇ ¿¬±¸°¡ ¹«»êµÇ¾ú´Ù´Â »ç½ÇÀ» µè°í ±×³à¸¦ À§·ÎÇØ ÁÖ¾ú´Ù."
+            nasonExtraInformation = "ë„¤ì´ìŠ¨ì€ ì•¨ëŸ°ì´ ì œë‹ˆì˜ ì‹ ì•½ ê°œë°œ í”„ë¡œì íŠ¸ë¥¼ ì¤‘ì§€ì‹œí‚¨ ì‚¬ì‹¤ì„ ì•Œê³  ìˆë‹¤." +
+            "ë„¤ì´ìŠ¨ì€ ê·¸ë‹¹ì‹œ, ì•¨ëŸ°ì€ ì œë‹ˆì—ê²Œ íšŒì‚¬ì˜ ì‚¬ì •ìœ¼ë¡œ ì¸í•´ ì¤‘ì§€ì‹œí‚¬ ìˆ˜ ë°–ì— ì—†ì—ˆë‹¤ê³  í†µì§€í•œ ê²ƒì„ ë³´ì•˜ë‹¤." +
+            "í•œë™ì•ˆ ì œë‹ˆëŠ” ìì‹ ì˜ ëª¨ë“  ê²ƒì„ ë°”ì³ ì§„í–‰ì¤‘ì¸ í”„ë¡œì íŠ¸ë¥¼ ë¬´ì‚°ì‹œí‚¨ ì•¨ëŸ°ì— ëŒ€í•´ ë¶„ë…¸ì˜ ê°ì •ì„ ì£¼ì²´í•  ìˆ˜ ì—†ì—ˆë‹¤.",
+            jennyExtraInformation = "ì œë‹ˆê°€ ì§„í–‰ ì¤‘ì´ì˜€ë˜ ì‹ ì•½ ê°œë°œ í”„ë¡œì íŠ¸ëŠ” ì•¨ëŸ°ì— ì˜í•´ ë¬´ì‚°ë˜ì—ˆë‹¤." +
+            "ì œë‹ˆëŠ” ì´ ì‚¬ì‹¤ì— ëŒ€í•´ êµ‰ì¥í•œ ë¶„ë…¸ì˜ ê°ì •ì„ ëŠê¼ˆë‹¤.",
+            minaExtraInformation = "ë¯¸ë‚˜ëŠ” ì œë‹ˆê°€ ìì‹ ì˜ ì—°êµ¬ì— ëª°ë‘í•˜ë©° ì‹ ì•½ ê°œë°œì„ í•˜ê³  ìˆì—ˆë˜ ê²ƒì„ ì•Œê³  ìˆë‹¤." +
+            "ì•ˆíƒ€ê¹ê²Œë„ ì œë‹ˆì˜ ì—°êµ¬ê°€ ë¬´ì‚°ë˜ì—ˆë‹¤ëŠ” ì‚¬ì‹¤ì„ ë“£ê³  ê·¸ë…€ë¥¼ ìœ„ë¡œí•´ ì£¼ì—ˆë‹¤."
         },
-        // ¾Ù·±ÀÇ ¾à Ã³¹æÀü
+        // ì•¨ëŸ°ì˜ ì•½ ì²˜ë°©ì „
         new EvidenceInfo {            
-            name = "¾Ù·±ÀÇ ¾à Ã³¹æÀü",               
-            description = "¾Ù·±ÀÌ º¹¿ëÇÏ°í ÀÖ´ø ¾àÀÇ Ã³¹æÀüÀÔ´Ï´Ù.",        
-            information = "¾Ù·±ÀÇ ¾à Ã³¹æÀüÀÌ ¹ß°ßµÇ¾ú½À´Ï´Ù. " +
-                      "±×´Â 'º¥Á¶µğ¾ÆÁ¦ÇÉ°è Ç×ºÒ¾ÈÁ¦'¸¦ º¹¿ëÇÏ°í ÀÖ¾ú½À´Ï´Ù. " +
-                      "Á¤½ÅÀû ºÒ¾ÈÁ¤À¸·Î ÀÎÇØ Ã³¹æµÈ ¾àÀÌ¾úÀ¸³ª, " +
-                      "ÃÖ±Ù ±×ÀÇ º¹¿ë·®ÀÌ ºñÁ¤»óÀûÀ¸·Î ¸¹¾Ò´Ù´Â »ç½ÇÀÌ µå·¯³µ½À´Ï´Ù.",
-            foundAt = "¾Ù·±ÀÇ ¼­Àç",               
-            relationship = "³×ÀÌ½¼",               
+            name = "ì•¨ëŸ°ì˜ ì•½ ì²˜ë°©ì „",               
+            description = "ì•¨ëŸ°ì´ ë³µìš©í•˜ê³  ìˆë˜ ì•½ì˜ ì²˜ë°©ì „ì…ë‹ˆë‹¤.",        
+            information = "ì•¨ëŸ°ì˜ ì•½ ì²˜ë°©ì „ì´ ë°œê²¬ë˜ì—ˆìŠµë‹ˆë‹¤. " +
+                      "ê·¸ëŠ” 'ë²¤ì¡°ë””ì•„ì œí•€ê³„ í•­ë¶ˆì•ˆì œ'ë¥¼ ë³µìš©í•˜ê³  ìˆì—ˆìŠµë‹ˆë‹¤. " +
+                      "ì •ì‹ ì  ë¶ˆì•ˆì •ìœ¼ë¡œ ì¸í•´ ì²˜ë°©ëœ ì•½ì´ì—ˆìœ¼ë‚˜, " +
+                      "ìµœê·¼ ê·¸ì˜ ë³µìš©ëŸ‰ì´ ë¹„ì •ìƒì ìœ¼ë¡œ ë§ì•˜ë‹¤ëŠ” ì‚¬ì‹¤ì´ ë“œëŸ¬ë‚¬ìŠµë‹ˆë‹¤.",
+            foundAt = "ì•¨ëŸ°ì˜ ì„œì¬",               
+            relationship = "ë„¤ì´ìŠ¨",               
             importance = "high",                   
-            notes = "ÃÖ±Ù ¾Ù·±ÀÌ º¹¿ëÇÏ´ø ¾àÀÇ ¾çÀÌ ºñÁ¤»óÀûÀ¸·Î ¸¹¾ÆÁ³´Ù´Â »ç½ÇÀÌ ¹àÇôÁ³½À´Ï´Ù. " +
-                "¾Ù·±Àº ÀÌ ¾àÀ¸·Î ÀÎÇØ ÆÇ´Ü·ÂÀÌ Èå·ÁÁ³À» °¡´É¼ºÀÌ ÀÖÀ¸¸ç, ÀÌ´Â »ç°ÇÀÇ Áß¿äÇÑ ´Ü¼­ÀÔ´Ï´Ù.",
+            notes = "ìµœê·¼ ì•¨ëŸ°ì´ ë³µìš©í•˜ë˜ ì•½ì˜ ì–‘ì´ ë¹„ì •ìƒì ìœ¼ë¡œ ë§ì•„ì¡Œë‹¤ëŠ” ì‚¬ì‹¤ì´ ë°í˜€ì¡ŒìŠµë‹ˆë‹¤. " +
+                "ì•¨ëŸ°ì€ ì´ ì•½ìœ¼ë¡œ ì¸í•´ íŒë‹¨ë ¥ì´ íë ¤ì¡Œì„ ê°€ëŠ¥ì„±ì´ ìˆìœ¼ë©°, ì´ëŠ” ì‚¬ê±´ì˜ ì¤‘ìš”í•œ ë‹¨ì„œì…ë‹ˆë‹¤.",
         
-            nasonExtraInformation = "¾Ù·±Àº ´ëÇĞ»ı ½ÃÀıºÎÅÍ ÀÌ ¾àÀ» º¹¿ëÇÏ¿´°í, È¸»ç CEO°¡ µÈ ÈÄ ¾à¹° º¹¿ë·®ÀÌ ´õ ´Ã¾ú½À´Ï´Ù. " +
-                                    "³×ÀÌ½¼Àº ¾Ù·±ÀÌ ¾à¹°·Î ÀÎÇØ °æ¿µ¿¡ Â÷ÁúÀ» ºúÀ» ¶§µµ ÀÖ¾úÀ½À» ¾Ë°í ÀÖ¾ú°í, " +
-                                    "¾Ù·±ÀÌ ¹«¸®ÇÑ ºÎÅ¹°ú ¸ğ¿åÀûÀÎ ¹ß¾ğÀ» ÇÒ ¶§ Å« ½ºÆ®·¹½º¸¦ ¹Ş¾Ò½À´Ï´Ù.",
+            nasonExtraInformation = "ì•¨ëŸ°ì€ ëŒ€í•™ìƒ ì‹œì ˆë¶€í„° ì´ ì•½ì„ ë³µìš©í•˜ì˜€ê³ , íšŒì‚¬ CEOê°€ ëœ í›„ ì•½ë¬¼ ë³µìš©ëŸ‰ì´ ë” ëŠ˜ì—ˆìŠµë‹ˆë‹¤. " +
+                                    "ë„¤ì´ìŠ¨ì€ ì•¨ëŸ°ì´ ì•½ë¬¼ë¡œ ì¸í•´ ê²½ì˜ì— ì°¨ì§ˆì„ ë¹šì„ ë•Œë„ ìˆì—ˆìŒì„ ì•Œê³  ìˆì—ˆê³ , " +
+                                    "ì•¨ëŸ°ì´ ë¬´ë¦¬í•œ ë¶€íƒê³¼ ëª¨ìš•ì ì¸ ë°œì–¸ì„ í•  ë•Œ í° ìŠ¤íŠ¸ë ˆìŠ¤ë¥¼ ë°›ì•˜ìŠµë‹ˆë‹¤.",
 
-            jennyExtraInformation = "Á¦´Ï´Â ¾Ù·±ÀÌ ´ëÇĞ»ı ½ÃÀıºÎÅÍ ¾à¹°À» º¹¿ëÇÏ°í ÀÖ´Ù´Â »ç½ÇÀ» ¾Ë°í ÀÖ¾úÀ¸¸ç, " +
-                                    "±× ´ç½Ã ¸®´õ½ÊÀÌ ¶Ù¾î³µ´ø ¾Ù·±ÀÌ ¾à¹° º¹¿ë ÈÄ¿¡´Â ±×·¸Áö ¾Ê¾ÒÀ½À» ±â¾ïÇÕ´Ï´Ù. " +
-                                    "Á¦´Ï´Â ½Å¾à ¿¬±¸¿øÀ¸·Î¼­ ¾Ù·±À» µµ¿ÍÁÖ°íÀÚ ÇßÁö¸¸, ¾Ù·±Àº Á¦´ÏÀÇ ²ŞÀ» ¹«½ÃÇÏ°í ºñ¹æÇÏ¿© " +
-                                    "Á¦´Ï¿¡°Ô Å« »óÃ³¸¦ ÁÖ¾ú½À´Ï´Ù. ±× ÀÌÈÄ·Î Á¦´Ï´Â ¾Ù·±¿¡°Ô Àû´ë°¨À» Ç°°Ô µÇ¾ú½À´Ï´Ù.",
+            jennyExtraInformation = "ì œë‹ˆëŠ” ì•¨ëŸ°ì´ ëŒ€í•™ìƒ ì‹œì ˆë¶€í„° ì•½ë¬¼ì„ ë³µìš©í•˜ê³  ìˆë‹¤ëŠ” ì‚¬ì‹¤ì„ ì•Œê³  ìˆì—ˆìœ¼ë©°, " +
+                                    "ê·¸ ë‹¹ì‹œ ë¦¬ë”ì‹­ì´ ë›°ì–´ë‚¬ë˜ ì•¨ëŸ°ì´ ì•½ë¬¼ ë³µìš© í›„ì—ëŠ” ê·¸ë ‡ì§€ ì•Šì•˜ìŒì„ ê¸°ì–µí•©ë‹ˆë‹¤. " +
+                                    "ì œë‹ˆëŠ” ì‹ ì•½ ì—°êµ¬ì›ìœ¼ë¡œì„œ ì•¨ëŸ°ì„ ë„ì™€ì£¼ê³ ì í–ˆì§€ë§Œ, ì•¨ëŸ°ì€ ì œë‹ˆì˜ ê¿ˆì„ ë¬´ì‹œí•˜ê³  ë¹„ë°©í•˜ì—¬ " +
+                                    "ì œë‹ˆì—ê²Œ í° ìƒì²˜ë¥¼ ì£¼ì—ˆìŠµë‹ˆë‹¤. ê·¸ ì´í›„ë¡œ ì œë‹ˆëŠ” ì•¨ëŸ°ì—ê²Œ ì ëŒ€ê°ì„ í’ˆê²Œ ë˜ì—ˆìŠµë‹ˆë‹¤.",
         
-            minaExtraInformation = "¹Ì³ª´Â ´ëÇĞ ½ÃÀı ¾Ù·±°ú ¿¬ÀÎ °ü°è¿´À¸¸ç, ±×°¡ ¾à¹° ºÎÀÛ¿ëÀ¸·Î ÀÎÇØ ÀÚÁÖ ÀÌ»óÇÑ Çàµ¿À» Çß´Ù´Â »ç½ÇÀ» ¾Ë°í ÀÖ½À´Ï´Ù. " +
-                                   "¹Ì³ª´Â Á¾Á¾ ¾Ù·±°ú ´ÙÅõ¾ú°í, ¶§¶§·Î ½ÉÇÑ ¸ğ¿åÀûÀÎ ¸»À» µéÀº Àûµµ ÀÖ¾ú½À´Ï´Ù. " +
-                                   "±×·Î ÀÎÇØ µÎ »ç¶÷Àº Á¹¾÷ ÈÄ ¼Ò¿øÇØÁ³°í °á±¹ Çì¾îÁö°Ô µÇ¾ú½À´Ï´Ù."
+            minaExtraInformation = "ë¯¸ë‚˜ëŠ” ëŒ€í•™ ì‹œì ˆ ì•¨ëŸ°ê³¼ ì—°ì¸ ê´€ê³„ì˜€ìœ¼ë©°, ê·¸ê°€ ì•½ë¬¼ ë¶€ì‘ìš©ìœ¼ë¡œ ì¸í•´ ìì£¼ ì´ìƒí•œ í–‰ë™ì„ í–ˆë‹¤ëŠ” ì‚¬ì‹¤ì„ ì•Œê³  ìˆìŠµë‹ˆë‹¤. " +
+                                   "ë¯¸ë‚˜ëŠ” ì¢…ì¢… ì•¨ëŸ°ê³¼ ë‹¤íˆ¬ì—ˆê³ , ë•Œë•Œë¡œ ì‹¬í•œ ëª¨ìš•ì ì¸ ë§ì„ ë“¤ì€ ì ë„ ìˆì—ˆìŠµë‹ˆë‹¤. " +
+                                   "ê·¸ë¡œ ì¸í•´ ë‘ ì‚¬ëŒì€ ì¡¸ì—… í›„ ì†Œì›í•´ì¡Œê³  ê²°êµ­ í—¤ì–´ì§€ê²Œ ë˜ì—ˆìŠµë‹ˆë‹¤."
         },
-        // ¾Ù·±ÀÇ Ã¥»ó¿¡¼­ ¹ß°ßµÈ ÆíÁö
+        // ì•¨ëŸ°ì˜ ì±…ìƒì—ì„œ ë°œê²¬ëœ í¸ì§€
         new EvidenceInfo {
-            name = "¾Ù·±ÀÇ Ã¥»ó¿¡¼­ ¹ß°ßµÈ ÆíÁö",
-            description = "´©±º°¡ ¾Ù·±À» À§ÇùÇÏ´Â ³»¿ëÀÌ ÀûÇô ÀÖ½À´Ï´Ù.",
-            information = "¾Ù·±ÀÇ Ã¥»ó¿¡¼­ ¾î¶°ÇÑ ÆíÁö°¡ ¹ß°ßµÇ¾ú½À´Ï´Ù." +
-            "ÀÌ ÆíÁö¿¡´Â ´©±º°¡ ¾Ù·±À» À§ÇùÇÏ´Â ³»¿ëÀÌ ÀûÇô ÀÖ½À´Ï´Ù. " +
-            "¾Ù·±¿¡ ´ëÇÑ ºĞ³ëÀÇ °¨Á¤ÀÌ ±Û·Î ³ªÅ¸³ª°í ÀÖ½À´Ï´Ù." +
-            "¾Ù·±ÀÇ Á×À½°ú ÀÌ ÆíÁöÀÇ ³»¿ëÀÌ ¿¬°üµÇ¾î ÀÖÀ»±î¿ä?",
+            name = "ì•¨ëŸ°ì˜ ì±…ìƒì—ì„œ ë°œê²¬ëœ í¸ì§€",
+            description = "ëˆ„êµ°ê°€ ì•¨ëŸ°ì„ ìœ„í˜‘í•˜ëŠ” ë‚´ìš©ì´ ì í˜€ ìˆìŠµë‹ˆë‹¤.",
+            information = "ì•¨ëŸ°ì˜ ì±…ìƒì—ì„œ ì–´ë– í•œ í¸ì§€ê°€ ë°œê²¬ë˜ì—ˆìŠµë‹ˆë‹¤." +
+            "ì´ í¸ì§€ì—ëŠ” ëˆ„êµ°ê°€ ì•¨ëŸ°ì„ ìœ„í˜‘í•˜ëŠ” ë‚´ìš©ì´ ì í˜€ ìˆìŠµë‹ˆë‹¤. " +
+            "ì•¨ëŸ°ì— ëŒ€í•œ ë¶„ë…¸ì˜ ê°ì •ì´ ê¸€ë¡œ ë‚˜íƒ€ë‚˜ê³  ìˆìŠµë‹ˆë‹¤." +
+            "ì•¨ëŸ°ì˜ ì£½ìŒê³¼ ì´ í¸ì§€ì˜ ë‚´ìš©ì´ ì—°ê´€ë˜ì–´ ìˆì„ê¹Œìš”?",
             foundAt = "Alan's Room",
             relationship = "Jenny",
             importance = "high",
             notes = "There must be real medicine somewhere",
 
 
-            nasonExtraInformation = "¾Ù·±ÀÌ Çù¹ÚÀ» ¹Ş´Â ÀÏÀº ÈçÇÑ ÀÏÀÌ¶ó°í ³×ÀÌ½¼Àº »ı°¢ÇÑ´Ù." +
-            "ÇÑ ±â¾÷ÀÇ CEO·Î½á ÀÌ Á¤µµÀÇ Çù¹ÚÀº ±Í¿©¿î ¼öÁØÀÌ¶ó°í ³×ÀÌ½¼Àº ¿©±ä´Ù." +
-            "ÇÏÁö¸¸ ¾Ù·±Àº Á¤½ÅÀû ºÒ¾ÈÁ¤ÇÔ ¶§¹®¿¡ ÀÌ ÆíÁö·Î ÀÎÇØ ¸¹Àº ½ºÆ®·¹½º¸¦ ¹Ş¾ÒÀ» °ÍÀÌ¶ó°í ÁÖÀåÇÑ´Ù.",
-            jennyExtraInformation = "¾Ù·±Àº Á¤½ÅÀû ºÒ¾ÈÁ¤ÇÔ°ú CEO¶ó´Â Á÷Ã¥À¸·Î ÀÎÇØ ¸¹Àº »ç¶÷µé¿¡°Ô ¹Ì¿ò »ì ÀÏÀ» ÇØ¿Ô´Ù." +
-            "Á¦´Ï´Â ÀÌ·± ¾Ù·±À» °¡¿²°Ô ¿©±âÁö ¾Ê´Â´Ù." +
-            "Á¦´Ï ¶ÇÇÑ ¾Ù·±¿¡°Ô ¾Ç°¨Á¤À» Ç°°í ÀÖ´Ù.",
-            minaExtraInformation = "¹Ì³ª´Â ¾Ù·±ÀÌ ÀÌ·± Çù¹ÚÀ» ¹Ş°í ÀÖ´ÂÁö ¸ô¶ó ³î¶ó¸ç ½½ÆÛÇÑ´Ù." +
-            "Á¹¾÷ ÈÄ¿¡ ¾Ù·±ÀÇ ¼Ò½ÄÀ» µèÁö ¸øÇÏ¿© ÀÌ·¸°Ô Å« °íÅëÀ» ¹ŞÀ» °ÍÀÌ¶ó »ı°¢ÇÏÁö ¸øÇÏ¿´´Ù." +
-            "¹Ì³ª´Â ¾Ù·±ÀÌ °ŞÀº °íÅëÀ» ¾Ë¾ÆÃ¤Áö ¸øÇÏ¿© Å©°Ô ÀÚÃ¥ÇÑ´Ù."
+            nasonExtraInformation = "ì•¨ëŸ°ì´ í˜‘ë°•ì„ ë°›ëŠ” ì¼ì€ í”í•œ ì¼ì´ë¼ê³  ë„¤ì´ìŠ¨ì€ ìƒê°í•œë‹¤." +
+            "í•œ ê¸°ì—…ì˜ CEOë¡œì¨ ì´ ì •ë„ì˜ í˜‘ë°•ì€ ê·€ì—¬ìš´ ìˆ˜ì¤€ì´ë¼ê³  ë„¤ì´ìŠ¨ì€ ì—¬ê¸´ë‹¤." +
+            "í•˜ì§€ë§Œ ì•¨ëŸ°ì€ ì •ì‹ ì  ë¶ˆì•ˆì •í•¨ ë•Œë¬¸ì— ì´ í¸ì§€ë¡œ ì¸í•´ ë§ì€ ìŠ¤íŠ¸ë ˆìŠ¤ë¥¼ ë°›ì•˜ì„ ê²ƒì´ë¼ê³  ì£¼ì¥í•œë‹¤.",
+            jennyExtraInformation = "ì•¨ëŸ°ì€ ì •ì‹ ì  ë¶ˆì•ˆì •í•¨ê³¼ CEOë¼ëŠ” ì§ì±…ìœ¼ë¡œ ì¸í•´ ë§ì€ ì‚¬ëŒë“¤ì—ê²Œ ë¯¸ì›€ ì‚´ ì¼ì„ í•´ì™”ë‹¤." +
+            "ì œë‹ˆëŠ” ì´ëŸ° ì•¨ëŸ°ì„ ê°€ì—¾ê²Œ ì—¬ê¸°ì§€ ì•ŠëŠ”ë‹¤." +
+            "ì œë‹ˆ ë˜í•œ ì•¨ëŸ°ì—ê²Œ ì•…ê°ì •ì„ í’ˆê³  ìˆë‹¤.",
+            minaExtraInformation = "ë¯¸ë‚˜ëŠ” ì•¨ëŸ°ì´ ì´ëŸ° í˜‘ë°•ì„ ë°›ê³  ìˆëŠ”ì§€ ëª°ë¼ ë†€ë¼ë©° ìŠ¬í¼í•œë‹¤." +
+            "ì¡¸ì—… í›„ì— ì•¨ëŸ°ì˜ ì†Œì‹ì„ ë“£ì§€ ëª»í•˜ì—¬ ì´ë ‡ê²Œ í° ê³ í†µì„ ë°›ì„ ê²ƒì´ë¼ ìƒê°í•˜ì§€ ëª»í•˜ì˜€ë‹¤." +
+            "ë¯¸ë‚˜ëŠ” ì•¨ëŸ°ì´ ê²ªì€ ê³ í†µì„ ì•Œì•„ì±„ì§€ ëª»í•˜ì—¬ í¬ê²Œ ìì±…í•œë‹¤."
         },
-        // Åõ±â¼º ÁÖ½Ä ÅõÀÚ ³»¿ëÀÌ ´ã°ÜÀÖÀ½
-        new EvidenceInfo {
-            name = "³×ÀÌ½¼ÀÇ ¼­·ù °¡¹æ¿¡¼­ ¹ß°ßµÈ ¹ı·ü ¼­·ù",
-            description = "¾Ù·±ÀÇ È¸»çÀÇ ¹ıÀû ¹®Á¦¿¡ ´ëÇÑ ³»¿ëÀÌ ´ã°ÜÀÖ½À´Ï´Ù.",
-            information = "³×ÀÌ½¼ÀÇ ¼­·ù °¡¹æ¿¡¼­ ¹ı·ü ¼­·ù°¡ ¹ß°ßµÇ¾ú½À´Ï´Ù." +
-            "ÀÌ ¼­·ù´Â ¾Ù·±ÀÇ È¸»çÀÇ ¹ıÀû ºĞÀï °¡´É¼ºÀ» ¾Ï½ÃÇÕ´Ï´Ù. " +
-            "¾Ù·±ÀÌ È¸»ç¸¦ µÑ·¯½Ñ ¹ıÀû ¹®Á¦·Î ÀÎÇØ ³×ÀÌ½¼°ú °¥µîÀ» °Ş°í ÀÖ¾ú´ø °ÍÀ¸·Î º¸ÀÔ´Ï´Ù. " +
-            "ÀÌ °¥µîÀÌ ¾Ù·±ÀÇ Á×À½¿¡ Á÷Á¢ÀûÀÎ ¿µÇâÀ» ¹ÌÃÆÀ»±î¿ä?",
+        // íˆ¬ê¸°ì„± ì£¼ì‹ íˆ¬ì ë‚´ìš©ì´ ë‹´ê²¨ìˆìŒ
+        new EvidenceInfo {                        
+            name = "ë„¤ì´ìŠ¨ì˜ ì„œë¥˜ ê°€ë°©ì—ì„œ ë°œê²¬ëœ ë²•ë¥  ì„œë¥˜",
+            description = "ì•¨ëŸ°ì˜ íšŒì‚¬ì˜ ë²•ì  ë¬¸ì œì— ëŒ€í•œ ë‚´ìš©ì´ ë‹´ê²¨ìˆìŠµë‹ˆë‹¤.",
+            information = "ë„¤ì´ìŠ¨ì˜ ì„œë¥˜ ê°€ë°©ì—ì„œ ë²•ë¥  ì„œë¥˜ê°€ ë°œê²¬ë˜ì—ˆìŠµë‹ˆë‹¤." +
+            "ì´ ì„œë¥˜ëŠ” ì•¨ëŸ°ì˜ íšŒì‚¬ì˜ ë²•ì  ë¶„ìŸ ê°€ëŠ¥ì„±ì„ ì•”ì‹œí•©ë‹ˆë‹¤. " +
+            "ì•¨ëŸ°ì´ íšŒì‚¬ë¥¼ ë‘˜ëŸ¬ì‹¼ ë²•ì  ë¬¸ì œë¡œ ì¸í•´ ë„¤ì´ìŠ¨ê³¼ ê°ˆë“±ì„ ê²ªê³  ìˆì—ˆë˜ ê²ƒìœ¼ë¡œ ë³´ì…ë‹ˆë‹¤. " +
+            "ì´ ê°ˆë“±ì´ ì•¨ëŸ°ì˜ ì£½ìŒì— ì§ì ‘ì ì¸ ì˜í–¥ì„ ë¯¸ì³¤ì„ê¹Œìš”?",
+            foundAt = "Nason's bag",
+            relationship = "Nason",
+            importance = "low",
+            notes = "Represents the relationship between Nason and Alan",
 
-            nasonExtraInformation = "³×ÀÌ½¼ÀÇ ¼­·ù °¡¹æ¿¡¼­ ¹ß°ßµÈ ¹ı·ü ¼­·ù´Â ¾Ù·±ÀÌ ÀÚ½ÅÀÇ È¸»çÀÇ °æ¿µ ¾ÇÈ­¸¦ ¹«¸¶½ÃÅ°±â À§ÇØ," +
-            "Åõ±â¼º ÅõÀÚ¸¦ ÇÑ »ç½ÇÀ» º¸¿©ÁÖ´Â ³»¿ëÀÌ ÀÖ½À´Ï´Ù." +
-            "³×ÀÌ½¼Àº ¾Ù·±¿¡°Ô ÀÌ·¯ÇÑ ¹æ½ÄÀ» ¹İ´ëÇßÁö¸¸, Á¤½ÅÀÌ ºÒ¾ÈÁ¤Çß´ø ¾Ù·±Àº ÀÌ·¯ÇÑ ¼ö´ÜÀ» »ç¿ëÇÒ ¼ö ¹Û¿¡ ¾ø¾ú´Ù°í ÁÖÀåÇß½À´Ï´Ù.",
-            jennyExtraInformation = "Á¦´Ï´Â ¾Ù·±ÀÇ È¸»ç °æ¿µ ½ÇÀûÀÌ ºÒ¾ÈÁ¤ÇÑ »ç½ÇÀ» ¾Ë°í ÀÖ¾ú½À´Ï´Ù." +
-            "³×ÀÌ½¼ÀÇ ¼­·ù °¡¹æ¿¡¼­ ¹ß°ßµÇ ¹ı·ü ¼­·ù´Â ¾Ù·±ÀÌ À§¹ıÀûÀÎ ÅõÀÚ¸¦ ÇÑ ³»¿ëÀÌ ´ã°ÜÀÖ½À´Ï´Ù." +
-            "Á¦´Ï´Â ¾Ù·±ÀÌ¶ó¸é ÀÌ·¯ÇÑ ÅõÀÚ¸¦ ÇÒ ¹ı ÇÏ´Ù°í ÀÎÁ¤ÇÕ´Ï´Ù.",
-            minaExtraInformation = "³×ÀÌ½¼ÀÇ ¼­·ù °¡¹æ¿¡¼­ ¹ß°ßµÇ ¹ı·ü ¼­·ù´Â ¾Ù·±ÀÌ À§¹ıÀûÀÎ ÅõÀÚ¸¦ ÇÑ ³»¿ëÀÌ ´ã°ÜÀÖ½À´Ï´Ù." +
-            "¹Ì³ª´Â ¾Ù·±ÀÌ ÀÌ·¯ÇÑ Çàµ¿À» ÇÑ °Í¿¡ Å« ½Ç¸Á°¨À» º¸ÀÌÁö¸¸," +
-            "ÇÑÆíÀ¸·Î´Â ¾Ù·±ÀÌ À§¹ıÀûÀÎ ÅõÀÚ¸¦ ÇÑ °Í¿¡ ¾È¾²·¯¿î ¸¶À½À» ´À³§´Ï´Ù."
+            nasonExtraInformation = "ë„¤ì´ìŠ¨ì˜ ì„œë¥˜ ê°€ë°©ì—ì„œ ë°œê²¬ëœ ë²•ë¥  ì„œë¥˜ëŠ” ì•¨ëŸ°ì´ ìì‹ ì˜ íšŒì‚¬ì˜ ê²½ì˜ ì•…í™”ë¥¼ ë¬´ë§ˆì‹œí‚¤ê¸° ìœ„í•´," +
+            "íˆ¬ê¸°ì„± íˆ¬ìë¥¼ í•œ ì‚¬ì‹¤ì„ ë³´ì—¬ì£¼ëŠ” ë‚´ìš©ì´ ìˆìŠµë‹ˆë‹¤." +
+            "ë„¤ì´ìŠ¨ì€ ì•¨ëŸ°ì—ê²Œ ì´ëŸ¬í•œ ë°©ì‹ì„ ë°˜ëŒ€í–ˆì§€ë§Œ, ì •ì‹ ì´ ë¶ˆì•ˆì •í–ˆë˜ ì•¨ëŸ°ì€ ì´ëŸ¬í•œ ìˆ˜ë‹¨ì„ ì‚¬ìš©í•  ìˆ˜ ë°–ì— ì—†ì—ˆë‹¤ê³  ì£¼ì¥í–ˆìŠµë‹ˆë‹¤.",
+            jennyExtraInformation = "ì œë‹ˆëŠ” ì•¨ëŸ°ì˜ íšŒì‚¬ ê²½ì˜ ì‹¤ì ì´ ë¶ˆì•ˆì •í•œ ì‚¬ì‹¤ì„ ì•Œê³  ìˆì—ˆìŠµë‹ˆë‹¤." +
+            "ë„¤ì´ìŠ¨ì˜ ì„œë¥˜ ê°€ë°©ì—ì„œ ë°œê²¬ë˜ ë²•ë¥  ì„œë¥˜ëŠ” ì•¨ëŸ°ì´ ìœ„ë²•ì ì¸ íˆ¬ìë¥¼ í•œ ë‚´ìš©ì´ ë‹´ê²¨ìˆìŠµë‹ˆë‹¤." +
+            "ì œë‹ˆëŠ” ì•¨ëŸ°ì´ë¼ë©´ ì´ëŸ¬í•œ íˆ¬ìë¥¼ í•  ë²• í•˜ë‹¤ê³  ì¸ì •í•©ë‹ˆë‹¤.",
+            minaExtraInformation = "ë„¤ì´ìŠ¨ì˜ ì„œë¥˜ ê°€ë°©ì—ì„œ ë°œê²¬ë˜ ë²•ë¥  ì„œë¥˜ëŠ” ì•¨ëŸ°ì´ ìœ„ë²•ì ì¸ íˆ¬ìë¥¼ í•œ ë‚´ìš©ì´ ë‹´ê²¨ìˆìŠµë‹ˆë‹¤." +
+            "ë¯¸ë‚˜ëŠ” ì•¨ëŸ°ì´ ì´ëŸ¬í•œ í–‰ë™ì„ í•œ ê²ƒì— í° ì‹¤ë§ê°ì„ ë³´ì´ì§€ë§Œ," +
+            "í•œí¸ìœ¼ë¡œëŠ” ì•¨ëŸ°ì´ ìœ„ë²•ì ì¸ íˆ¬ìë¥¼ í•œ ê²ƒì— ì•ˆì“°ëŸ¬ìš´ ë§ˆìŒì„ ëŠë‚ë‹ˆë‹¤."
         },
-        // ¹Ì³ªÀÇ ¸Ş¸ğ
+        // ë¯¸ë‚˜ì˜ ë©”ëª¨
         new EvidenceInfo {
-            name = "¹Ì³ªÀÇ ¸Ş¸ğ",
-            description = "¹Ì³ªÀÇ ¾Ù·±¿¡ ´ëÇÑ ¸¶À½ÀÌ ÀûÇôÀÖ½À´Ï´Ù.",
-            information = "¹Ì³ª°¡ ÀÛ¼ºÇÑ ¸Ş¸ğ°¡ ¹ß°ßµÇ¾ú½À´Ï´Ù. " +
-            "ÀÌ ¸Ş¸ğ¿¡´Â ¹Ì³ªÀÇ Áø½É°ú ¾Ù·±¿¡ ´ëÇÑ »ı°¢ÀÌ ´ã°Ü ÀÖ½À´Ï´Ù. " +
-            "¹Ì³ª°¡ ¾Ù·±¿¡°Ô ¾ÆÁ÷ »ç¶ûÀÇ °¨Á¤ÀÌ ³²¾ÆÀÖ¾úÀ½ÀÌ ÃßÃøµË´Ï´Ù. ",
+            name = "ë¯¸ë‚˜ì˜ ë©”ëª¨",
+            description = "ë¯¸ë‚˜ì˜ ì•¨ëŸ°ì— ëŒ€í•œ ë§ˆìŒì´ ì í˜€ìˆìŠµë‹ˆë‹¤.",
+            information = "ë¯¸ë‚˜ê°€ ì‘ì„±í•œ ë©”ëª¨ê°€ ë°œê²¬ë˜ì—ˆìŠµë‹ˆë‹¤. " +
+            "ì´ ë©”ëª¨ì—ëŠ” ë¯¸ë‚˜ì˜ ì§„ì‹¬ê³¼ ì•¨ëŸ°ì— ëŒ€í•œ ìƒê°ì´ ë‹´ê²¨ ìˆìŠµë‹ˆë‹¤. " +
+            "ë¯¸ë‚˜ê°€ ì•¨ëŸ°ì—ê²Œ ì•„ì§ ì‚¬ë‘ì˜ ê°ì •ì´ ë‚¨ì•„ìˆì—ˆìŒì´ ì¶”ì¸¡ë©ë‹ˆë‹¤. ",
+            foundAt = "Mina's room",
+            relationship = "Mina",
+            importance = "low",
+            notes = "Mina still feels sympathy for Alan.",
 
-            nasonExtraInformation = "³×ÀÌ½¼Àº ´ëÇĞ»ı ½ÃÀı ¹Ì³ª¿Í ¾Ù·±ÀÌ ¼­·Î ¿¬ÀÎ »çÀÌ¿´´ø »ç½ÇÀ» ¾Ë°í ÀÖ½À´Ï´Ù." +
-            "³×ÀÌ½¼Àº ¾Ù·±°ú ¹Ì³ª°¡ ´ëÇĞ Á¹¾÷°ú ÇÔ²² ¼­·Î »çÀÌ°¡ ¼Ò¿øÇØÁ® °á±¹ Çì¾îÁø »ç½Ç ¶ÇÇÑ ¾Ë°í ÀÖ½À´Ï´Ù." +
-            "³×ÀÌ½¼Àº ¹Ì³ª°¡ ¾ÆÁ÷ ¾Ù·±¿¡ ´ëÇÑ »ç¶ûÀÇ °¨Á¤ÀÌ ³²¾ÆÀÖÀ» °ÍÀÌ¶ó ÃßÃøÇÕ´Ï´Ù.",
-            jennyExtraInformation = "Á¦´Ï´Â ¹Ì³ª¿Í ¾Ù·±ÀÌ °á±¹ ÁÁÁö ¾Ê°Ô Çì¾îÁø »ç½ÇÀ» ¾Ë°í ÀÖ½À´Ï´Ù." +
-            "Á¦´Ï´Â ¾Æ¸¶ ¹Ì³ª°¡ ¾Ù·±¿¡°Ô ÀÌ ¸Ş¸ğ¸¦ Àü´ŞÇÒÁö ¸Á¼³¿´´Ù°í ÃßÃøÇÕ´Ï´Ù.",
-            minaExtraInformation = "¹Ì³ª´Â ¾Ù·±¿¡°Ô ¾ÆÁ÷ ¿¬¹ÎÀÇ °¨Á¤ÀÌ ³²¾ÆÀÖ½À´Ï´Ù." +
-            "¹Ì³ª´Â ¾Ù·±ÀÌ Á×À» ÁÙµµ ¸ğ¸£°í ´ÙÀ½¿¡ ±âÈ¸°¡ ÀÖÀ» °ÍÀÌ¶ó°í ¹Ï¾î," +
-            "´ÙÀ½¿¡ ÀÚ½ÅÀÇ ¸¶À½À» ÀüÇÏ·Á°í ÇßÁö¸¸ °á±¹ ¾Ù·±ÀÌ Á×¾î ÀÚ½ÅÀÇ ¸¶À½À» Àü´ŞÇÏÁö ¸øÇÑ °ÍÀ» ÈÄÈ¸ÇÕ´Ï´Ù."
+            nasonExtraInformation = "ë„¤ì´ìŠ¨ì€ ëŒ€í•™ìƒ ì‹œì ˆ ë¯¸ë‚˜ì™€ ì•¨ëŸ°ì´ ì„œë¡œ ì—°ì¸ ì‚¬ì´ì˜€ë˜ ì‚¬ì‹¤ì„ ì•Œê³  ìˆìŠµë‹ˆë‹¤." +
+            "ë„¤ì´ìŠ¨ì€ ì•¨ëŸ°ê³¼ ë¯¸ë‚˜ê°€ ëŒ€í•™ ì¡¸ì—…ê³¼ í•¨ê»˜ ì„œë¡œ ì‚¬ì´ê°€ ì†Œì›í•´ì ¸ ê²°êµ­ í—¤ì–´ì§„ ì‚¬ì‹¤ ë˜í•œ ì•Œê³  ìˆìŠµë‹ˆë‹¤." +
+            "ë„¤ì´ìŠ¨ì€ ë¯¸ë‚˜ê°€ ì•„ì§ ì•¨ëŸ°ì— ëŒ€í•œ ì‚¬ë‘ì˜ ê°ì •ì´ ë‚¨ì•„ìˆì„ ê²ƒì´ë¼ ì¶”ì¸¡í•©ë‹ˆë‹¤.",
+            jennyExtraInformation = "ì œë‹ˆëŠ” ë¯¸ë‚˜ì™€ ì•¨ëŸ°ì´ ê²°êµ­ ì¢‹ì§€ ì•Šê²Œ í—¤ì–´ì§„ ì‚¬ì‹¤ì„ ì•Œê³  ìˆìŠµë‹ˆë‹¤." +
+            "ì œë‹ˆëŠ” ì•„ë§ˆ ë¯¸ë‚˜ê°€ ì•¨ëŸ°ì—ê²Œ ì´ ë©”ëª¨ë¥¼ ì „ë‹¬í• ì§€ ë§ì„¤ì˜€ë‹¤ê³  ì¶”ì¸¡í•©ë‹ˆë‹¤.",
+            minaExtraInformation = "ë¯¸ë‚˜ëŠ” ì•¨ëŸ°ì—ê²Œ ì•„ì§ ì—°ë¯¼ì˜ ê°ì •ì´ ë‚¨ì•„ìˆìŠµë‹ˆë‹¤." +
+            "ë¯¸ë‚˜ëŠ” ì•¨ëŸ°ì´ ì£½ì„ ì¤„ë„ ëª¨ë¥´ê³  ë‹¤ìŒì— ê¸°íšŒê°€ ìˆì„ ê²ƒì´ë¼ê³  ë¯¿ì–´," +
+            "ë‹¤ìŒì— ìì‹ ì˜ ë§ˆìŒì„ ì „í•˜ë ¤ê³  í–ˆì§€ë§Œ ê²°êµ­ ì•¨ëŸ°ì´ ì£½ì–´ ìì‹ ì˜ ë§ˆìŒì„ ì „ë‹¬í•˜ì§€ ëª»í•œ ê²ƒì„ í›„íšŒí•©ë‹ˆë‹¤."
         },
-        // ¾Ù·±ÀÇ Áı ÁÖº¯¿¡¼­ ¹ß°ßµÈ ¹ßÀÚ±¹
+        // ì•¨ëŸ°ì˜ ì§‘ ì£¼ë³€ì—ì„œ ë°œê²¬ëœ ë°œìêµ­
         new EvidenceInfo {
-            name = "¾Ù·±ÀÇ Áı ÁÖº¯¿¡¼­ ¹ß°ßµÈ ¹ßÀÚ±¹",
-            description = "ÃÊ´ëµÈ ÀÎ¿ø Áß ´©±º°¡ÀÇ °ÍÀ¸·Î ÃßÁ¤µÇ´Â ¹ßÀÚ±¹ÀÔ´Ï´Ù.",
-            information = "¾Ù·±ÀÇ Áı ÁÖº¯¿¡¼­ ´©±º°¡ÀÇ ¹ßÀÚ±¹ÀÌ ¹ß°ßµÇ¾ú½À´Ï´Ù." +
-            "ÀÌ ¹ßÀÚ±¹Àº ¾Ù·±ÀÇ ¹æ ¹Ù±ù¿¡ ÀÌ¾îÁ® ÀÖ½À´Ï´Ù." +
-            "ÀÌ ¹ßÀÚ±¹Àº ÃÊ´ëµÈ ÀÎ¿ø Áß ´©±º°¡ÀÇ °ÍÀ¸·Î ÃßÁ¤µË´Ï´Ù. " +
-            "´©±º°¡ ¾Ù·±À» »ìÇØÇÏ°í Áı ¹ÛÀ¸·Î ³ª°¡·Á°í Çß´ø °ÍÀÏ±î¿ä? ",
+            name = "ì•¨ëŸ°ì˜ ì§‘ ì£¼ë³€ì—ì„œ ë°œê²¬ëœ ë°œìêµ­",
+            description = "ì´ˆëŒ€ëœ ì¸ì› ì¤‘ ëˆ„êµ°ê°€ì˜ ê²ƒìœ¼ë¡œ ì¶”ì •ë˜ëŠ” ë°œìêµ­ì…ë‹ˆë‹¤.",
+            information = "ì•¨ëŸ°ì˜ ì§‘ ì£¼ë³€ì—ì„œ ëˆ„êµ°ê°€ì˜ ë°œìêµ­ì´ ë°œê²¬ë˜ì—ˆìŠµë‹ˆë‹¤." +
+            "ì´ ë°œìêµ­ì€ ì•¨ëŸ°ì˜ ë°© ë°”ê¹¥ì— ì´ì–´ì ¸ ìˆìŠµë‹ˆë‹¤." +
+            "ì´ ë°œìêµ­ì€ ì´ˆëŒ€ëœ ì¸ì› ì¤‘ ëˆ„êµ°ê°€ì˜ ê²ƒìœ¼ë¡œ ì¶”ì •ë©ë‹ˆë‹¤. " +
+            "ëˆ„êµ°ê°€ ì•¨ëŸ°ì„ ì‚´í•´í•˜ê³  ì§‘ ë°–ìœ¼ë¡œ ë‚˜ê°€ë ¤ê³  í–ˆë˜ ê²ƒì¼ê¹Œìš”? ",
+            foundAt = "Around alan's house",
+            relationship = "Nason",
+            importance = "low",
+            notes = "Whose footprints are these?",
 
-            nasonExtraInformation = "³×ÀÌ½¼Àº ÀÌ ¹ßÀÚ±¹Àº ÀÚ½ÅÀÇ °ÍÀÎ °ÍÀ» ¾Ë°í ÀÖ½À´Ï´Ù." +
-            "ÆÄÆ¼ Áß°£¿¡ ³×ÀÌ½¼ÀÌ Àá±ñ ÀüÈ­¸¦ ¹Ş±â À§ÇØ ³ª°£ °ÍÀÔ´Ï´Ù.",
-            jennyExtraInformation = "Á¦´Ï´Â ÀÌ ¹ßÀÚ±¹ÀÇ ÁÖÀÎÀÌ ³×ÀÌ½¼ÀÌ¶ó°í ÃßÃøÇÕ´Ï´Ù." +
-            "Á¦´Ï´Â ³×ÀÌ½¼ÀÌ ¿ÀÈÄ 9½Ã °æ¿¡ Àá½Ã ¹Û¿¡ ³ª°¬´Ù ¿Â °ÍÀ» ¾Ë°í ÀÖ½À´Ï´Ù.",
-            minaExtraInformation = "¹Ì³ª´Â ÀÌ ¹ßÀÚ±¹ÀÇ ÁÖÀÎÀÌ ¾Ù·±À» »ìÇØÇÏ°í Ã¢¹®À» ÅëÇØ ´Ş¾Æ³µÀ» °ÍÀÌ¶ó ÃßÃøÇÕ´Ï´Ù." +
-            "Ã¢¹® ¹ÛÀ¸·Î ´Ş¾Æ³²À¸·Î½á ÀÚ½ÅÀÌ ¾Ù·±À» Á×ÀÌÁö ¾ÊÀº °ÍÃ³·³ ÅÂ¿¬ÇÏ°Ô Áı ¾ÈÀ¸·Î µ¹¾Æ¿ÔÀ» °ÍÀÌ¶ó°í ÃßÃøÇÕ´Ï´Ù."
+            nasonExtraInformation = "ë„¤ì´ìŠ¨ì€ ì´ ë°œìêµ­ì€ ìì‹ ì˜ ê²ƒì¸ ê²ƒì„ ì•Œê³  ìˆìŠµë‹ˆë‹¤." +
+            "íŒŒí‹° ì¤‘ê°„ì— ë„¤ì´ìŠ¨ì´ ì ê¹ ì „í™”ë¥¼ ë°›ê¸° ìœ„í•´ ë‚˜ê°„ ê²ƒì…ë‹ˆë‹¤.",
+            jennyExtraInformation = "ì œë‹ˆëŠ” ì´ ë°œìêµ­ì˜ ì£¼ì¸ì´ ë„¤ì´ìŠ¨ì´ë¼ê³  ì¶”ì¸¡í•©ë‹ˆë‹¤." +
+            "ì œë‹ˆëŠ” ë„¤ì´ìŠ¨ì´ ì˜¤í›„ 9ì‹œ ê²½ì— ì ì‹œ ë°–ì— ë‚˜ê°”ë‹¤ ì˜¨ ê²ƒì„ ì•Œê³  ìˆìŠµë‹ˆë‹¤.",
+            minaExtraInformation = "ë¯¸ë‚˜ëŠ” ì´ ë°œìêµ­ì˜ ì£¼ì¸ì´ ì•¨ëŸ°ì„ ì‚´í•´í•˜ê³  ì°½ë¬¸ì„ í†µí•´ ë‹¬ì•„ë‚¬ì„ ê²ƒì´ë¼ ì¶”ì¸¡í•©ë‹ˆë‹¤." +
+            "ì°½ë¬¸ ë°–ìœ¼ë¡œ ë‹¬ì•„ë‚¨ìœ¼ë¡œì¨ ìì‹ ì´ ì•¨ëŸ°ì„ ì£½ì´ì§€ ì•Šì€ ê²ƒì²˜ëŸ¼ íƒœì—°í•˜ê²Œ ì§‘ ì•ˆìœ¼ë¡œ ëŒì•„ì™”ì„ ê²ƒì´ë¼ê³  ì¶”ì¸¡í•©ë‹ˆë‹¤."
         },
-        // ¾Ù·±ÀÇ ÄÄÇ»ÅÍ¿¡ Ç¥½ÃµÈ ÀÌ¸ŞÀÏ
+        // ì•¨ëŸ°ì˜ ì»´í“¨í„°ì— í‘œì‹œëœ ì´ë©”ì¼
         new EvidenceInfo {
-            name = "¾Ù·±ÀÇ ÄÄÇ»ÅÍ¿¡ Ç¥½ÃµÈ ÀÌ¸ŞÀÏ",
-            description = "¾Ù·±ÀÇ ÄÄÇ»ÅÍ¿¡ ½Å¾à ÇÁ·ÎÁ§Æ® Æó±â ÃÖÁ¾ È®ÀÎ¼­°¡ º¸ÀÔ´Ï´Ù.",
-            information = "¾Ù·±ÀÇ ÄÄÇ»ÅÍ¿¡¼­ ÇÏ³ªÀÇ ÀÌ¸ŞÀÏÀÌ ¹ß°ßµÇ¾ú½À´Ï´Ù." +
-            "¾Ù·±ÀÇ È¸»çÀÇ ºñ¿ëÀ» ÁÙÀÌ±â À§ÇØ ½Å¾à °³¹ß ÇÁ·ÎÁ§Æ® ÁøÇàÀ» Æ÷±âÇÏ°Ú´Ù´Â ³»¿ëÀÌ ´ã°Ü ÀÖ½À´Ï´Ù.",
+            name = "ì•¨ëŸ°ì˜ ì»´í“¨í„°ì— í‘œì‹œëœ ì´ë©”ì¼",
+            description = "ì•¨ëŸ°ì˜ ì»´í“¨í„°ì— ì‹ ì•½ í”„ë¡œì íŠ¸ íê¸° ìµœì¢… í™•ì¸ì„œê°€ ë³´ì…ë‹ˆë‹¤.",
+            information = "ì•¨ëŸ°ì˜ ì»´í“¨í„°ì—ì„œ í•˜ë‚˜ì˜ ì´ë©”ì¼ì´ ë°œê²¬ë˜ì—ˆìŠµë‹ˆë‹¤." +
+            "ì•¨ëŸ°ì˜ íšŒì‚¬ì˜ ë¹„ìš©ì„ ì¤„ì´ê¸° ìœ„í•´ ì‹ ì•½ ê°œë°œ í”„ë¡œì íŠ¸ ì§„í–‰ì„ í¬ê¸°í•˜ê² ë‹¤ëŠ” ë‚´ìš©ì´ ë‹´ê²¨ ìˆìŠµë‹ˆë‹¤.",
+            foundAt = "Alan's computer",
+            relationship = "Jenny",
+            importance = "medium",
+            notes = "This project's leader was Jenny.",
 
-            nasonExtraInformation = "³×ÀÌ½¼Àº ¾Ù·±ÀÇ È¸»çÀÇ °æ¿µ »óÅÂ°¡ ÁÁÁö ¾Ê¾Æ ÀÌ·¯ÇÑ ¼±ÅÃÀ» ÇÑ °ÍÀÌ¶ó°í »ı°¢ÇÑ´Ù." +
-            "ÇöÀç ¾Ù·±ÀÇ È¸»ç´Â °æ¿µ À§±âÀÌ¸ç ¾Ù·±ÀÇ Á¤½ÅÀûÀ¸·Î ¾àÇÑ »óÅÂÀÏ ¶§ ÀÌ·¯ÇÑ °áÁ¤À» ³»·È´Ù´Â °ÍÀ» ¾È´Ù.",
-            jennyExtraInformation = "¾Ù·±ÀÌ Æó±âÇÏ·Á°í ÇÑ ÇÁ·ÎÁ§Æ®´Â Á¦´Ï°¡ ¸ÃÀº ÇÁ·ÎÁ§Æ®ÀÌ´Ù." +
-            "¾Ù·±ÀÇ °áÁ¤À¸·Î Á¦´ÏÀÇ ¿¬±¸´Â ½ÇÆĞÇÒ ¿î¸í¿¡ Ã³Çß°í," +
-            "ÀÌ´Â ±×³àÀÇ Ä¿¸®¾î¿¡ Ä¡¸íÀûÀÎ Å¸°İÀ» ÀÔÈú ¼ö ÀÖ¾ú´Ù." +
-            "Á¦´Ï´Â ÀÌ¸¦ ¾Ù·±ÀÌ ÀÇµµÀûÀ¸·Î ÀÚ½ÅÀÇ ¹Ì·¡¸¦ ¸ÁÄ¡·Á Çß´Ù°í ¹Ï¾ú´Ù.",
-            minaExtraInformation = "¹Ì³ª´Â ¾Ù·±ÀÌ ½Å¾à °³¹ß ÇÁ·ÎÁ§Æ®¸¦ Æó±âÇÏ·Á°í ÇÑ ÀÌÀ¯°¡ ÀÖÀ» °ÍÀÌ¶ó°í ÃßÃøÇÑ´Ù." +
-            "´ë¿ÜÀûÀÎ ÀÌÀ¯´Â ÁøÂ¥ ÀÌÀ¯°¡ ¾Æ´Ò °ÍÀÌ¶ó°í »ı°¢ÇÑ´Ù."
+            nasonExtraInformation = "ë„¤ì´ìŠ¨ì€ ì•¨ëŸ°ì˜ íšŒì‚¬ì˜ ê²½ì˜ ìƒíƒœê°€ ì¢‹ì§€ ì•Šì•„ ì´ëŸ¬í•œ ì„ íƒì„ í•œ ê²ƒì´ë¼ê³  ìƒê°í•œë‹¤." +
+            "í˜„ì¬ ì•¨ëŸ°ì˜ íšŒì‚¬ëŠ” ê²½ì˜ ìœ„ê¸°ì´ë©° ì•¨ëŸ°ì˜ ì •ì‹ ì ìœ¼ë¡œ ì•½í•œ ìƒíƒœì¼ ë•Œ ì´ëŸ¬í•œ ê²°ì •ì„ ë‚´ë ¸ë‹¤ëŠ” ê²ƒì„ ì•ˆë‹¤.",
+            jennyExtraInformation = "ì•¨ëŸ°ì´ íê¸°í•˜ë ¤ê³  í•œ í”„ë¡œì íŠ¸ëŠ” ì œë‹ˆê°€ ë§¡ì€ í”„ë¡œì íŠ¸ì´ë‹¤." +
+            "ì•¨ëŸ°ì˜ ê²°ì •ìœ¼ë¡œ ì œë‹ˆì˜ ì—°êµ¬ëŠ” ì‹¤íŒ¨í•  ìš´ëª…ì— ì²˜í–ˆê³ ," +
+            "ì´ëŠ” ê·¸ë…€ì˜ ì»¤ë¦¬ì–´ì— ì¹˜ëª…ì ì¸ íƒ€ê²©ì„ ì…í ìˆ˜ ìˆì—ˆë‹¤." +
+            "ì œë‹ˆëŠ” ì´ë¥¼ ì•¨ëŸ°ì´ ì˜ë„ì ìœ¼ë¡œ ìì‹ ì˜ ë¯¸ë˜ë¥¼ ë§ì¹˜ë ¤ í–ˆë‹¤ê³  ë¯¿ì—ˆë‹¤.",
+            minaExtraInformation = "ë¯¸ë‚˜ëŠ” ì•¨ëŸ°ì´ ì‹ ì•½ ê°œë°œ í”„ë¡œì íŠ¸ë¥¼ íê¸°í•˜ë ¤ê³  í•œ ì´ìœ ê°€ ìˆì„ ê²ƒì´ë¼ê³  ì¶”ì¸¡í•œë‹¤." +
+            "ëŒ€ì™¸ì ì¸ ì´ìœ ëŠ” ì§„ì§œ ì´ìœ ê°€ ì•„ë‹ ê²ƒì´ë¼ê³  ìƒê°í•œë‹¤."
+        },
+        // ì•¨ëŸ°ì˜ ë³¸ë˜ ë³µìš©í•´ì•¼ í•  ì•½ë¬¼
+        new EvidenceInfo {
+            name = "Benzodiazepine anti-anxiety drugs",
+            description = "ì•¨ëŸ°ì´ í‰ì†Œ ë³µìš©í•˜ëŠ” ì•½ì…ë‹ˆë‹¤.",
+            information = "ì•¨ëŸ°ì— ë°©ì— ìˆì–´ì•¼ í•  ì•½ì´ ì–´ì§¸ì„œì¸ì§€ ëª¨ë¥´ê²Œ ë¯¸ë‚˜ì˜ ê°€ë°©ì—ì„œ ë°œê²¬ë˜ì—ˆìŠµë‹ˆë‹¤." +
+            "ì´ ë‹¨ì„œëŠ” ë¯¸ë‚˜ê°€ ì˜ì‹¬ë°›ì„ ìˆ˜ ìˆê²Œ ë˜ëŠ” ì¦ê±°ì…ë‹ˆë‹¤.",
+            foundAt = "Mina's bag",
+            relationship = "Mina",
+            importance = "medium",
+            notes = "Why were Alan's drugs found in Mina's bag?",
+
+            nasonExtraInformation = "ë„¤ì´ìŠ¨ì€ ë¯¸ë‚˜ê°€ ì•¨ëŸ°ì˜ ì•½ì„ ê°€ì§€ê³  ìˆëŠ” ê²ƒì„ ë³´ê³  ë¯¸ë‚˜ê°€ ë²”ì¸ì´ë¼ ì˜ì‹¬í•œë‹¤." +
+            "ë¯¸ë‚˜ê°€ ì•¨ëŸ°ì˜ ì•½ì˜ ë‚´ìš©ë¬¼ì„ ë…ê¸ˆë¬¼ë¡œ ë°”ê¾¼ ê²ƒì´ë¼ ë¯¿ëŠ”ë‹¤.",
+            jennyExtraInformation = "ì œë‹ˆëŠ” ë¯¸ë‚˜ì˜ ê°€ë°©ì—ì„œ ì•¨ëŸ°ì˜ ì•½ì´ ë°œê²¬ëœ ê²ƒì„ ë³´ê³  ë¯¸ë‚˜ê°€ ë²”ì¸ì¼ ê²ƒì´ë¼ê³  ì¶”ì¸¡í•œë‹¤." +
+            "ë¯¸ë‚˜ëŠ” ê³¼ê±° ì•¨ëŸ°ê³¼ ì—°ì¸ì´ì˜€ìœ¼ë‚˜, ì•¨ëŸ°ì´ ì‚¬ì—…ì„ ì‹œì‘í•˜ë©´ì„œ ì•¨ëŸ°ì—ê²Œ ë§ˆìŒì— ìƒì²˜ë¥¼ ë°›ì•˜ë‹¤ëŠ” ê²ƒì„ ì•ˆë‹¤." +
+            "ì´ì— ë³µìˆ˜í•˜ê¸° ìœ„í•´ ì•¨ëŸ°ì„ ë…ì‚´í•˜ì˜€ë‹¤ê³  ì£¼ì¥í•œë‹¤.",            
+            minaExtraInformation = "ë¯¸ë‚˜ëŠ” ìì‹ ì˜ ê°€ë°©ì—ì„œ ì•¨ëŸ°ì˜ ì•½ì´ ë°œê²¬ëœ ê²ƒì— ë†€ë€ë‹¤." +
+            "ë¯¸ë‚˜ëŠ” ì•¨ëŸ°ì˜ ì•½ì„ ë³¸ ì ì´ ì—†ê¸° ë•Œë¬¸ì´ë‹¤." +
+            "ë¯¸ë‚˜ëŠ” ëˆ„êµ°ê°€ ì•¨ëŸ°ì˜ ì•½ ë‚´ìš©ë¬¼ì„ ë°”ê¾¸ê³  ìì‹ ì˜ ê°€ë°©ì— ì•¨ëŸ°ì˜ ì•½ì„ ê°ì³ë‘ì—ˆì„ ê²ƒì´ë¼ê³  ì£¼ì¥í•œë‹¤."
         }
     };
 
@@ -418,35 +449,35 @@ public class JsonManager : MonoBehaviour
         string filePath = Path.Combine(jsonPath, "evidenceData.json");
         evidencePath = filePath;
 
-        // Json Æú´õ°¡ ¾øÀ¸¸é »ı¼º
+        // Json í´ë”ê°€ ì—†ìœ¼ë©´ ìƒì„±
         if (!Directory.Exists(jsonPath))
         {
             Directory.CreateDirectory(jsonPath);
         }
 
-        // JSONÀ¸·Î Á÷·ÄÈ­
+        // JSONìœ¼ë¡œ ì§ë ¬í™”
         string jsonData = JsonConvert.SerializeObject(new EvidenceInfoList { evidenceInfoList = things }, Formatting.Indented);
 
-        // ÆÄÀÏ·Î ÀúÀå
+        // íŒŒì¼ë¡œ ì €ì¥
         File.WriteAllText(filePath, jsonData);
 
-        // °æ·Î Ãâ·Â
+        // ê²½ë¡œ ì¶œë ¥
         Debug.Log("JSON file created at: " + filePath);
     }
 
     public EvidenceInfoList LoadEvidenceJson()
     {
-        // JSON ÆÄÀÏ °æ·Î (ÀúÀåÇÒ ¶§ »ç¿ëÇÑ °æ·Î¿Í µ¿ÀÏÇØ¾ß ÇÔ)
+        // JSON íŒŒì¼ ê²½ë¡œ (ì €ì¥í•  ë•Œ ì‚¬ìš©í•œ ê²½ë¡œì™€ ë™ì¼í•´ì•¼ í•¨)
         string filePath = Path.Combine(jsonPath, "evidenceData.json");
         EvidenceInfoList evidenceInfoList = new EvidenceInfoList();
 
-        // ÆÄÀÏÀÌ Á¸ÀçÇÏ´ÂÁö È®ÀÎ
+        // íŒŒì¼ì´ ì¡´ì¬í•˜ëŠ”ì§€ í™•ì¸
         if (File.Exists(filePath))
         {
-            // JSON ÆÄÀÏÀ» ¹®ÀÚ¿­·Î ÀĞÀ½
+            // JSON íŒŒì¼ì„ ë¬¸ìì—´ë¡œ ì½ìŒ
             string jsonData = File.ReadAllText(filePath);
 
-            // JSON ¹®ÀÚ¿­À» ThingInfoList °´Ã¼·Î ¿ªÁ÷·ÄÈ­
+            // JSON ë¬¸ìì—´ì„ ThingInfoList ê°ì²´ë¡œ ì—­ì§ë ¬í™”
             evidenceInfoList = JsonConvert.DeserializeObject<EvidenceInfoList>(jsonData);
         }
         else
@@ -454,23 +485,23 @@ public class JsonManager : MonoBehaviour
             Debug.LogError("JSON file not found at: " + filePath);
         }
 
-        Debug.Log("json ÆÄÀÏ ·Îµå ¿Ï·á");
+        Debug.Log("json íŒŒì¼ ë¡œë“œ ì™„ë£Œ");
         return evidenceInfoList;
     }
 
     public NPCRoleInfoList LoadNPCRoleJson()
     {
-        // JSON ÆÄÀÏ °æ·Î (ÀúÀåÇÒ ¶§ »ç¿ëÇÑ °æ·Î¿Í µ¿ÀÏÇØ¾ß ÇÔ)
+        // JSON íŒŒì¼ ê²½ë¡œ (ì €ì¥í•  ë•Œ ì‚¬ìš©í•œ ê²½ë¡œì™€ ë™ì¼í•´ì•¼ í•¨)
         string filePath = Path.Combine(jsonPath, "npcRoleData.json");
         NPCRoleInfoList evidenceInfoList = new NPCRoleInfoList();
 
-        // ÆÄÀÏÀÌ Á¸ÀçÇÏ´ÂÁö È®ÀÎ
+        // íŒŒì¼ì´ ì¡´ì¬í•˜ëŠ”ì§€ í™•ì¸
         if (File.Exists(filePath))
         {
-            // JSON ÆÄÀÏÀ» ¹®ÀÚ¿­·Î ÀĞÀ½
+            // JSON íŒŒì¼ì„ ë¬¸ìì—´ë¡œ ì½ìŒ
             string jsonData = File.ReadAllText(filePath);
 
-            // JSON ¹®ÀÚ¿­À» ThingInfoList °´Ã¼·Î ¿ªÁ÷·ÄÈ­
+            // JSON ë¬¸ìì—´ì„ ThingInfoList ê°ì²´ë¡œ ì—­ì§ë ¬í™”
             npcRoleInfoList = JsonConvert.DeserializeObject<NPCRoleInfoList>(jsonData);
         }
         else
@@ -478,7 +509,7 @@ public class JsonManager : MonoBehaviour
             Debug.LogError("JSON file not found at: " + filePath);
         }
 
-        Debug.Log("json ÆÄÀÏ ·Îµå ¿Ï·á");
+        Debug.Log("json íŒŒì¼ ë¡œë“œ ì™„ë£Œ");
         return npcRoleInfoList;
     }
 }
