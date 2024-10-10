@@ -5,17 +5,18 @@ using OpenAI;
 
 public class EvidenceManager : MonoBehaviour
 {
-    // <증거, 해당 증거를 얻었는지 여부>
-    // private Dictionary<Evidence, bool> evidenceDict = new Dictionary<Evidence, bool>();
     [SerializeField] private List<Evidence> evidences = new List<Evidence>();
     [SerializeField] private Queue<Evidence> evidenceQueue = new Queue<Evidence>();
 
-    private const int totalEvidenceLength = 4;
+    private const int totalEvidenceLength = 9;      // 나중에 9로 하기(증거 개수)
     private int currentEvidenceLength = 0;
 
     public NPCRole[] npcRole = new NPCRole[3];
-    public JsonManager jsonManager;
 
+    void Start()
+    {
+        InitializeEvidenceInformation();
+    }
 
     //----------------------------------------------------------//
 
@@ -34,9 +35,7 @@ public class EvidenceManager : MonoBehaviour
     private void InitializeEvidence(Evidence evidence)
     {
         string evidenceName = evidence.GetEvidenceName();
-        // Debug.Log("evidence 이름 시험 : " + evidenceName);
         evidence.Initialize(GetEvidenceName(evidenceName), GetEvidenceDescription(evidenceName));
-        // Debug.Log("증거 이름 : " + GetEvidenceName(evidenceName) + "\n증거 설명 : " + GetEvidenceDescription(evidenceName));
         evidences.Add(evidence);
     }
 
@@ -47,34 +46,75 @@ public class EvidenceManager : MonoBehaviour
         {
             InitializeEvidence(evidenceQueue.Dequeue());
         }
-    }
+    }   
 
-    // 증거를 찾았을 경우 이벤트 발생시키기
-    public void FindEvidence(Evidence evidence)
+    //----------------------------------------------------------//
+
+    // npc들에게 증거에 대한 정보 전달
+    private void InitializeEvidenceInformation()
     {
-        for(int i = 0; i < npcRole.Length; i++)
+        if (JsonManager.evidenceInfoList != null)
         {
-            // npcRole[i].DiscoverEvidence(evidence);
-            SendInformation(evidence, npcRole[i]);
+            string npcName;
+
+            string evidenceName;
+            string evidenceInformation;
+            string evidenceFoundAt;
+            string evidenceRealtionship;
+            string evidenceImportance;
+            string evidenceNotes;
+
+            string extraInformation;
+
+            for (int i = 0; i < npcRole.Length; i++)
+            {
+                npcName = npcRole[i].currentCharacter.ToString();
+
+                foreach (EvidenceInfo ei in JsonManager.evidenceInfoList.evidenceInfoList)
+                {
+                    ChatMessage evidenceMessage = new ChatMessage();
+                    evidenceMessage.Role = "system";
+
+                    evidenceName = ei.name;
+                    evidenceInformation = ei.information;
+                    evidenceFoundAt = ei.foundAt;
+                    evidenceRealtionship = ei.relationship;
+                    evidenceImportance = ei.importance;
+                    evidenceNotes = ei.notes;
+
+                    switch (npcName)
+                    {
+                        case "Nason":
+                            extraInformation = ei.nasonExtraInformation;
+                            break;
+                        case "Jenny":
+                            extraInformation = ei.jennyExtraInformation;
+                            break;
+                        case "Mina":
+                            extraInformation = ei.minaExtraInformation;
+                            break;
+
+                        default:
+                            Debug.LogError("3명 npc 외의 다른 이름 참조!");
+                            return;
+                    }
+
+                    string completeEvidenceMessage =
+                        $"{i + 1}번째 증거에 대한 정보와, 해당 정보에 대한 캐릭터의 태도 및 의견을 알려줄께.\n" +
+                        $"증거 이름 : {evidenceName}.\n" +
+                        $"증거 내용 : {evidenceInformation}.\n" +
+                        $"증거가 발견된 장소 : {evidenceFoundAt}.\n" +
+                        $"증거와 관련된 주요 인물 : {evidenceRealtionship}.\n" +
+                        $"해당 증거의 중요도 : {evidenceImportance}.\n" +
+                        $"추가적으로 필요한 증거나 단서 : {evidenceNotes}.\n" +
+                        $"해당 증거에 대한 {npcName}의 태도 및 의견 : {extraInformation}.\n";
+
+                    evidenceMessage.Content = completeEvidenceMessage;
+
+                    npcRole[i].AddMessage(npcRole[i].currentCharacter, evidenceMessage);
+                }
+            }
         }
-    }
-    
-    /// <summary>
-    /// npc에게 증거 정보 전달
-    /// </summary>
-    /// <param EvidenceManager에서 관리하는 증거 오브젝트="evidence"></param>
-    /// <param 각 npc="npc"></param>
-    void SendInformation(Evidence evidence, NPCRole npc)
-    {
-        ChatMessage evidenceMessage = new ChatMessage();
-        evidenceMessage.Role = "system";
-        
-        string information = GetEvidenceInformation(evidence.name);
-        string extraInformation = GetNPCInformation(evidence.name, npc.currentCharacter.ToString());
-
-        evidenceMessage.Content = information + extraInformation;
-
-        npc.AddMessage(evidenceMessage);
     }
 
     //----------------------------------------------------------//
@@ -87,7 +127,7 @@ public class EvidenceManager : MonoBehaviour
             foreach (EvidenceInfo ei in JsonManager.evidenceInfoList.evidenceInfoList)
             {
                 if (ei.name == evidenceName)
-                {                    
+                {
                     return ei;
                 }
             }
@@ -104,32 +144,9 @@ public class EvidenceManager : MonoBehaviour
         return evidence?.name; // null이면 null 반환
     }
 
-    // 특정 증거 설명 반환
     public string GetEvidenceDescription(string evidenceName)
     {
         EvidenceInfo evidence = GetEvidenceByName(evidenceName);
         return evidence?.description; // null이면 null 반환
-    }
-
-    // 특정 증거 정보 반환
-    public string GetEvidenceInformation(string evidenceName)
-    {
-        EvidenceInfo evidence = GetEvidenceByName(evidenceName);
-        return evidence?.information; // null이면 null 반환
-    }
-
-    // npc에 따라 적절한 정보 전달
-    public string GetNPCInformation(string evidenceName, string npcName)
-    {
-        EvidenceInfo evidence = GetEvidenceByName(evidenceName);
-
-        if(npcName == "Nason")
-            return evidence?.nasonExtraInformation; // null이면 null 반환
-        else if(npcName == "Jenny")
-            return evidence?.jennyExtraInformation;
-        else if(npcName == "Jenny")
-            return evidence?.minaExtraInformation;
-
-        else return null;
     }
 }

@@ -36,7 +36,9 @@ public class ConversationManager : MonoBehaviour
         if (isTalking)
         {
             if(uIManager.GetAskField().text == "")
-                uIManager.GetEndConversationButton().gameObject.SetActive(true);
+            {
+                uIManager.GetEndConversationButton().gameObject.SetActive(uIManager.GetIsSkipping());
+            }                
             else
                 uIManager.GetEndConversationButton().gameObject.SetActive(false);            
         }            
@@ -106,7 +108,7 @@ public class ConversationManager : MonoBehaviour
     {
         if (npcRole != null)
         {
-            logManager.AddLog(npcRole, uIManager.tmpQuestion, answer);
+            logManager.AddLog(npcRole, uIManager.GetAskFieldText(), answer);
             uIManager.SetInteractableAskField(false);
             SetAudio();
 

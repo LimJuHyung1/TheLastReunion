@@ -13,21 +13,21 @@ public class Evidence : Thing
 
     public enum EvidenceName
     {
-        독극물_용액이_든_유리병,
+        독극물_용액이_들어있던_유리병,
         제니의_연구_기록,
         앨런의_약_처방전,
-        앨런의_책상에서_발견된_편지,
+        앨런의_책장에서_발견된_편지,
         네이슨의_서류_가방에서_발견된_법률_서류,
         미나의_메모,
         앨런의_집_주변에서_발견된_발자국,
-        앨런의_컴퓨터에_표시된_이메일
+        앨런의_컴퓨터에_표시된_이메일,
+        앨런이_본래_복용해야_할_약물
     }
 
     public EvidenceName evidenceName;
 
     public void GetEvidence()
-    {
-        evidenceManager.FindEvidence(this);
+    {        
         Debug.Log(name + "이 추가되었습니다.");
 
         // UI 상에 해당 오브젝트를 습득하였다는 문구 추가하기
