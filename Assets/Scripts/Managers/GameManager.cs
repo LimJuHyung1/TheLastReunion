@@ -5,7 +5,10 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    private AudioSource audioSource;
+
     public Image escPage;
+    public Image evidencePage;
 
     public LogManager logManager;
     public TutorialManager tutorialManager;
@@ -13,7 +16,10 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
+        audioSource = GetComponent<AudioSource>();
+
         escPage.gameObject.SetActive(false);
+        evidencePage.gameObject.SetActive(false);
     }
 
     void Update()
@@ -31,6 +37,7 @@ public class GameManager : MonoBehaviour
             {
                 if (!player.GetIsTalking())
                 {
+                    audioSource.Play();
                     OpenEscPage();
                 }
                 else
@@ -57,7 +64,17 @@ public class GameManager : MonoBehaviour
         escPage.gameObject.SetActive(false);        
     }
 
+    public void OpenEvidencePage()
+    {
+        escPage.gameObject.SetActive(false);
+        evidencePage.gameObject.SetActive(true);
+    }
 
+    public void CloseEvidencePage()
+    {
+        player.UnactivateIsTalking();
+        evidencePage.gameObject.SetActive(false);
+    }
 
 
 

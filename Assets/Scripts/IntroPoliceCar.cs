@@ -7,8 +7,11 @@ public class IntroPoliceCar : MonoBehaviour
     AudioSource audio;
     public int loopCount; // 반복 횟수 설정
 
+    public GameObject[] wheels;
+
     short currentLoop = 0;
     float currentTime = 0f;
+    float wheelRotationSpeed = 120f; // 바퀴 회전 속도 설정
     float targetVolume = 0.6f; // 목표 볼륨
     float fadeInDuration = 4f; // 페이드 인 지속 시간 (초 단위)
     float fadeOutDuration = 4f; // 페이드 아웃 지속 시간 (초 단위)
@@ -49,6 +52,11 @@ public class IntroPoliceCar : MonoBehaviour
     {
         // 앞 방향으로 이동 (z축 기준)
         transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
+
+        foreach (var wheel in wheels)
+        {
+            wheel.transform.Rotate(wheelRotationSpeed * Time.deltaTime, 0, 0);
+        }        
     }
 
     private IEnumerator StartSiren()

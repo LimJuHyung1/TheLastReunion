@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections;
-using UnityEditor.VersionControl;
 
 public class CameraScript : MonoBehaviour
 {
@@ -8,7 +7,7 @@ public class CameraScript : MonoBehaviour
     public UIManager uIManager;    
 
     int[] layers = new int[4];
-    bool isThisThing = false;
+    bool isThisEvidence = false;
     float mouseSensitivity = 180f; // 마우스 감도
     float xRotation = 0f;
     [SerializeField] Transform playerBody;          // 플레이어의 Transform (카메라가 붙어있을 대상)
@@ -60,14 +59,14 @@ public class CameraScript : MonoBehaviour
             {
                 if (IsEvidenceLayer(other.gameObject.layer))
                 {
-                    isThisThing = false;
+                    isThisEvidence = false;
 
                     // Thing 컴포넌트가 있는지 체크한 후, 설명 코루틴 실행
-                    Thing thingComponent = other.GetComponent<Thing>();
+                    Evidence evidenceComponent = other.GetComponent<Evidence>();
 
-                    if (thingComponent != null)
+                    if (evidenceComponent != null)
                     {
-                        StartCoroutine(ShowDescription(thingComponent));
+                        StartCoroutine(ShowDescription(evidenceComponent));
                     }
                 }
 
@@ -99,7 +98,7 @@ public class CameraScript : MonoBehaviour
         {
             if (IsAbleToShowDescription(other.gameObject.layer))
             {
-                isThisThing = false;
+                isThisEvidence = false;
 
                 uIManager.HideKeyAndDescriontion();
             }
@@ -111,13 +110,13 @@ public class CameraScript : MonoBehaviour
     /// <summary>
     /// 오브젝트의 설명을 UI에 표시
     /// </summary>
-    /// <param 증거 오브젝트="thing"></param>
+    /// <param 증거 오브젝트="evidence"></param>
     /// <returns></returns>
-    IEnumerator ShowDescription(Thing thing)
+    IEnumerator ShowDescription(Evidence evidence)
     {
-        thing.GetComponent<Evidence>().GetEvidence();
+        evidence.GetComponent<Evidence>().GetEvidence();
         yield return StartCoroutine
-            (uIManager.ShowDescription(thing.Description));
+            (uIManager.ShowDescription(evidence.GetDescription()));
         // isThisThing = false;
     }
 

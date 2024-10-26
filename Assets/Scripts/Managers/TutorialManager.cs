@@ -13,6 +13,7 @@ public class TutorialManager : MonoBehaviour
 
     public CameraManager cameraManager;
     public Player player;
+    public Timer timer;
     public UIManager uIManager;
     
     bool isPlayingTutorial = true;
@@ -143,6 +144,8 @@ public class TutorialManager : MonoBehaviour
             tutorialPage.gameObject.SetActive(false);
             SetTutorialUI(false);
             StartCoroutine(ExitTutorialSequence());
+            timer.gameObject.SetActive(true);
+            timer.StartTimer();
         }
         else
         {

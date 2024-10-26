@@ -1,20 +1,24 @@
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SoundManager : MonoBehaviour
 {
     public static SoundManager Instance { get; private set; }
 
     public AudioClip[] footStepSounds;
-    public AudioClip[] dispatchSounds;
+    public AudioClip[] buttonSounds;        // 0 - 나가기  // 1 - 메뉴   // 2 - 화살표  // 3 - 프로필
+    public Button[] closeButtons;
+    public Button[] menuButtons;
+    public Button[] arrowButtons;
+    public Button[] profileButtons;
     public StepCycle stepCycleManager;
 
     public LayerMask groundLayer; // 땅으로 인식할 레이어
 
-    private short dispatchIndex = 0;
-    private AudioSource[] audioSources; // 0 - 발소리  // 1 - 타이핑 소리
+    private AudioSource[] audioSources; // 0 - 발소리  // 1 - 타이핑 소리   // 2 - BGM  // 3 - 버튼 클릭 소리
     private CharacterController characterController;
     private GameObject player;
-    private RaycastHit hit;
 
     void Awake()
     {
@@ -37,6 +41,12 @@ public class SoundManager : MonoBehaviour
         stepCycleManager = new StepCycle(2f); // 초기 발소리 간격
 
         audioSources[0].loop = false;
+
+        // audioSources[2].Play();
+        SetButtonsSound();
+
+        stepCycleManager.SetFootStepSound(GetComponent<AudioSource>(), footStepSounds[0]);
+        SetNullAudioMixerGroup();
     }
 
     public void SetNullAudioMixerGroup()
@@ -80,13 +90,6 @@ public class SoundManager : MonoBehaviour
         }
     }
 
-    public void PlayDispatchSound()
-    {
-        audioSources[0].clip = dispatchSounds[dispatchIndex];
-        audioSources[0].Play();
-        dispatchIndex++;
-    }
-
     //-----------------------------------------------//
     // 타이핑 소리 관련 메서드
 
@@ -106,6 +109,31 @@ public class SoundManager : MonoBehaviour
     {
         if (audioSources[1] != null)
             audioSources[1].clip = typeSound;
+    }
+
+    //-----------------------------------------------//
+
+    void SetButtonsSound()
+    {
+        // 버튼 그룹과 사운드 인덱스를 매핑
+        AddButtonListeners(closeButtons, 0);
+        AddButtonListeners(menuButtons, 1);
+        AddButtonListeners(arrowButtons, 2);
+        AddButtonListeners(profileButtons, 3);
+    }
+
+    void AddButtonListeners(Button[] buttons, int soundIndex)
+    {
+        foreach (Button button in buttons)
+        {
+            button.onClick.AddListener(() => PlayButtonSound(soundIndex));
+        }
+    }
+
+    void PlayButtonSound(int soundIndex)
+    {
+        audioSources[3].clip = buttonSounds[soundIndex];
+        audioSources[3].Play();
     }
 }
 

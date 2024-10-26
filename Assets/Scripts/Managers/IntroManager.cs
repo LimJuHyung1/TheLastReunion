@@ -10,11 +10,11 @@ public class IntroManager : MonoBehaviour
 
     public FadeUtility fadeUtility;
     public GameObject rainPrefab;
-    public SoundManager soundManager;
+    public IntroSoundManager introSoundManager;
 
     short textIndex = 0;
     int currentSceneIndex;
-    float verticalSpacing = 70f; // 텍스트 간의 수직 간격
+    float verticalSpacing = 100f; // 텍스트 간의 수직 간격
 
     string[] dispatch = {
             "차량 42, 사건 번호 1375에 응답 바랍니다.",
@@ -59,26 +59,22 @@ public class IntroManager : MonoBehaviour
 
         foreach (string message in dispatch)
         {
-            yield return new WaitForSeconds(1.5f);
-            soundManager.PlayDispatchSound();
+            yield return new WaitForSeconds(3.5f);
+            introSoundManager.PlayDispatchSound();
             
             yield return StartCoroutine(ShowIntroDispatch(introTexts[textIndex], message, initialText));
             textIndex++;
         }
 
         initialText = "Police Officer : ";
-        yield return new WaitForSeconds(1.5f);
-        soundManager.PlayDispatchSound();
+        yield return new WaitForSeconds(3.5f);
+        introSoundManager.PlayDispatchSound();
 
         yield return StartCoroutine(ShowIntroDispatch(introTexts[textIndex], officerResponse, initialText));
         textIndex++;
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(3.5f);
 
-        screen.transform.SetSiblingIndex(screen.transform.parent.childCount - 1);
-
-        soundManager.stepCycleManager.SetFootStepSound
-            (soundManager.GetComponent<AudioSource>(), soundManager.footStepSounds[0]);
-        soundManager.SetNullAudioMixerGroup();
+        screen.transform.SetSiblingIndex(screen.transform.parent.childCount - 1);        
 
         yield return StartCoroutine(fadeUtility.FadeIn(screen, 3f));
         rainPrefab.gameObject.SetActive(false);
@@ -125,6 +121,12 @@ public class IntroManager : MonoBehaviour
             RectTransform rectTransform = introTexts[i].GetComponent<RectTransform>();
             if (rectTransform != null)
             {
+                if(i == 5)
+                {
+                    rectTransform.anchoredPosition = new Vector2(0, -100 + -i * verticalSpacing);
+                    break;
+                }
+
                 // 텍스트의 y 좌표를 일정 간격으로 띄우며 배치합니다
                 rectTransform.anchoredPosition = new Vector2(0, -30 + -i * verticalSpacing);
             }

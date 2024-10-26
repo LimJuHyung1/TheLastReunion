@@ -4,13 +4,23 @@ using OpenAI;
 using UnityEngine;
 
 public class NPCRole : NPC
-{    
+{
+    public enum Character
+    {
+        Nason,
+        Jenny,
+        Mina
+    }
+
     public Character currentCharacter;
 
     private Animator anim;
+    private List<ChatMessage> chatMessages;
+    private List<ChatMessage> nasonMessages = new List<ChatMessage>();
+    private List<ChatMessage> jennyMessages = new List<ChatMessage>();
+    private List<ChatMessage> minaMessages = new List<ChatMessage>();
     private Player player;
-
-    private OpenAIApi openAI = new OpenAIApi();
+    private OpenAIApi openAI = new OpenAIApi();    
 
     // Start is called before the first frame update
     protected override void Start()
@@ -19,6 +29,25 @@ public class NPCRole : NPC
         anim = GetComponent<Animator>();
         anim.SetBool("walk", false);
 
+        if(chatMessages != null)
+        {
+            switch (currentCharacter)
+            {
+                case Character.Nason:
+                    chatMessages = nasonMessages;
+                    break;
+                case Character.Jenny:
+                    chatMessages = jennyMessages;
+                    break;
+                case Character.Mina:
+                    chatMessages = minaMessages;
+                    break;
+
+                default:
+                    Debug.LogError("메세지 할당 에러 발생!");
+                    break;
+            }
+        }
         SetRole();
     }
 
@@ -49,23 +78,21 @@ public class NPCRole : NPC
         // 시스템 메시지 생성
         ChatMessage systemMessage = new ChatMessage
         {
-            Role = "system",
-            Content = GetCommonRoleDescription(name) + GetSpecificRoleDescription(name)
+            Role = "system",            
+            // Content = GetCommonRoleDescription(name) + GetSpecificRoleDescription(name)
+            Content = GetCommonRoleDescription(name)
         };
 
-        messages[currentCharacter].Add(systemMessage);
+        chatMessages.Add(systemMessage);
     }
 
-
-
-    // 답변 출력
-    /*
+    // 답변 출력    
     public async void GetResponse()
     {
         if (uIManager.GetAskFieldTextLength() < 1)
         {
             return;
-        }
+        }        
 
         ChatMessage newMessage = new ChatMessage
         {
@@ -73,11 +100,9 @@ public class NPCRole : NPC
             Role = "user"
         };
 
-        messages[currentCharacter].Add(newMessage);
-
         CreateChatCompletionRequest request = new CreateChatCompletionRequest
         {
-            Messages = messages[currentCharacter],
+            Messages = chatMessages,
             Model = "gpt-3.5-turbo"
         };
 
@@ -86,44 +111,32 @@ public class NPCRole : NPC
         if (response.Choices != null && response.Choices.Count > 0)
         {
             var chatResponse = response.Choices[0].Message;
-            messages[currentCharacter].Add(newMessage);
+            Debug.Log(chatResponse.Content);
+            chatMessages.Add(newMessage);
 
             answer = chatResponse.Content;
-            // onResponse.Invoke(chatResponse.Content);
 
             cm.ShowAnswer(chatResponse.Content);
         }
     }
-    */
 
-    public async void GetResponse()
+    public void AddMessage(ChatMessage chatMessage)
     {
-        // 해당 캐릭터의 대화 히스토리에 사용자 메시지 추가
-        ChatMessage newMessage = new ChatMessage
+        switch (currentCharacter)
         {
-            Content = uIManager.GetAskFieldText(),
-            Role = "user"
-        };
-        messages[currentCharacter].Add(newMessage);
+            case Character.Nason:
+                chatMessages = nasonMessages; break;
+            case Character.Jenny:
+                chatMessages = jennyMessages; break;
+            case Character.Mina:
+                chatMessages = minaMessages; break;
 
-        // API 호출 준비
-        CreateChatCompletionRequest request = new CreateChatCompletionRequest
-        {
-            Messages = messages[currentCharacter],  // 해당 캐릭터의 메시지 리스트 사용
-            Model = "gpt-3.5-turbo"
-        };
-
-        var response = await openAI.CreateChatCompletion(request);
-
-        // 결과 처리
-        if (response.Choices != null && response.Choices.Count > 0)
-        {
-            var chatResponse = response.Choices[0].Message;
-            messages[currentCharacter].Add(chatResponse);  // 캐릭터별 히스토리에 응답 추가
-            Debug.Log($"{currentCharacter}의 응답: {chatResponse.Content}");
-
-            cm.ShowAnswer(chatResponse.Content);
+            default:
+                Debug.LogError("메세지 할당 에러 발생!");
+                break;
         }
+
+        chatMessages.Add(chatMessage);
     }
 
 
@@ -142,6 +155,14 @@ public class NPCRole : NPC
 
         // 타겟 위치를 바라보도록 회전
         transform.LookAt(targetPosition);
+    }
+
+    public void ShowMessages()
+    {
+        foreach (var message in chatMessages)
+        {
+            Debug.Log(message.Content);
+        }
     }
 }
 

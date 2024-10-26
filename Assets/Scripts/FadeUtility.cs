@@ -61,6 +61,24 @@ public class FadeUtility : MonoBehaviour
         graphic.gameObject.SetActive(false);
     }
 
+    public IEnumerator FadeInOut(Graphic graphic, float fadeDuration, float delay = 0.5f)
+    {
+        while (true)
+        {
+            // 페이드 인
+            yield return StartCoroutine(FadeIn(graphic, fadeDuration));
+
+            // 일정 시간 대기
+            yield return new WaitForSeconds(delay);
+
+            // 페이드 아웃
+            yield return StartCoroutine(FadeOut(graphic, fadeDuration));
+
+            // 다시 일정 시간 대기
+            yield return new WaitForSeconds(delay);
+        }
+    }
+
     public IEnumerator SwitchCameraWithFade(Image screen, CameraManager cameraManager, GameObject player, NPCRole npcRole)
     {
         yield return StartCoroutine(FadeIn(screen, 1.5f));

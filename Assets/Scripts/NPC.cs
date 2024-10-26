@@ -1,21 +1,11 @@
 using OpenAI;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using AdvancedPeopleSystem;
 
 public class NPC : MonoBehaviour
-{
-    public enum Character
-    {
-        Nason,
-        Jenny,
-        Mina
-    }
-
-    // 공용 이벤트 변수
-    public OnResponseEvent onResponse;
+{    
     public static string answer;
 
     // private bool isRecording = false;
@@ -26,13 +16,7 @@ public class NPC : MonoBehaviour
     private List<string> emotionsList = new List<string>();
 
     protected ConversationManager cm;
-    protected UIManager uIManager;
-    protected Dictionary<Character, List<ChatMessage>> messages = new Dictionary<Character, List<ChatMessage>>()
-    {
-        { Character.Nason, new List<ChatMessage>() },
-        { Character.Jenny, new List<ChatMessage>() },
-        { Character.Mina, new List<ChatMessage>() }
-    };
+    protected UIManager uIManager;    
 
 
     // 내부 클래스
@@ -51,21 +35,7 @@ public class NPC : MonoBehaviour
         {
             emotionsList.Add(e.name);
         }
-    }
-
-    public void AddMessage(Character c, ChatMessage chatMessage)
-    {
-        // 딕셔너리에서 캐릭터에 해당하는 메시지 리스트를 가져와서 chatMessage 추가
-        if (messages.ContainsKey(c))
-        {
-            messages[c].Add(chatMessage);
-        }
-        else
-        {
-            // 해당 캐릭터의 리스트가 없을 경우 새로운 리스트를 추가하고 chatMessage 삽입
-            messages[c] = new List<ChatMessage> { chatMessage };
-        }
-    }
+    }    
 
 
     public void faceAnimation()

@@ -1,7 +1,15 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
-public class Evidence : Thing
+public class Evidence : MonoBehaviour
 {
+    private string thisName;
+    private string description;
+    private string information;
+    private string relationship;
+    private string importance;
+    private string notes;
+
     [SerializeField]
     private EvidenceManager evidenceManager;
 
@@ -26,18 +34,52 @@ public class Evidence : Thing
 
     public EvidenceName evidenceName;
 
+    public void Initialize(string name, string description, string information, string relationship, string importance, string notes)
+    {
+        this.thisName = name;
+        this.description = description;
+        this.information = information;
+        this.relationship = relationship;
+        this.importance = importance;
+        this.notes = notes;
+    }
+
     public void GetEvidence()
-    {        
+    {
         Debug.Log(name + "이 추가되었습니다.");
 
-        // UI 상에 해당 오브젝트를 습득하였다는 문구 추가하기
-
+        evidenceManager.FindEvidence(this);
         gameObject.SetActive(false);
     }
 
-    public string GetEvidenceName()
+    public string GetName()
     {
         // 열거형 값을 문자열로 변환하고 '_' 문자를 공백으로 변경
         return this.evidenceName.ToString().Replace('_', ' ');
+    }
+
+    public string GetDescription()
+    {
+        return this.description;
+    }
+
+    public string GetInformation()
+    {
+        return this.information;
+    }
+
+    public string GetRelationship()
+    {
+        return this.relationship;
+    }
+
+    public string GetImportance()
+    {
+        return this.importance;
+    }
+
+    public string GetNotets()
+    {
+        return this.notes;
     }
 }

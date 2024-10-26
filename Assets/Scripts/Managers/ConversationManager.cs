@@ -3,13 +3,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
+using UnityEngine.Events;
 using UnityEngine.UI;
 using static UnityEngine.Rendering.DebugUI;
 
 
 public class ConversationManager : MonoBehaviour
 {
+    public class OnResponse : UnityEvent<string> { }
+
     public AudioClip[] typeSounds;
     public GameObject player;    
 
@@ -20,29 +22,17 @@ public class ConversationManager : MonoBehaviour
     private bool isTalking = false;
     private bool isAbleToGoNext = false;
     private Coroutine displayCoroutine;
-    private Queue<string> sentencesQueue = new Queue<string>();    
+    private Queue<string> sentencesQueue = new Queue<string>();
 
-    // [SerializeField]Police npcRole;
+    public NPCRole[] npcRolee;
+
     [SerializeField] NPCRole npcRole;
 
     // Start is called before the first frame update
     void Start()
     {        
         SoundManager.Instance.SetNullAudioMixerGroup();
-    }
-
-    void Update()
-    {
-        if (isTalking)
-        {
-            if(uIManager.GetAskField().text == "")
-            {
-                uIManager.GetEndConversationButton().gameObject.SetActive(uIManager.GetIsSkipping());
-            }                
-            else
-                uIManager.GetEndConversationButton().gameObject.SetActive(false);            
-        }            
-    }
+    }    
 
     /// <summary>
     /// Player 스크립트에서 접촉 npc 반환 받음
@@ -59,9 +49,9 @@ public class ConversationManager : MonoBehaviour
     public void AddListenersResponse()
     {
         if(npcRole != null)
-        {            
+        {
             uIManager.onEndEditAskField(npcRole.GetResponse);
-            uIManager.onEndEditAskField(uIManager.SetNullInputField);
+            uIManager.onEndEditAskField(uIManager.SetNullInputField);            
         }                        
     }
 
@@ -108,7 +98,7 @@ public class ConversationManager : MonoBehaviour
     {
         if (npcRole != null)
         {
-            logManager.AddLog(npcRole, uIManager.GetAskFieldText(), answer);
+            logManager.AddLog(npcRole, uIManager.GetQuestion(), answer);
             uIManager.SetInteractableAskField(false);
             SetAudio();
 
@@ -143,30 +133,33 @@ public class ConversationManager : MonoBehaviour
     /// <returns></returns>
     private IEnumerator DisplaySentences()
     {
-        do
+        if (isTalking)
         {
-            string sentence = sentencesQueue.Dequeue();
-            isAbleToGoNext = false; // 다음 문장으로 넘어갈 수 없도록 설정
-
-            ChatMessage message = new ChatMessage { Content = sentence };
-            npcRole.PlayEmotion(message);
-
-            yield return StartCoroutine(uIManager.ShowLine(uIManager.GetNPCAnswer(), sentence)); // 텍스트 표시 코루틴 실행
-
-            // 마우스 클릭을 기다리기 전에 다음 문장으로 넘어갈 수 있도록 대기
-            yield return new WaitUntil(() => isAbleToGoNext);
-
-            if (sentencesQueue.Count > 0 && isAbleToGoNext)
+            do
             {
-                yield return new WaitUntil(() => Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)); // 마우스 클릭 또는 엔터키 대기
-                uIManager.ChangeIsSkipping(true);
-            }
-        }
-        while (sentencesQueue.Count > 0);
+                string sentence = sentencesQueue.Dequeue();
+                isAbleToGoNext = false; // 다음 문장으로 넘어갈 수 없도록 설정
 
-        uIManager.SetInteractableAskField(true);
-        uIManager.ChangeIsSkipping(true);
-        displayCoroutine = null; // 코루틴이 끝나면 변수 초기화
+                ChatMessage message = new ChatMessage { Content = sentence };
+                npcRole.PlayEmotion(message);
+
+                yield return StartCoroutine(uIManager.ShowLine(uIManager.GetNPCAnswer(), sentence)); // 텍스트 표시 코루틴 실행
+
+                // 마우스 클릭을 기다리기 전에 다음 문장으로 넘어갈 수 있도록 대기
+                yield return new WaitUntil(() => isAbleToGoNext);
+
+                if (sentencesQueue.Count > 0 && isAbleToGoNext)
+                {
+                    yield return new WaitUntil(() => Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)); // 마우스 클릭 또는 엔터키 대기
+                    uIManager.ChangeIsSkipping(true);
+                }
+            }
+            while (sentencesQueue.Count > 0);
+        }
+            uIManager.SetInteractableAskField(true);
+            uIManager.ChangeIsSkipping(true);
+            uIManager.FocusOnAskField();
+            displayCoroutine = null; // 코루틴이 끝나면 변수 초기화                
     }
 
     public void IsAbleToGoNextTrue()
@@ -211,7 +204,7 @@ public class ConversationManager : MonoBehaviour
 
     // 대화 시작 함수
     public void StartConversation()
-    {        
+    {
         StartCoroutine(StartConversationCoroutine());
     }
 
@@ -249,5 +242,27 @@ public class ConversationManager : MonoBehaviour
         // 코루틴이 끝난 후에 실행할 코드
         player.GetComponent<Player>().UnactivateIsTalking();
         RemoveNPCRole();
+    }
+
+
+
+
+
+
+
+
+
+
+    public void ShowNasonMessage()
+    {
+        npcRolee[0].ShowMessages();
+    }
+    public void ShowJennyMessage()
+    {
+        npcRolee[1].ShowMessages();
+    }
+    public void ShowMinaMessage()
+    {
+        npcRolee[2].ShowMessages();
     }
 }

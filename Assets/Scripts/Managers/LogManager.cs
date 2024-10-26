@@ -173,7 +173,6 @@ public class LogManager : MonoBehaviour
             newLog.SetComponent();
             newLog.SetAnchor();
 
-            Debug.Log(question);
             newLog.SetQuestion(question);
             newLog.SetAnswer(answer);
 

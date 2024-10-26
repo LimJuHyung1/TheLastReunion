@@ -3,11 +3,12 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using System.Collections.Generic;
+// using static UnityEngine.Rendering.DebugUI;
 
 public class UIManager : MonoBehaviour
 {
-    public static string tmpAnswer;
-    public string tmpQuestion;
+    public static string tmpAnswer = "";
+    public string tmpQuestion = "";
 
     public Button endConversationBtn;
 
@@ -15,6 +16,7 @@ public class UIManager : MonoBehaviour
     public EvidenceManager evidenceManager;
 
     public InputField askField;
+    public Image boundaryUI;
     public Image chatBox;
     public Image cursor;
     public Image screen;
@@ -23,6 +25,7 @@ public class UIManager : MonoBehaviour
     public Text keyDescriptionText;
     public Text thingDescriptionText;
     public Text thingNameText;
+    public Timer timer;
 
     [SerializeField] Text NPCName;
     [SerializeField] Text NPCAnswer;
@@ -55,9 +58,12 @@ public class UIManager : MonoBehaviour
 
         askField.gameObject.SetActive(false);
         answerText.gameObject.SetActive(false);
+        boundaryUI.gameObject.SetActive(false);
         chatBox.gameObject.SetActive(false);
         cursor.gameObject.SetActive(false);
         endConversationBtn.gameObject.SetActive(false);
+
+        timer.gameObject.SetActive(false);
 
         // 게임 인트로 부터 실행시킬 때는 true로 설정하기 - UIManager도 같이
         screen.gameObject.SetActive(true);
@@ -70,20 +76,25 @@ public class UIManager : MonoBehaviour
 
     // InputField 텍스트 길이 반환
     public int GetAskFieldTextLength()
-    {
+    {        
         return askField.text.Length;
     }
 
     // InputField 텍스트 반환
     public string GetAskFieldText()
     {
-        tmpQuestion = askField.text;
         return askField.text;
     }
 
     public InputField GetAskField()
     {
         return askField;
+    }
+
+    public string GetQuestion()
+    {
+        Debug.Log(tmpQuestion);
+        return tmpQuestion;
     }
 
     //---------------------------------------------------------------//
@@ -167,7 +178,8 @@ public class UIManager : MonoBehaviour
     /// <param name="action"></param>
     public void onEndEditAskField(UnityAction action)
     {
-        askField.onEndEdit.AddListener((string text) => {
+        askField.onEndEdit.AddListener((string text) => {            
+            tmpQuestion = text;
             action();
         });
     }    
@@ -175,6 +187,12 @@ public class UIManager : MonoBehaviour
     public Button GetEndConversationButton()
     {
         return endConversationBtn;
+    }
+
+    public void FocusOnAskField()
+    {
+        askField.Select();
+        askField.ActivateInputField(); // InputField 활성화
     }
 
     //---------------------------------------------------------------//
@@ -307,7 +325,21 @@ public class UIManager : MonoBehaviour
     }
 
     //---------------------------------------------//
-    
+
+    public void ActivateBoundaryUI()
+    {
+        boundaryUI.gameObject.SetActive(true);
+    }
+
+    public void UnactivateBoundaryUI()
+    {
+        boundaryUI.gameObject.SetActive(false);
+    }
+
+    public Image GetBoundaryUI()
+    {
+        return boundaryUI;
+    }
 }
 
 public class UIManagerSup
@@ -356,7 +388,7 @@ public class UIManagerSup
         {
             keys[0].gameObject.SetActive(true);
 
-            evidenceDescription = evidenceManager.GetEvidenceName(other.GetComponent<Evidence>().Name);
+            evidenceDescription = evidenceManager.GetEvidenceName(other.GetComponent<Evidence>().GetName());
             description.text = evidenceDescription;
             description.gameObject.SetActive(true);
         }
