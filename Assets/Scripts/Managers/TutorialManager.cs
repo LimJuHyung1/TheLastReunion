@@ -12,6 +12,8 @@ public class TutorialManager : MonoBehaviour
     public Image tutorialPage;
 
     public CameraManager cameraManager;
+    public EvidenceManager evidenceManager;
+
     public Player player;
     public Timer timer;
     public UIManager uIManager;
@@ -31,11 +33,6 @@ public class TutorialManager : MonoBehaviour
         SetTutorialUI(false);
 
         ShowPlayRole();
-        // CursorManager.Instance.OnVisualization();
-
-        // player.UnactivateIsTalking();
-        // CursorManager.Instance.OffVisualization();
-        // cameraManager.ChangeCam();
     }
 
     private void SetPages()
@@ -94,7 +91,6 @@ public class TutorialManager : MonoBehaviour
     
     public void ShowTutorialPage()
     {
-        // CursorManager.Instance.OnVisualization();        
         SetTutorialUI(true);
         exitTutorialBtn.gameObject.SetActive(true);
         SetActiveFalseAllPages();
@@ -103,7 +99,6 @@ public class TutorialManager : MonoBehaviour
 
     public void HideTutorialPage()
     {
-        // CursorManager.Instance.OffVisualization();
         SetTutorialUI(false);
     }
 
@@ -143,6 +138,7 @@ public class TutorialManager : MonoBehaviour
         {
             tutorialPage.gameObject.SetActive(false);
             SetTutorialUI(false);
+            evidenceManager.SendEvidenceInfo();
             StartCoroutine(ExitTutorialSequence());
             timer.gameObject.SetActive(true);
             timer.StartTimer();

@@ -16,11 +16,8 @@ public class NPCRole : NPC
 
     private Animator anim;
     private List<ChatMessage> chatMessages;
-    private List<ChatMessage> nasonMessages = new List<ChatMessage>();
-    private List<ChatMessage> jennyMessages = new List<ChatMessage>();
-    private List<ChatMessage> minaMessages = new List<ChatMessage>();
     private Player player;
-    private OpenAIApi openAI = new OpenAIApi();    
+    private OpenAIApi openAI;
 
     // Start is called before the first frame update
     protected override void Start()
@@ -29,25 +26,7 @@ public class NPCRole : NPC
         anim = GetComponent<Animator>();
         anim.SetBool("walk", false);
 
-        if(chatMessages != null)
-        {
-            switch (currentCharacter)
-            {
-                case Character.Nason:
-                    chatMessages = nasonMessages;
-                    break;
-                case Character.Jenny:
-                    chatMessages = jennyMessages;
-                    break;
-                case Character.Mina:
-                    chatMessages = minaMessages;
-                    break;
-
-                default:
-                    Debug.LogError("메세지 할당 에러 발생!");
-                    break;
-            }
-        }
+        openAI = new OpenAIApi(); // NPC마다 독립적인 인스턴스 생성
         SetRole();
     }
 
@@ -75,12 +54,13 @@ public class NPCRole : NPC
 
     void SetRole()
     {
-        // 시스템 메시지 생성
+        chatMessages = new List<ChatMessage>(); // 각 NPC마다 새 리스트 생성
         ChatMessage systemMessage = new ChatMessage
         {
-            Role = "system",            
-            // Content = GetCommonRoleDescription(name) + GetSpecificRoleDescription(name)
-            Content = GetCommonRoleDescription(name)
+            Role = "system",
+            Content = GetCommonRoleDescription(currentCharacter.ToString()) 
+            + GetSpecificRoleDescription(currentCharacter.ToString())
+            // Content = GetCommonRoleDescription(name)
         };
 
         chatMessages.Add(systemMessage);
@@ -100,6 +80,8 @@ public class NPCRole : NPC
             Role = "user"
         };
 
+        chatMessages.Add(newMessage);
+
         CreateChatCompletionRequest request = new CreateChatCompletionRequest
         {
             Messages = chatMessages,
@@ -111,31 +93,17 @@ public class NPCRole : NPC
         if (response.Choices != null && response.Choices.Count > 0)
         {
             var chatResponse = response.Choices[0].Message;
-            Debug.Log(chatResponse.Content);
-            chatMessages.Add(newMessage);
+
+            chatMessages.Add(chatResponse);
 
             answer = chatResponse.Content;
 
-            cm.ShowAnswer(chatResponse.Content);
+            cm.ShowAnswer(answer);
         }
     }
 
     public void AddMessage(ChatMessage chatMessage)
     {
-        switch (currentCharacter)
-        {
-            case Character.Nason:
-                chatMessages = nasonMessages; break;
-            case Character.Jenny:
-                chatMessages = jennyMessages; break;
-            case Character.Mina:
-                chatMessages = minaMessages; break;
-
-            default:
-                Debug.LogError("메세지 할당 에러 발생!");
-                break;
-        }
-
         chatMessages.Add(chatMessage);
     }
 
@@ -155,14 +123,6 @@ public class NPCRole : NPC
 
         // 타겟 위치를 바라보도록 회전
         transform.LookAt(targetPosition);
-    }
-
-    public void ShowMessages()
-    {
-        foreach (var message in chatMessages)
-        {
-            Debug.Log(message.Content);
-        }
     }
 }
 

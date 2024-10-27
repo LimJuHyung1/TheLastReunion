@@ -22,8 +22,7 @@ public class EvidenceManager : MonoBehaviour
     private float space = 40f;
 
     void Start()
-    {
-        SendEvidenceInfo();
+    {        
         evidenceButton = Resources.Load<GameObject>("EvidenceButton");
         evidenceIntroductionPage = Resources.Load<GameObject>("EvidenceIntroductionPage");
     }
@@ -126,7 +125,7 @@ public class EvidenceManager : MonoBehaviour
     //----------------------------------------------------------//
 
     // npc들에게 증거에 대한 정보 전달
-    private void SendEvidenceInfo()
+    public void SendEvidenceInfo()
     {
         if (JsonManager.evidenceInfoList != null)
         {

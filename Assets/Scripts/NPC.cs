@@ -1,12 +1,11 @@
 using OpenAI;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 using AdvancedPeopleSystem;
 
 public class NPC : MonoBehaviour
 {    
-    public static string answer;
+    protected string answer;
 
     // private bool isRecording = false;
     private float emotionTime = 5;
@@ -16,12 +15,7 @@ public class NPC : MonoBehaviour
     private List<string> emotionsList = new List<string>();
 
     protected ConversationManager cm;
-    protected UIManager uIManager;    
-
-
-    // 내부 클래스
-    [System.Serializable]
-    public class OnResponseEvent : UnityEvent<string> { }
+    protected UIManager uIManager;       
 
 
     protected virtual void Start()

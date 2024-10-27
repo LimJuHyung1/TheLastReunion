@@ -176,13 +176,18 @@ public class UIManager : MonoBehaviour
     /// NPC 대화 전 엔터 키 가능하게 세팅
     /// </summary>
     /// <param name="action"></param>
-    public void onEndEditAskField(UnityAction action)
+    public void OnEndEditAskField(UnityAction action)
     {
         askField.onEndEdit.AddListener((string text) => {            
             tmpQuestion = text;
             action();
         });
-    }    
+    }
+
+    public void RemoveOnEndEditListener()
+    {
+        askField.onEndEdit.RemoveAllListeners();
+    }
 
     public Button GetEndConversationButton()
     {

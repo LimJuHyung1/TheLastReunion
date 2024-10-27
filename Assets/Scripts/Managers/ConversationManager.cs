@@ -24,8 +24,6 @@ public class ConversationManager : MonoBehaviour
     private Coroutine displayCoroutine;
     private Queue<string> sentencesQueue = new Queue<string>();
 
-    public NPCRole[] npcRolee;
-
     [SerializeField] NPCRole npcRole;
 
     // Start is called before the first frame update
@@ -43,16 +41,19 @@ public class ConversationManager : MonoBehaviour
         npcRole = npc;        
     }
 
-    /// <summary>
-    /// 임시로 버튼을 통해 npc 답변 받아냄
-    /// </summary>
     public void AddListenersResponse()
     {
         if(npcRole != null)
         {
-            uIManager.onEndEditAskField(npcRole.GetResponse);
-            uIManager.onEndEditAskField(uIManager.SetNullInputField);            
+            uIManager.OnEndEditAskField(npcRole.GetResponse);
+            uIManager.OnEndEditAskField(uIManager.SetNullInputField);            
         }                        
+    }
+
+    public void TmpAskButton()
+    {
+        npcRole.GetResponse();
+        uIManager.SetNullInputField();
     }
 
     public void RemoveNPCRole()
@@ -76,9 +77,6 @@ public class ConversationManager : MonoBehaviour
                     break;
                 case "Jenny":
                     uIManager.ChangeNPCName("제니");
-                    break;
-                case "Police":
-                    uIManager.ChangeNPCName("경찰");
                     break;
 
                 default:
@@ -235,6 +233,7 @@ public class ConversationManager : MonoBehaviour
         uIManager.SetNullInputField();
         uIManager.SetConversationUI(false);
         uIManager.SetBlankAnswerText();
+        uIManager.RemoveOnEndEditListener();
 
         // SwitchCameraWithFade 코루틴이 완료될 때까지 대기
         yield return StartCoroutine(FadeUtility.Instance.SwitchCameraWithFade(uIManager.screen, cameraManager, player, npcRole));
@@ -242,27 +241,5 @@ public class ConversationManager : MonoBehaviour
         // 코루틴이 끝난 후에 실행할 코드
         player.GetComponent<Player>().UnactivateIsTalking();
         RemoveNPCRole();
-    }
-
-
-
-
-
-
-
-
-
-
-    public void ShowNasonMessage()
-    {
-        npcRolee[0].ShowMessages();
-    }
-    public void ShowJennyMessage()
-    {
-        npcRolee[1].ShowMessages();
-    }
-    public void ShowMinaMessage()
-    {
-        npcRolee[2].ShowMessages();
     }
 }
