@@ -15,13 +15,15 @@ public class ConversationManager : MonoBehaviour
     public AudioClip[] typeSounds;
     public GameObject player;    
 
-    public CameraManager cameraManager;
+    public CameraManager cameraManager;    
     public LogManager logManager;
+    public SpawnManager spawnManager;
     public UIManager uIManager;
 
     private bool isTalking = false;
     private bool isAbleToGoNext = false;
-    private Coroutine displayCoroutine;
+
+    private Coroutine displayCoroutine;    
     private Queue<string> sentencesQueue = new Queue<string>();
 
     [SerializeField] NPCRole npcRole;
@@ -48,12 +50,6 @@ public class ConversationManager : MonoBehaviour
             uIManager.OnEndEditAskField(npcRole.GetResponse);
             uIManager.OnEndEditAskField(uIManager.SetNullInputField);            
         }                        
-    }
-
-    public void TmpAskButton()
-    {
-        npcRole.GetResponse();
-        uIManager.SetNullInputField();
     }
 
     public void RemoveNPCRole()
@@ -225,7 +221,7 @@ public class ConversationManager : MonoBehaviour
     public void EndConversation()
     {
         isTalking = false;
-        StartCoroutine(EndConversationCoroutine());
+        StartCoroutine(EndConversationCoroutine());        
     }
 
     private IEnumerator EndConversationCoroutine()
@@ -236,7 +232,8 @@ public class ConversationManager : MonoBehaviour
         uIManager.RemoveOnEndEditListener();
 
         // SwitchCameraWithFade 코루틴이 완료될 때까지 대기
-        yield return StartCoroutine(FadeUtility.Instance.SwitchCameraWithFade(uIManager.screen, cameraManager, player, npcRole));
+        yield return StartCoroutine(FadeUtility.Instance.SwitchCameraWithFade
+            (uIManager.screen, cameraManager, player, npcRole, spawnManager));        
 
         // 코루틴이 끝난 후에 실행할 코드
         player.GetComponent<Player>().UnactivateIsTalking();

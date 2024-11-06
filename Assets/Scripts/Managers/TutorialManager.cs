@@ -60,7 +60,6 @@ public class TutorialManager : MonoBehaviour
         preBtn.gameObject.SetActive(false);
         exitTutorialBtn.gameObject.SetActive(false);
         tutorialPages[index].gameObject.SetActive(true);
-        // CursorManager.Instance.OnVisualization();
         player.ActivateIsTalking();
     }
 
@@ -138,10 +137,11 @@ public class TutorialManager : MonoBehaviour
         {
             tutorialPage.gameObject.SetActive(false);
             SetTutorialUI(false);
-            evidenceManager.SendEvidenceInfo();
+            // evidenceManager.SendEvidenceInfo();
             StartCoroutine(ExitTutorialSequence());
-            timer.gameObject.SetActive(true);
-            timer.StartTimer();
+
+            uIManager.SetActiveTimer(true);
+            uIManager.BeginCountdown();
         }
         else
         {
@@ -162,7 +162,6 @@ public class TutorialManager : MonoBehaviour
     {
         player.UnactivateIsTalking();
         uIManager.SetActiveCursor(true);
-        // CursorManager.Instance.OffVisualization();
         cameraManager.ChangeCam();
         index = 0;
         yield return null;

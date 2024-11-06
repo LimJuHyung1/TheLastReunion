@@ -63,7 +63,7 @@ public class UIManager : MonoBehaviour
         cursor.gameObject.SetActive(false);
         endConversationBtn.gameObject.SetActive(false);
 
-        timer.gameObject.SetActive(false);
+        SetActiveTimer(false);
 
         // 게임 인트로 부터 실행시킬 때는 true로 설정하기 - UIManager도 같이
         screen.gameObject.SetActive(true);
@@ -93,7 +93,6 @@ public class UIManager : MonoBehaviour
 
     public string GetQuestion()
     {
-        Debug.Log(tmpQuestion);
         return tmpQuestion;
     }
 
@@ -314,6 +313,16 @@ public class UIManager : MonoBehaviour
     public Image GetScreen()
     {
         return this.screen;
+    }
+
+    public void SetActiveTimer(bool whether)
+    {
+        timer.gameObject.SetActive(whether);
+    }
+
+    public void BeginCountdown()
+    {
+        timer.StartTimer();
     }
 
     //---------------------------------------------//

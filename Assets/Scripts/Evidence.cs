@@ -6,6 +6,7 @@ public class Evidence : MonoBehaviour
     private string thisName;
     private string description;
     private string information;
+    private string foundAt;
     private string relationship;
     private string importance;
     private string notes;
@@ -34,11 +35,12 @@ public class Evidence : MonoBehaviour
 
     public EvidenceName evidenceName;
 
-    public void Initialize(string name, string description, string information, string relationship, string importance, string notes)
+    public void Initialize(string name, string description, string information, string foundAt, string relationship, string importance, string notes)
     {
         this.thisName = name;
         this.description = description;
         this.information = information;
+        this.foundAt = foundAt;
         this.relationship = relationship;
         this.importance = importance;
         this.notes = notes;
@@ -46,8 +48,6 @@ public class Evidence : MonoBehaviour
 
     public void GetEvidence()
     {
-        Debug.Log(name + "이 추가되었습니다.");
-
         evidenceManager.FindEvidence(this);
         gameObject.SetActive(false);
     }
@@ -66,6 +66,11 @@ public class Evidence : MonoBehaviour
     public string GetInformation()
     {
         return this.information;
+    }
+
+    public string GetFoundAt()
+    {
+        return foundAt;
     }
 
     public string GetRelationship()

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using OpenAI;
+using static Evidence;
 
 
 public class EvidenceManager : MonoBehaviour
@@ -10,8 +11,8 @@ public class EvidenceManager : MonoBehaviour
     public ScrollRect evidenceScrollRect;
     public Image evidencePage;
 
-    [SerializeField] GameObject evidenceButton; // Resources 폴더에 존재
-    [SerializeField] GameObject evidenceIntroductionPage; // Resources 폴더에 존재
+    GameObject evidenceButton; // Resources 폴더에 존재
+    GameObject evidenceIntroductionPage; // Resources 폴더에 존재
     [SerializeField] private List<RectTransform> findedEvidenceRectTransformList = new List<RectTransform>();
     [SerializeField] private List<Image> evidenceIntroductionList = new List<Image>();
     [SerializeField] private List<Evidence> evidences = new List<Evidence>();
@@ -57,6 +58,7 @@ public class EvidenceManager : MonoBehaviour
             (GetEvidenceName(evidenceName),
             GetEvidenceDescription(evidenceName),
             GetEvidenceInformation(evidenceName),
+            GetEvidenceFoundAt(evidenceName),
             GetEvidenceRelationship(evidenceName),
             GetEvidenceInformation(evidenceName),
             GetEvidenceNotes(evidenceName));
@@ -67,6 +69,12 @@ public class EvidenceManager : MonoBehaviour
 
     public void FindEvidence(Evidence evidence)
     {
+        SendEvidenceInfo(evidence);
+        UpdateEvidencePage(evidence);
+    }
+
+    private void UpdateEvidencePage(Evidence evidence)
+    {
         // 증거 버튼 생성 및 설정
         EvidenceButton evidenceButtonInstance = Instantiate(evidenceButton, evidenceScrollRect.content).GetComponent<EvidenceButton>();
         findedEvidenceRectTransformList.Add(evidenceButtonInstance.GetComponent<RectTransform>());
@@ -74,7 +82,7 @@ public class EvidenceManager : MonoBehaviour
         // 증거 소개 페이지 생성 및 설정
         GameObject evidencePageInstance = Instantiate(evidenceIntroductionPage, evidencePage.transform);
         evidencePageInstance.SetActive(false);
-        
+
         string evidenceName = evidence.GetName();
 
         // Text 컴포넌트를 효율적으로 설정하는 헬퍼 함수 호출
@@ -125,12 +133,10 @@ public class EvidenceManager : MonoBehaviour
     //----------------------------------------------------------//
 
     // npc들에게 증거에 대한 정보 전달
-    public void SendEvidenceInfo()
+    public void SendEvidenceInfo(Evidence evidence)
     {
         if (JsonManager.evidenceInfoList != null)
         {
-            string npcName;
-
             string evidenceName;
             string evidenceInformation;
             string evidenceFoundAt;
@@ -142,52 +148,30 @@ public class EvidenceManager : MonoBehaviour
 
             for (int i = 0; i < npcRole.Length; i++)
             {
-                npcName = npcRole[i].currentCharacter.ToString();
-                int tmpIndex = 0;
-                foreach (EvidenceInfo ei in JsonManager.evidenceInfoList.evidenceInfoList)
-                {
-                    ChatMessage evidenceMessage = new ChatMessage();
-                    evidenceMessage.Role = "system";
+                ChatMessage evidenceMessage = new ChatMessage();
+                evidenceMessage.Role = "system";
 
-                    evidenceName = ei.name;
-                    evidenceInformation = ei.information;
-                    evidenceFoundAt = ei.foundAt;
-                    evidenceRealtionship = ei.relationship;
-                    evidenceImportance = ei.importance;
-                    evidenceNotes = ei.notes;
+                evidenceName = GetEvidenceName(evidence.GetName());
+                evidenceInformation = GetEvidenceInformation(evidence.GetName());
+                evidenceFoundAt = GetEvidenceFoundAt(evidence.GetName());
+                evidenceRealtionship = GetEvidenceRelationship(evidence.GetName());
+                evidenceImportance = GetEvidenceImportance(evidence.GetName());
+                evidenceNotes = GetEvidenceNotes(evidence.GetName());
+                extraInformation = GetEvidenceExtraInformation(evidence.GetName(), npcRole[i]);
+                string completeEvidenceMessage =
+                "지금 플레이어가 발견한 증거에 대한 정보를 알려줄께.\n" +
+                $"증거 이름 : {evidenceName}.\n" +
+                $"증거 내용 : {evidenceInformation}.\n" +
+                $"증거가 발견된 장소 : {evidenceFoundAt}.\n" +
+                $"증거와 관련된 주요 인물 : {evidenceRealtionship}.\n" +
+                $"해당 증거의 중요도 : {evidenceImportance}.\n" +
+                $"추가적으로 필요한 증거나 단서 : {evidenceNotes}.\n" +
+                $"증거가 {npcRole[i].currentCharacter.ToString()}와 관련된 사실 : {extraInformation}.\n";
 
-                    switch (npcName)
-                    {
-                        case "Nason":
-                            extraInformation = ei.nasonExtraInformation;
-                            break;
-                        case "Jenny":
-                            extraInformation = ei.jennyExtraInformation;
-                            break;
-                        case "Mina":
-                            extraInformation = ei.minaExtraInformation;
-                            break;
+                evidenceMessage.Content = completeEvidenceMessage;
+                npcRole[i].AddMessage(evidenceMessage);
 
-                        default:
-                            Debug.LogError("3명 npc 외의 다른 이름 참조!");
-                            return;
-                    }
-
-                    string completeEvidenceMessage =
-                        $"{tmpIndex + 1}번째 증거에 대한 정보와, 해당 정보에 대한 캐릭터의 태도 및 의견을 알려줄께.\n" +
-                        $"증거 이름 : {evidenceName}.\n" +
-                        $"증거 내용 : {evidenceInformation}.\n" +
-                        $"증거가 발견된 장소 : {evidenceFoundAt}.\n" +
-                        $"증거와 관련된 주요 인물 : {evidenceRealtionship}.\n" +
-                        $"해당 증거의 중요도 : {evidenceImportance}.\n" +
-                        $"추가적으로 필요한 증거나 단서 : {evidenceNotes}.\n" +
-                        $"해당 증거에 대한 {npcName}의 태도 및 의견 : {extraInformation}.\n";
-
-                    evidenceMessage.Content = completeEvidenceMessage;
-
-                    tmpIndex++;
-                    npcRole[i].AddMessage(evidenceMessage);
-                }
+                Debug.Log(npcRole[i].currentCharacter.ToString() + $"에게 {evidence.GetName()}에 관한 증거가 전송되었습니다");
             }
         }
     }
@@ -231,6 +215,12 @@ public class EvidenceManager : MonoBehaviour
         return evidence?.information;
     }
 
+    public string GetEvidenceFoundAt(string evidenceName)
+    {
+        EvidenceInfo evidence = GetEvidenceByName(evidenceName);
+        return evidence?.foundAt;
+    }
+
     public string GetEvidenceRelationship(string evidenceName)
     {
         EvidenceInfo evidence = GetEvidenceByName(evidenceName);
@@ -247,5 +237,24 @@ public class EvidenceManager : MonoBehaviour
     {
         EvidenceInfo evidence = GetEvidenceByName(evidenceName);
         return evidence?.notes;
+    }
+
+
+    public string GetEvidenceExtraInformation(string evidenceName, NPCRole npc)
+    {
+        EvidenceInfo evidence = GetEvidenceByName(evidenceName);
+
+        switch (npc.currentCharacter.ToString())
+        {
+            case "Nason":
+                return evidence?.nasonExtraInformation;
+            case "Jenny":
+                return evidence?.jennyExtraInformation;
+            case "Mina":
+                return evidence?.minaExtraInformation;
+
+            default:
+                return null;
+        }
     }
 }

@@ -7,10 +7,8 @@ public class NPC : MonoBehaviour
 {    
     protected string answer;
 
-    // private bool isRecording = false;
     private float emotionTime = 5;
 
-    // private AudioClip recording;
     private CharacterCustomization cc;
     private List<string> emotionsList = new List<string>();
 
@@ -104,11 +102,13 @@ public class NPC : MonoBehaviour
     {
         if (JsonManager.npcRoleInfoList != null)
         {
-            foreach (NPCRoleInfo tmp in JsonManager.npcRoleInfoList.npcRoleInfoList)
+            foreach (NPCRoleInfo info in JsonManager.npcRoleInfoList.npcRoleInfoList)
             {
-                if (tmp.npcName == npcName)
+                string name = info.role.Substring(0, info.role.IndexOf(','));                
+                if (name == npcName)
                 {
-                    return tmp;
+                    Debug.Log("성공");
+                    return info;
                 }
             }
         }
@@ -117,21 +117,33 @@ public class NPC : MonoBehaviour
         return null;
     }
 
-    public string GetNPCName(string npcName)
+    public string GetRole(string npcName)
     {
         NPCRoleInfo npcRoleInfo = GetNPCRoleByName(npcName);
-        return npcRoleInfo?.npcName; // null이면 null 반환
+        return npcRoleInfo?.role; // null이면 null 반환
     }
 
-    public string GetCommonRoleDescription(string npcName)
+    public string GetInstructions(string npcName)
     {
         NPCRoleInfo npcRoleInfo = GetNPCRoleByName(npcName);
-        return npcRoleInfo?.commonRoleDescription; // null이면 null 반환
+        return npcRoleInfo?.instructions; // null이면 null 반환
     }
 
-    public string GetSpecificRoleDescription(string npcName)
+    public string GetBackground(string npcName)
     {
         NPCRoleInfo npcRoleInfo = GetNPCRoleByName(npcName);
-        return npcRoleInfo?.specificRoleDescription; // null이면 null 반환
+        return npcRoleInfo?.background; // null이면 null 반환
+    }
+
+    public string GetAlibi(string npcName)
+    {
+        NPCRoleInfo npcRoleInfo = GetNPCRoleByName(npcName);
+        return npcRoleInfo?.alibi; // null이면 null 반환
+    }
+
+    public string GetResponseGuidelines(string npcName)
+    {
+        NPCRoleInfo npcRoleInfo = GetNPCRoleByName(npcName);
+        return npcRoleInfo?.responseGuidelines; // null이면 null 반환
     }
 }

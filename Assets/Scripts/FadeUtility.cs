@@ -20,31 +20,37 @@ public class FadeUtility : MonoBehaviour
     }
 
     // 그래픽(이미지 또는 텍스트) 페이드 인
-    public IEnumerator FadeIn(Graphic graphic, float fadeDuration)
+    public IEnumerator FadeIn(Graphic graphic, float fadeDuration, float targetAlpha = 1.0f)
     {
         graphic.gameObject.SetActive(true);
 
         Color tmpColor = graphic.color;
-        tmpColor.a = 0f;
+        tmpColor.a = 0f; // 시작 투명도는 0으로 설정
         graphic.color = tmpColor;
 
         float elapsedTime = 0f;
         Color color = graphic.color;
 
+        // 목표 투명도까지 페이드 인
         while (elapsedTime < fadeDuration)
         {
             elapsedTime += Time.deltaTime;
-            color.a = Mathf.Clamp01(elapsedTime / fadeDuration);
+            color.a = Mathf.Clamp01(elapsedTime / fadeDuration) * targetAlpha;
             graphic.color = color;
             yield return null;
         }
+
+        // 정확히 목표 투명도로 설정
+        color.a = targetAlpha;
+        graphic.color = color;
     }
 
+
     // 그래픽(이미지 또는 텍스트) 페이드 아웃
-    public IEnumerator FadeOut(Graphic graphic, float fadeDuration)
+    public IEnumerator FadeOut(Graphic graphic, float fadeDuration, float alpha = 1.0f)
     {
         Color tmpColor = graphic.color;
-        tmpColor.a = 1f;
+        tmpColor.a = alpha;
         graphic.color = tmpColor;
 
         float elapsedTime = 0f;
@@ -53,7 +59,7 @@ public class FadeUtility : MonoBehaviour
         while (elapsedTime < fadeDuration)
         {
             elapsedTime += Time.deltaTime;
-            color.a = Mathf.Clamp01(1f - (elapsedTime / fadeDuration));
+            color.a = Mathf.Clamp01(alpha - (elapsedTime / fadeDuration));
             graphic.color = color;
             yield return null;
         }
@@ -79,15 +85,18 @@ public class FadeUtility : MonoBehaviour
         }
     }
 
-    public IEnumerator SwitchCameraWithFade(Image screen, CameraManager cameraManager, GameObject player, NPCRole npcRole)
+    public IEnumerator SwitchCameraWithFade(Image screen, CameraManager cameraManager, GameObject player, NPCRole npcRole, SpawnManager spawnManager = null)
     {
-        yield return StartCoroutine(FadeIn(screen, 1.5f));
+        yield return StartCoroutine(FadeIn(screen, 1f));
 
         yield return new WaitForSeconds(1f);
         npcRole.TurnTowardPlayer(player.transform);
         player.GetComponent<Player>().TurnTowardNPC(npcRole.transform);
         player.GetComponent<Player>().ReadyConversation();
-        yield return StartCoroutine(FadeOut(screen, 1.5f));
+
+        if (spawnManager != null)
+            spawnManager.RelocationNPC(npcRole);
+        yield return StartCoroutine(FadeOut(screen, 1f));
     }
 
     // 텍스트 알파 값 설정

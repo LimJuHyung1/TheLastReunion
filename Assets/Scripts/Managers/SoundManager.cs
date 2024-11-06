@@ -1,11 +1,13 @@
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class SoundManager : MonoBehaviour
 {
     public static SoundManager Instance { get; private set; }
 
+    public AudioClip[] endBGM;              // 0 - 범인 고를 때  // 1 - 범인 고른 후
     public AudioClip[] footStepSounds;
     public AudioClip[] buttonSounds;        // 0 - 나가기  // 1 - 메뉴   // 2 - 화살표  // 3 - 프로필
     public Button[] closeButtons;
@@ -19,6 +21,10 @@ public class SoundManager : MonoBehaviour
     private AudioSource[] audioSources; // 0 - 발소리  // 1 - 타이핑 소리   // 2 - BGM  // 3 - 버튼 클릭 소리
     private CharacterController characterController;
     private GameObject player;
+
+    private float fadeOutDuration = 1f; // 볼륨 감소 시간
+    private float fadeInDuration = 1f;  // 볼륨 증가 시간
+    private float targetVolume = 1f;    // 최종 목표 볼륨 값
 
     void Awake()
     {
@@ -134,6 +140,42 @@ public class SoundManager : MonoBehaviour
     {
         audioSources[3].clip = buttonSounds[soundIndex];
         audioSources[3].Play();
+    }
+
+    //-----------------------------------------------//
+
+    public AudioClip GetSelectCriminalBGM()
+    {
+        return endBGM[0];
+    }
+
+    public AudioClip GetEndingBGM()
+    {
+        return endBGM[1];
+    }
+
+    public IEnumerator FadeOutAndChangeClip(AudioClip audio)
+    {
+        // 1. 볼륨을 천천히 줄여 0으로 만들기
+        float startVolume = audioSources[2].volume;
+        for (float t = 0; t < fadeOutDuration; t += Time.deltaTime)
+        {
+            audioSources[2].volume = Mathf.Lerp(startVolume, 0, t / fadeOutDuration);
+            yield return null;
+        }
+        audioSources[2].volume = 0;
+
+        // 2. 오디오 클립 변경
+        audioSources[2].clip = audio;
+        audioSources[2].Play();
+
+        // 3. 볼륨을 서서히 증가시켜 목표 볼륨으로 맞추기
+        for (float t = 0; t < fadeInDuration; t += Time.deltaTime)
+        {
+            audioSources[2].volume = Mathf.Lerp(0, targetVolume, t / fadeInDuration);
+            yield return null;
+        }
+        audioSources[2].volume = targetVolume;
     }
 }
 

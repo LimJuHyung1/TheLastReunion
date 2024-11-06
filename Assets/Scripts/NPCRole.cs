@@ -54,13 +54,16 @@ public class NPCRole : NPC
 
     void SetRole()
     {
+        string npcName = currentCharacter.ToString();
         chatMessages = new List<ChatMessage>(); // 각 NPC마다 새 리스트 생성
         ChatMessage systemMessage = new ChatMessage
         {
             Role = "system",
-            Content = GetCommonRoleDescription(currentCharacter.ToString()) 
-            + GetSpecificRoleDescription(currentCharacter.ToString())
-            // Content = GetCommonRoleDescription(name)
+            Content = GetRole(npcName) 
+            + GetInstructions(npcName) 
+            + GetBackground(npcName) 
+            + GetAlibi(npcName)
+            + GetResponseGuidelines(npcName)            
         };
 
         chatMessages.Add(systemMessage);

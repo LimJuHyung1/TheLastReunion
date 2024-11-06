@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class GameManager : MonoBehaviour
     public LogManager logManager;
     public TutorialManager tutorialManager;
     public Player player;
+    public UIManager uIManager;
 
     void Awake()
     {
@@ -99,6 +101,25 @@ public class GameManager : MonoBehaviour
         escPage.gameObject.SetActive(true);
 
         logManager.CloseLogPage();
+    }
+
+    public void SelectCriminal()
+    {
+        StartCoroutine(SelectCriminalCoroutine());
+    }
+
+    public IEnumerator SelectCriminalCoroutine()
+    {
+        yield return StartCoroutine(FadeUtility.Instance.FadeIn(uIManager.GetScreen(), 2f));
+        yield return StartCoroutine(LoadLastScene());
+    }
+
+    IEnumerator LoadLastScene()
+    {
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+        SceneManager.LoadScene(currentSceneIndex + 1);
+        
+        yield return null;
     }
 
     public void ExitGame()
