@@ -246,7 +246,6 @@ public class UIManager : MonoBehaviour
     /// <summary>
     /// Funiture, Evidence 설명 ui에 표시
     /// </summary>
-    /// <param 증거 이름="name"></param>
     /// <param 증거 설명="description"></param>
     /// <returns></returns>
     public IEnumerator ShowDescription(string description)

@@ -107,7 +107,6 @@ public class NPC : MonoBehaviour
                 string name = info.role.Substring(0, info.role.IndexOf(','));                
                 if (name == npcName)
                 {
-                    Debug.Log("¼º°ø");
                     return info;
                 }
             }

@@ -18,7 +18,7 @@ public class EvidenceManager : MonoBehaviour
     [SerializeField] private List<Evidence> evidences = new List<Evidence>();
     [SerializeField] private Queue<Evidence> evidenceQueue = new Queue<Evidence>();
 
-    private const int totalEvidenceLength = 9;      // 나중에 9로 하기(증거 개수)
+    private const int totalEvidenceLength = 11;      // 증거 개수
     private int currentEvidenceLength = 0;
     private float space = 40f;
 
@@ -59,8 +59,7 @@ public class EvidenceManager : MonoBehaviour
             GetEvidenceDescription(evidenceName),
             GetEvidenceInformation(evidenceName),
             GetEvidenceFoundAt(evidenceName),
-            GetEvidenceRelationship(evidenceName),
-            GetEvidenceInformation(evidenceName),
+            GetEvidenceRelationship(evidenceName),            
             GetEvidenceNotes(evidenceName));
         evidences.Add(evidence);
     }
@@ -71,6 +70,9 @@ public class EvidenceManager : MonoBehaviour
     {
         SendEvidenceInfo(evidence);
         UpdateEvidencePage(evidence);
+
+        int targetLayer = LayerMask.NameToLayer("House");
+        SetLayerRecursively(evidence.gameObject, targetLayer);
     }
 
     private void UpdateEvidencePage(Evidence evidence)
@@ -88,10 +90,9 @@ public class EvidenceManager : MonoBehaviour
         // Text 컴포넌트를 효율적으로 설정하는 헬퍼 함수 호출
         SetTextInChild(evidencePageInstance.transform.GetChild(0), GetEvidenceName(evidenceName));
         SetTextInChild(evidencePageInstance.transform.GetChild(1), GetEvidenceInformation(evidenceName));
-        SetTextInChild(evidencePageInstance.transform.GetChild(2), "중요도 : " + GetEvidenceImportance(evidenceName));
-        SetTextInChild(evidencePageInstance.transform.GetChild(3), "연관인물 : " + GetEvidenceRelationship(evidenceName));
-        SetTextInChild(evidencePageInstance.transform.GetChild(4), "추가 힌트 : " + GetEvidenceNotes(evidenceName));
-
+        SetTextInChild(evidencePageInstance.transform.GetChild(2), "연관인물 : " + GetEvidenceRelationship(evidenceName));
+        SetTextInChild(evidencePageInstance.transform.GetChild(3), "추가 힌트 : " + GetEvidenceNotes(evidenceName));
+        SetRawImage(evidencePageInstance.transform.GetChild(4), GetEvidenceRenderTexture(evidenceName));
         evidenceButtonInstance.SetAnchor();
         evidenceButtonInstance.SetText(evidence);
         evidenceButtonInstance.GetComponent<Button>().onClick.AddListener(SetActiveFalseAllIntroductions);
@@ -106,6 +107,15 @@ public class EvidenceManager : MonoBehaviour
     private void SetTextInChild(Transform childTransform, string text)
     {
         childTransform.GetComponent<Text>().text = text;
+    }
+
+    private void SetRawImage(Transform childTransform, RenderTexture evidenceRenderTexture)
+    {
+        if (evidenceRenderTexture != null)
+        {
+            childTransform.GetComponent<RawImage>().texture = evidenceRenderTexture;
+        }
+        else Debug.Log("texture 없음");
     }
 
     void SetActiveFalseAllIntroductions()
@@ -130,6 +140,18 @@ public class EvidenceManager : MonoBehaviour
         scrollRect.content.sizeDelta = new Vector2(scrollRect.content.sizeDelta.x, y);
     }
 
+
+    // 재귀적으로 레이어를 설정하는 함수
+    void SetLayerRecursively(GameObject obj, int newLayer)
+    {
+        obj.layer = newLayer;
+
+        foreach (Transform child in obj.transform)
+        {
+            SetLayerRecursively(child.gameObject, newLayer);
+        }
+    }
+
     //----------------------------------------------------------//
 
     // npc들에게 증거에 대한 정보 전달
@@ -141,7 +163,6 @@ public class EvidenceManager : MonoBehaviour
             string evidenceInformation;
             string evidenceFoundAt;
             string evidenceRealtionship;
-            string evidenceImportance;
             string evidenceNotes;
 
             string extraInformation;
@@ -155,7 +176,6 @@ public class EvidenceManager : MonoBehaviour
                 evidenceInformation = GetEvidenceInformation(evidence.GetName());
                 evidenceFoundAt = GetEvidenceFoundAt(evidence.GetName());
                 evidenceRealtionship = GetEvidenceRelationship(evidence.GetName());
-                evidenceImportance = GetEvidenceImportance(evidence.GetName());
                 evidenceNotes = GetEvidenceNotes(evidence.GetName());
                 extraInformation = GetEvidenceExtraInformation(evidence.GetName(), npcRole[i]);
                 string completeEvidenceMessage =
@@ -164,7 +184,6 @@ public class EvidenceManager : MonoBehaviour
                 $"증거 내용 : {evidenceInformation}.\n" +
                 $"증거가 발견된 장소 : {evidenceFoundAt}.\n" +
                 $"증거와 관련된 주요 인물 : {evidenceRealtionship}.\n" +
-                $"해당 증거의 중요도 : {evidenceImportance}.\n" +
                 $"추가적으로 필요한 증거나 단서 : {evidenceNotes}.\n" +
                 $"증거가 {npcRole[i].currentCharacter.ToString()}와 관련된 사실 : {extraInformation}.\n";
 
@@ -178,7 +197,7 @@ public class EvidenceManager : MonoBehaviour
 
     //----------------------------------------------------------//
 
-    // 특정 증거의 ThingInfo를 반환하는 메서드
+    // 특정 증거의 EvidenceInfo를 반환하는 메서드
     private EvidenceInfo GetEvidenceByName(string evidenceName)
     {
         if (JsonManager.evidenceInfoList != null)
@@ -227,12 +246,6 @@ public class EvidenceManager : MonoBehaviour
         return evidence?.relationship;
     }
 
-    public string GetEvidenceImportance(string evidenceName)
-    {
-        EvidenceInfo evidence = GetEvidenceByName(evidenceName);
-        return evidence?.importance;
-    }
-
     public string GetEvidenceNotes(string evidenceName)
     {
         EvidenceInfo evidence = GetEvidenceByName(evidenceName);
@@ -257,4 +270,14 @@ public class EvidenceManager : MonoBehaviour
                 return null;
         }
     }
+
+    public RenderTexture GetEvidenceRenderTexture(string evidenceName)
+    {
+        EvidenceInfo evidence = GetEvidenceByName(evidenceName);        
+        RenderTexture renderTexture = Resources.Load<RenderTexture>($"{evidence.renderTexturePath}");
+
+        Debug.Log($"RenderTextures/{evidence.renderTexturePath}");
+        return renderTexture;
+    }
+
 }

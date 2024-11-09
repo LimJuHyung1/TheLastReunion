@@ -7,7 +7,6 @@ public class CameraScript : MonoBehaviour
     public UIManager uIManager;    
 
     int[] layers = new int[4];
-    bool isThisEvidence = false;
     float mouseSensitivity = 180f; // 마우스 감도
     float xRotation = 0f;
     [SerializeField] Transform playerBody;          // 플레이어의 Transform (카메라가 붙어있을 대상)
@@ -59,13 +58,12 @@ public class CameraScript : MonoBehaviour
             {
                 if (IsEvidenceLayer(other.gameObject.layer))
                 {
-                    isThisEvidence = false;
-
-                    // Thing 컴포넌트가 있는지 체크한 후, 설명 코루틴 실행
                     Evidence evidenceComponent = other.GetComponent<Evidence>();
 
-                    if (evidenceComponent != null)
+                    if (evidenceComponent != null && !evidenceComponent.GetIsFound())
                     {
+                        evidenceComponent.SetIsFoundTrue();
+                        evidenceComponent.GetEvidence();
                         StartCoroutine(ShowDescription(evidenceComponent));
                     }
                 }
@@ -98,8 +96,6 @@ public class CameraScript : MonoBehaviour
         {
             if (IsAbleToShowDescription(other.gameObject.layer))
             {
-                isThisEvidence = false;
-
                 uIManager.HideKeyAndDescriontion();
             }
         }            
@@ -114,10 +110,8 @@ public class CameraScript : MonoBehaviour
     /// <returns></returns>
     IEnumerator ShowDescription(Evidence evidence)
     {
-        evidence.GetComponent<Evidence>().GetEvidence();
         yield return StartCoroutine
             (uIManager.ShowDescription(evidence.GetDescription()));
-        // isThisThing = false;
     }
 
     bool IsEvidenceLayer(int layer)
