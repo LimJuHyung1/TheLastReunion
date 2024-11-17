@@ -6,9 +6,9 @@ using static Evidence;
 
 
 public class EvidenceManager : MonoBehaviour
-{
-    public NPCRole[] npcRole = new NPCRole[3];
+{    
     public ScrollRect evidenceScrollRect;
+    public SpawnManager spawnManager;
     public Image evidencePage;
 
     GameObject evidenceButton; // Resources 폴더에 존재
@@ -17,6 +17,8 @@ public class EvidenceManager : MonoBehaviour
     [SerializeField] private List<Image> evidenceIntroductionList = new List<Image>();
     [SerializeField] private List<Evidence> evidences = new List<Evidence>();
     [SerializeField] private Queue<Evidence> evidenceQueue = new Queue<Evidence>();
+
+    private NPCRole[] npcRole = new NPCRole[3];
 
     private const int totalEvidenceLength = 11;      // 증거 개수
     private int currentEvidenceLength = 0;
@@ -29,6 +31,11 @@ public class EvidenceManager : MonoBehaviour
     }
 
     //----------------------------------------------------------//
+
+    public void ReceiveNPCRole(NPCRole[] npcs)
+    {
+        npcRole = npcs;
+    }
 
     // 증거 초기화
     public void SetEvidence(Evidence evidence)
@@ -189,8 +196,6 @@ public class EvidenceManager : MonoBehaviour
 
                 evidenceMessage.Content = completeEvidenceMessage;
                 npcRole[i].AddMessage(evidenceMessage);
-
-                Debug.Log(npcRole[i].currentCharacter.ToString() + $"에게 {evidence.GetName()}에 관한 증거가 전송되었습니다");
             }
         }
     }
@@ -276,8 +281,6 @@ public class EvidenceManager : MonoBehaviour
         EvidenceInfo evidence = GetEvidenceByName(evidenceName);        
         RenderTexture renderTexture = Resources.Load<RenderTexture>($"{evidence.renderTexturePath}");
 
-        Debug.Log($"RenderTextures/{evidence.renderTexturePath}");
         return renderTexture;
     }
-
 }

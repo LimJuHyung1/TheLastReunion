@@ -7,7 +7,7 @@ public class CameraScript : MonoBehaviour
     public UIManager uIManager;    
 
     int[] layers = new int[4];
-    float mouseSensitivity = 180f; // 마우스 감도
+    [SerializeField] float mouseSensitivity = 115f; // 마우스 감도
     float xRotation = 0f;
     [SerializeField] Transform playerBody;          // 플레이어의 Transform (카메라가 붙어있을 대상)
     Player player;
@@ -64,6 +64,7 @@ public class CameraScript : MonoBehaviour
                     {
                         evidenceComponent.SetIsFoundTrue();
                         evidenceComponent.GetEvidence();
+                        uIManager.IsAttachedToEvidenceProperty = false;
                         StartCoroutine(ShowDescription(evidenceComponent));
                     }
                 }
@@ -155,9 +156,14 @@ public class CameraScript : MonoBehaviour
         Vector3 direction = playerTrans.forward;
 
         // 카메라가 바라보는 방향의 y좌표를 살짝 낮춥니다.
-        direction.y -= 0.5f;
+        direction.y -= 0.3f;
 
         // 새로운 방향 벡터를 사용하여 카메라 회전 설정
         transform.rotation = Quaternion.LookRotation(direction.normalized);
+    }
+
+    public void SetMouseSensitivity(float value)
+    {
+        mouseSensitivity = value;
     }
 }

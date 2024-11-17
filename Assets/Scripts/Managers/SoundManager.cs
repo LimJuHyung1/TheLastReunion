@@ -7,6 +7,7 @@ public class SoundManager : MonoBehaviour
 {
     public static SoundManager Instance { get; private set; }
 
+    public AudioClip typingClip;
     public AudioClip[] endBGM;              // 0 - 범인 고를 때  // 1 - 범인 고른 후
     public AudioClip[] footStepSounds;
     public AudioClip[] buttonSounds;        // 0 - 나가기  // 1 - 메뉴   // 2 - 화살표  // 3 - 프로필
@@ -109,6 +110,12 @@ public class SoundManager : MonoBehaviour
     {
         if (audioSources[1] != null)
             audioSources[1].Stop();
+    }
+
+    public void SetTypingClip()
+    {
+        if (audioSources[1] != null)
+            audioSources[1].clip = typingClip;
     }
 
     public void ChangeTextAudioClip(AudioClip typeSound)

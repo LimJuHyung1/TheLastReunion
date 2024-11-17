@@ -6,9 +6,13 @@ public class Player : MonoBehaviour
 
     public GameObject conversationManager;
     public Transform cameraTransform;
+    public UIManager uIManager;
 
     [SerializeField] private bool isTalking = false;    
     private bool isMoving = false;
+    private string evidenceLayerName = "Evidence"; // 감지할 레이어 이름
+    private int evidenceLayer; // 감지할 레이어의 정수 값
+
 
     private Animator anim;    
     private Camera cam;
@@ -23,7 +27,9 @@ public class Player : MonoBehaviour
         anim = GetComponent<Animator>();
         cam = transform.GetChild(0).GetComponent<Camera>();
         characterController = GetComponent<CharacterController>();
-        cm = conversationManager.GetComponent<ConversationManager>();        
+        cm = conversationManager.GetComponent<ConversationManager>();
+
+        evidenceLayer = LayerMask.NameToLayer(evidenceLayerName);
     }
 
     void FixedUpdate()
@@ -52,7 +58,38 @@ public class Player : MonoBehaviour
             }
         }
     }
-    
+
+
+    private void OnTriggerEnter(Collider other)
+    {
+        // 접촉한 오브젝트의 레이어를 확인
+        if (other.gameObject.layer == evidenceLayer)
+        {
+            if (other.GetComponent<Evidence>() != null)
+            {
+                if (!other.GetComponent<Evidence>().GetIsFound())
+                    uIManager.IsAttachedToEvidenceProperty = true;
+            }
+            else
+                Debug.Log("널 :" + other.name);
+        }
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        // 트리거 영역을 벗어났는지 확인
+        if (other.gameObject.layer == evidenceLayer)
+        {
+            if (!other.GetComponent<Evidence>().GetIsFound())
+                uIManager.IsAttachedToEvidenceProperty = false;
+        }
+    }
+
+
+
+
+
+
     //----------------------------------------------------------//
 
     public void GetNPCRole(GameObject gameObject)

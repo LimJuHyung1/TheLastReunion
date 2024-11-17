@@ -65,6 +65,11 @@ public class Evidence : MonoBehaviour
         evidenceManager.FindEvidence(this);
     }
 
+
+
+
+
+
     public string GetName()
     {
         // 열거형 값을 문자열로 변환하고 '_' 문자를 공백으로 변경

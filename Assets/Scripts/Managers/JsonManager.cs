@@ -224,7 +224,7 @@ public class JsonManager : MonoBehaviour
         // ThingInfo 객체 생성
         List<EvidenceInfo> evidences = new List<EvidenceInfo>
         {
-        // 독극물 용액이 들어있던 유리병 - o
+        // 독극물 용액이 들어있던 유리병
         new EvidenceInfo {                    
             name = "독극물 용액이 들어있던 유리병",
             description = "앨런의 사망원인의 독이 들어있었던 병입니다.",
@@ -248,7 +248,7 @@ public class JsonManager : MonoBehaviour
 
             renderTexturePath = "RenderTextures/Poison"
         },
-        // 제니의 연구 기록 - o
+        // 제니의 연구 기록
         new EvidenceInfo {
             name = "제니의 연구 기록",
             description = "제니가 연구하던 신약 개발과 관련된 내용이 적혀 있습니다.\n",
@@ -270,7 +270,7 @@ public class JsonManager : MonoBehaviour
 
             renderTexturePath = "RenderTextures/Report"
         },
-        // 앨런의 약 처방전 - o
+        // 앨런의 약 처방전
         new EvidenceInfo {            
             name = "앨런의 약 처방전",               
             description = "앨런이 복용하고 있던 약의 처방전입니다.",        
@@ -297,7 +297,7 @@ public class JsonManager : MonoBehaviour
 
             renderTexturePath = "RenderTextures/Prescription"
         },
-        // 앨런의 책장에서 발견된 편지 - o
+        // 앨런의 책장에서 발견된 편지
         new EvidenceInfo {
             name = "앨런의 책장에서 발견된 편지",
             description = "누군가 앨런을 위협하는 내용이 적혀 있습니다.\n",
@@ -321,7 +321,7 @@ public class JsonManager : MonoBehaviour
 
             renderTexturePath = "RenderTextures/Letter"
         },
-        // 투기성 주식 투자 내용이 담겨있음 - o
+        // 투기성 주식 투자 내용이 담겨있음
         new EvidenceInfo {                        
             name = "네이슨의 서류 가방에서 발견된 법률 서류",
             description = "앨런의 회사의 법적 문제에 대한 내용이 담겨있습니다.",
@@ -345,7 +345,7 @@ public class JsonManager : MonoBehaviour
 
             renderTexturePath = "RenderTextures/Nason'sBag"
         },
-        // 미나의 메모 - o
+        // 미나의 메모
         new EvidenceInfo {  
             name = "미나의 메모",
             description = "미나의 앨런에 대한 마음이 적혀있습니다.",
@@ -367,7 +367,7 @@ public class JsonManager : MonoBehaviour
 
             renderTexturePath = "RenderTextures/Memo"
         },
-        // 앨런의 집 주변에서 발견된 발자국 - o
+        // 앨런의 집 주변에서 발견된 발자국
         new EvidenceInfo {
             name = "앨런의 집 주변에서 발견된 발자국",
             description = "초대된 인원 중 누군가의 것으로 추정되는 발자국입니다.",
@@ -388,7 +388,7 @@ public class JsonManager : MonoBehaviour
 
             renderTexturePath = "RenderTextures/Footprint"
         },
-        // 앨런의 컴퓨터에 표시된 이메일 - o
+        // 앨런의 컴퓨터에 표시된 이메일
         new EvidenceInfo {
             name = "앨런의 컴퓨터에 표시된 이메일",
             description = "앨런의 컴퓨터에 신약 프로젝트 폐기 최종 확인서가 보입니다.",
@@ -409,7 +409,7 @@ public class JsonManager : MonoBehaviour
 
             renderTexturePath = "RenderTextures/Email"
         },
-        // 앨런이 본래 복용해야 할 약물 - o
+        // 앨런이 본래 복용해야 할 약물
         new EvidenceInfo {
             name = "앨런이 본래 복용해야 할 약물",
             description = "앨런이 평소 복용하는 약입니다.",
@@ -430,7 +430,7 @@ public class JsonManager : MonoBehaviour
 
             renderTexturePath = "RenderTextures/Mina'sBag"
         },
-        // 손상된 식물 - o
+        // 손상된 식물
         new EvidenceInfo {
             name = "손상된 식물",
             description = "앨런이 키우던 식물이 뽑혀 있습니다.",
@@ -438,7 +438,7 @@ public class JsonManager : MonoBehaviour
                             "이 식물은 앨런이 정성 들여 키우던 식물로,\n" +
                             "누군가 앨런에게 앙심을 품고 파괴한 흔적일 수 있습니다.",
             foundAt = "식물실",
-            relationship = " - ",
+            relationship = "제니",
             notes = "식물실에 있었던 인물을 조사하세요.",
 
 
@@ -453,11 +453,11 @@ public class JsonManager : MonoBehaviour
 
             renderTexturePath = "RenderTextures/Plant"
         },
-        // 경영 보고서 일부 - o
+        // 경영 보고서 일부
         new EvidenceInfo {
             name = "경영 보고서 일부",
-            description = "경영 보고서의 일부가 에어 하키가 있는 방 바닥에 흩어져 있습니다.",
-            information = "경영 보고서의 일부가 에어 하키가 있는 방 바닥에 흩어져 있습니다.\n" +
+            description = "경영 보고서의 일부가 바닥에 흩어져 있습니다.",
+            information = "경영 보고서의 일부가 놀이방 바닥에 흩어져 있습니다.\n" +
             "보고서에는 회사의 최근 분기 실적이 적혀 있으며,\n" +
             "특히 자금 부족과 사업 손실에 대한 내용이 강조되어 있습니다.",
             foundAt = "에어 하키 방",

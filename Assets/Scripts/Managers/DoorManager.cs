@@ -1,69 +1,53 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class DoorManager : MonoBehaviour
 {
     public AudioClip[] openDoorSound = new AudioClip[2];
-    public GameObject[] _0F_doors;    
-    public GameObject[] _1F_doors;    
+    public GameObject[] _0F_doors;
+    public GameObject[] _1F_doors;
 
-    Door[] _0F_doors_comp;
-    Door[] _1F_doors_comp;
+    private Door[] _0F_doors_comp;
+    private Door[] _1F_doors_comp;
 
-    void Awake()
+    void Start()
     {
-        _0F_doors_comp = new Door[_0F_doors.Length];
-        _1F_doors_comp = new Door[_1F_doors.Length];
-        SetDoors();
+        _0F_doors_comp = InitializeDoors(_0F_doors, new int[] { 1, 2, 4, 5 });
+        _1F_doors_comp = InitializeDoors(_1F_doors, new int[] { 1, 2 });
     }
 
-    /// <summary>
-    /// Switch character settings by selector index
-    /// </summary>
-    // 초기 문 오브젝트 설정
-    void SetDoors()
+    // 문 오브젝트 초기화 메서드
+    private Door[] InitializeDoors(GameObject[] doors, int[] reverseAngleIndices)
     {
-        int randomValue;
-
-        for (int i = 0; i < _0F_doors.Length; i++)
+        Door[] doorComponents = new Door[doors.Length];
+        for (int i = 0; i < doors.Length; i++)
         {
-            _0F_doors_comp[i] = _0F_doors[i].GetComponent<Door>();            
-
-            if(i == 1 || i == 2 || i == 4 || i == 5)
-            {
-                _0F_doors_comp[i].openAngle = -120f;
-            }
-            else _0F_doors_comp[i].openAngle = 120f;
-
-            randomValue = Random.Range(0, 2);
-
-            if(randomValue == 0)
-                _0F_doors[i].GetComponent<AudioSource>().clip = openDoorSound[0];
-            else
-                _0F_doors[i].GetComponent<AudioSource>().clip = openDoorSound[1];  
-            
-            _0F_doors_comp[i].SetAudio();
+            doorComponents[i] = doors[i].GetComponent<Door>();
+            SetDoorProperties(doorComponents[i], i, reverseAngleIndices);
         }
+        return doorComponents;
+    }
 
-        for(int j = 0; j < _1F_doors.Length; j++)
+    // 문 속성 설정
+    private void SetDoorProperties(Door door, int index, int[] reverseAngleIndices)
+    {
+        door.SetOpenAngle(ShouldReverseAngle(index, reverseAngleIndices) ? -120f : 120f);
+        door.SetAudioClip(GetRandomAudioClip());
+    }
+
+    // 랜덤 오디오 클립 선택
+    private AudioClip GetRandomAudioClip()
+    {
+        int randomValue = Random.Range(0, openDoorSound.Length);
+        return openDoorSound[randomValue];
+    }
+
+    // 특정 인덱스가 반대 각도를 설정해야 하는지 확인
+    private bool ShouldReverseAngle(int index, int[] reverseAngleIndices)
+    {
+        foreach (int reverseIndex in reverseAngleIndices)
         {
-            _1F_doors_comp[j] = _1F_doors[j].GetComponent<Door>();
-
-            if (j == 1 || j == 2)
-            {
-                _1F_doors_comp[j].openAngle = -120f;
-            }
-            else _1F_doors_comp[j].openAngle = 120f;
-
-            randomValue = Random.Range(0, 2);
-
-            if (randomValue == 0)
-                _1F_doors[j].GetComponent<AudioSource>().clip = openDoorSound[0];
-            else
-                _1F_doors[j].GetComponent<AudioSource>().clip = openDoorSound[1];
-
-            _1F_doors_comp[j].SetAudio();
+            if (index == reverseIndex) return true;
         }
+        return false;
     }
 }

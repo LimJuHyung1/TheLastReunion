@@ -4,17 +4,20 @@ using UnityEngine;
 
 public class SpawnManager : MonoBehaviour
 {
+    public EvidenceManager evidenceManager;
     public Transform spawnPositions;
-    public Dictionary<Transform, bool> spawnPositionUsage = new Dictionary<Transform, bool>();    // npc 재배치 위치
-    public NPCRole[] NPCs;
+    public Dictionary<Transform, bool> spawnPositionUsage = new Dictionary<Transform, bool>();    // npc 재배치 위치    [SerializeField] private NPCRole[] NPCs;
 
     private System.Random random = new System.Random();
     private List<Transform> spawnPositionList = new List<Transform>(); // 미사용 위치 목록
+    [SerializeField] private NPCRole[] NPCs = new NPCRole[3];
+    [SerializeField] private string[] NPCNames = { "NPC4", "NPC3", "NPC2" };
 
     void Start()
     {
         SetSpawnPositions();
         SetInitialNPCPosition();
+        evidenceManager.ReceiveNPCRole(SendNPCsToEvidenceManager());
     }
 
     void SetSpawnPositions()
@@ -25,12 +28,12 @@ public class SpawnManager : MonoBehaviour
             spawnPositionUsage.Add(position, false);
             spawnPositionList.Add(position);
         }
-    }
+    }    
 
     void SetInitialNPCPosition()
     {
         for (int i = 0; i < NPCs.Length; i++)
-        {
+        {            
             // 랜덤 인덱스 선택 및 위치 설정
             int randomIndex = random.Next(spawnPositionList.Count);
             Transform chosenPosition = spawnPositionList[randomIndex];
@@ -42,11 +45,23 @@ public class SpawnManager : MonoBehaviour
             }
             else
             {
-                NPCs[i].transform.position = chosenPosition.position;
+                GameObject npc = Instantiate(Resources.Load<GameObject>(NPCNames[i]));
+                int layer = LayerMask.NameToLayer("NPC");
+                npc.layer = layer;
+                NPCs[i] = npc.GetComponent<NPCRole>();
+
+                npc.transform.position = chosenPosition.position;
                 spawnPositionUsage[chosenPosition] = true;
             }
         }
     }
+
+    public NPCRole[] SendNPCsToEvidenceManager()
+    {
+        return NPCs;
+    }
+
+
 
     public void RelocationNPC(NPCRole npc)
     {       

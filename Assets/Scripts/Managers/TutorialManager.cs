@@ -166,4 +166,11 @@ public class TutorialManager : MonoBehaviour
         index = 0;
         yield return null;
     }
+
+    //-------------------------------------------------------------//
+
+    public bool GetIsPlayingTutorial()
+    {
+        return isPlayingTutorial;
+    }
 }

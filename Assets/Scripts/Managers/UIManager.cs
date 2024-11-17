@@ -9,19 +9,19 @@ public class UIManager : MonoBehaviour
 {
     public static string tmpAnswer = "";
     public string tmpQuestion = "";
-
-    public Button endConversationBtn;
+    public static bool isAttachedToEvidence = false;
 
     public ConversationManager conversationManager;
     public EvidenceManager evidenceManager;
 
+    public Button endConversationBtn;
+    public GameObject pulsing;
     public InputField askField;
     public Image boundaryUI;
     public Image chatBox;
     public Image cursor;
     public Image screen;
     public Image[] keys;
-    public Text answerText;
     public Text keyDescriptionText;
     public Text thingDescriptionText;
     public Text thingNameText;
@@ -31,6 +31,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] Text NPCAnswer;
     [SerializeField] GameObject waitingMark;
     [SerializeField] GameObject clickMark;
+
     UIManagerSup sup;
 
     [SerializeField]
@@ -57,18 +58,16 @@ public class UIManager : MonoBehaviour
         clickMark = chatBox.transform.GetChild(4).gameObject;
 
         askField.gameObject.SetActive(false);
-        answerText.gameObject.SetActive(false);
         boundaryUI.gameObject.SetActive(false);
         chatBox.gameObject.SetActive(false);
         cursor.gameObject.SetActive(false);
         endConversationBtn.gameObject.SetActive(false);
+        pulsing.gameObject.SetActive(false);
 
         SetActiveTimer(false);
 
         // 게임 인트로 부터 실행시킬 때는 true로 설정하기 - UIManager도 같이
         screen.gameObject.SetActive(true);
-
-        // screen.gameObject.SetActive(false);
     }    
 
     //---------------------------------------------------------------//
@@ -107,7 +106,6 @@ public class UIManager : MonoBehaviour
     {
         GameObject[] uiElements = {
         askField.gameObject,
-        answerText.gameObject,
         chatBox.gameObject,
         endConversationBtn.gameObject
     };
@@ -118,7 +116,6 @@ public class UIManager : MonoBehaviour
         }
 
         cursor.gameObject.SetActive(!b);
-        answerText.text = "";
     }
 
     // 대화 시 NPC 이름 출력
@@ -163,6 +160,11 @@ public class UIManager : MonoBehaviour
         askField.interactable = b;
     }
 
+    public void SetActiveEndConversationButton(bool b)
+    {
+        endConversationBtn.gameObject.SetActive(b);
+    }
+
     /// <summary>
     /// NPC 답변 텍스트를 공백으로 설정
     /// </summary>
@@ -186,11 +188,6 @@ public class UIManager : MonoBehaviour
     public void RemoveOnEndEditListener()
     {
         askField.onEndEdit.RemoveAllListeners();
-    }
-
-    public Button GetEndConversationButton()
-    {
-        return endConversationBtn;
     }
 
     public void FocusOnAskField()
@@ -353,6 +350,39 @@ public class UIManager : MonoBehaviour
     {
         return boundaryUI;
     }
+
+
+
+
+    public GameObject GetPulsing()
+    {
+        return pulsing;
+    }
+
+    public void SetActivePulsing(bool isOn)
+    {
+        pulsing.gameObject.SetActive(isOn);
+    }
+
+    // 프로퍼티 정의
+    public bool IsAttachedToEvidenceProperty
+    {
+        get => isAttachedToEvidence;
+        set
+        {
+            if (isAttachedToEvidence != value) // 값이 변경될 때만 실행
+            {
+                isAttachedToEvidence = value;
+                IsAttachedToEvidenceChanged(); // 특정 함수 호출
+            }
+        }
+    }
+
+    private void IsAttachedToEvidenceChanged()
+    {
+        if (isAttachedToEvidence) SetActivePulsing(true);
+        else SetActivePulsing(false);
+    }
 }
 
 public class UIManagerSup
@@ -426,7 +456,7 @@ public class UIManagerSup
         }
         else if (IsDoorLayer(layer))
         {
-            if (!other.GetComponent<Door>().isOpened)
+            if (!other.GetComponent<Door>().IsOpened())
             {
                 keys[1].gameObject.SetActive(true);
                 description.text = actionDescriptions[3];

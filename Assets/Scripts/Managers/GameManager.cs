@@ -10,7 +10,9 @@ public class GameManager : MonoBehaviour
 
     public Image escPage;
     public Image evidencePage;
+    public Slider mouseSlider;
 
+    public CameraScript cam;
     public LogManager logManager;
     public TutorialManager tutorialManager;
     public Player player;
@@ -22,16 +24,22 @@ public class GameManager : MonoBehaviour
 
         escPage.gameObject.SetActive(false);
         evidencePage.gameObject.SetActive(false);
+
+        if (mouseSlider != null)
+        {
+            mouseSlider.value = 115f; // 슬라이더 초기값 설정
+            mouseSlider.onValueChanged.AddListener(OnSensitivityChanged); // 슬라이더 값 변경 이벤트 연결
+        }
     }
 
     void Update()
-    {      
+    {        
         // 강제로 커서 상태 유지
         if (player.GetIsTalking())
         {
             // Esc 메뉴가 열려있으면 커서가 보이게 설정
             Cursor.visible = true;
-            Cursor.lockState = CursorLockMode.None;
+            Cursor.lockState = CursorLockMode.None;       
         }
         else
         {
@@ -51,7 +59,7 @@ public class GameManager : MonoBehaviour
             // Esc 메뉴가 닫혀있으면 커서 숨기고 잠금
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
-        }
+        }  
     }
 
     void OpenEscPage()
@@ -63,7 +71,7 @@ public class GameManager : MonoBehaviour
     public void CloseEscPage()
     {
         player.UnactivateIsTalking();
-        escPage.gameObject.SetActive(false);        
+        escPage.gameObject.SetActive(false);
     }
 
     public void OpenEvidencePage()
@@ -125,5 +133,12 @@ public class GameManager : MonoBehaviour
     public void ExitGame()
     {
         Application.Quit();
+    }
+
+
+
+    public void OnSensitivityChanged(float value)
+    {
+        cam.SetMouseSensitivity(value);        
     }
 }

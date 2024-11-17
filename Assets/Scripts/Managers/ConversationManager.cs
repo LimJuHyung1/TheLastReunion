@@ -94,6 +94,7 @@ public class ConversationManager : MonoBehaviour
         {
             logManager.AddLog(npcRole, uIManager.GetQuestion(), answer);
             uIManager.SetInteractableAskField(false);
+            uIManager.SetActiveEndConversationButton(false);
             SetAudio();
 
             sentencesQueue.Clear();
@@ -150,10 +151,12 @@ public class ConversationManager : MonoBehaviour
             }
             while (sentencesQueue.Count > 0);
         }
-            uIManager.SetInteractableAskField(true);
-            uIManager.ChangeIsSkipping(true);
-            uIManager.FocusOnAskField();
-            displayCoroutine = null; // 코루틴이 끝나면 변수 초기화                
+
+        uIManager.SetActiveEndConversationButton(true);
+        uIManager.SetInteractableAskField(true);
+        uIManager.ChangeIsSkipping(true);
+        uIManager.FocusOnAskField();
+        displayCoroutine = null; // 코루틴이 끝나면 변수 초기화                
     }
 
     public void IsAbleToGoNextTrue()
@@ -228,8 +231,8 @@ public class ConversationManager : MonoBehaviour
     {
         uIManager.SetNullInputField();
         uIManager.SetConversationUI(false);
-        uIManager.SetBlankAnswerText();
         uIManager.RemoveOnEndEditListener();
+        uIManager.SetBlankAnswerText();        
 
         // SwitchCameraWithFade 코루틴이 완료될 때까지 대기
         yield return StartCoroutine(FadeUtility.Instance.SwitchCameraWithFade

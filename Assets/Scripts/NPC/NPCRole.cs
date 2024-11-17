@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using OpenAI;
 using UnityEngine;
@@ -23,6 +24,7 @@ public class NPCRole : NPC
     protected override void Start()
     {
         base.Start();
+
         anim = GetComponent<Animator>();
         anim.SetBool("walk", false);
 
