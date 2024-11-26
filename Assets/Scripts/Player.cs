@@ -75,7 +75,13 @@ public class Player : MonoBehaviour
         }
     }
 
-    void OnTriggerExit(Collider other)
+    private void OnTriggerStay(Collider other)
+    {
+        if(cm.GetIsTalking())
+            uIManager.IsAttachedToEvidenceProperty = false;
+    }
+
+    private void OnTriggerExit(Collider other)
     {
         // 트리거 영역을 벗어났는지 확인
         if (other.gameObject.layer == evidenceLayer)

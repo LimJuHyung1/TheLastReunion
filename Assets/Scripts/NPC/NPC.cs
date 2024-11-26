@@ -12,10 +12,10 @@ public class NPC : MonoBehaviour
 
     protected string answer;
     protected ConversationManager cm;
+    protected NPCRoleInfoManager roleInfoManager;
     protected UIManager uIManager;
 
-    private NPCEmotionHandler emotionHandler;
-    private NPCRoleInfoManager roleInfoManager;
+    private NPCEmotionHandler emotionHandler;    
 
     protected virtual void Start()
     {
@@ -25,7 +25,7 @@ public class NPC : MonoBehaviour
         cc = GetComponent<CharacterCustomization>();
 
         // NPCEmotionHandler 초기화
-        emotionHandler = new NPCEmotionHandler(cc);
+        emotionHandler = new NPCEmotionHandler(cc);        
         roleInfoManager = new NPCRoleInfoManager();
 
         // 씬 시작 시 색상 초기화
@@ -52,6 +52,7 @@ public class NPC : MonoBehaviour
     public string GetRole(string npcName) => roleInfoManager.GetRole(npcName);
     public string GetInstructions(string npcName) => roleInfoManager.GetInstructions(npcName);
     public string GetBackground(string npcName) => roleInfoManager.GetBackground(npcName);
+    public string GetFriends(string npcName) => roleInfoManager.GetFriends(npcName);
     public string GetAlibi(string npcName) => roleInfoManager.GetAlibi(npcName);
     public string GetResponseGuidelines(string npcName) => roleInfoManager.GetResponseGuidelines(npcName);
 

@@ -84,10 +84,6 @@ public class ConversationManager : MonoBehaviour
             Debug.LogError("ShowName - npc가 없습니다!");
     }
 
-    /// <summary>
-    /// NPC 스크립트에서 실행됨
-    /// </summary>
-    /// <param chatGPT Answer="answer"></param>
     public void ShowAnswer(string answer)
     {
         if (npcRole != null)
@@ -99,8 +95,8 @@ public class ConversationManager : MonoBehaviour
 
             sentencesQueue.Clear();
 
-            // 정규식을 이용해 문장을 '.', '?', '!' 문자로 분할하면서 해당 문자 유지
-            string[] sentences = System.Text.RegularExpressions.Regex.Split(answer, @"(?<=[.!?])");
+            // 정규식을 이용해 '.', '?', '!'로 분할하면서 "..." 예외 처리
+            string[] sentences = System.Text.RegularExpressions.Regex.Split(answer, @"(?<=[^\.]\.|[!?])");
 
             foreach (string part in sentences)
             {
@@ -145,7 +141,9 @@ public class ConversationManager : MonoBehaviour
 
                 if (sentencesQueue.Count > 0 && isAbleToGoNext)
                 {
-                    yield return new WaitUntil(() => Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)); // 마우스 클릭 또는 엔터키 대기
+                    yield return new WaitUntil(() => Input.GetMouseButtonDown(0) 
+                    || Input.GetKeyDown(KeyCode.Space) 
+                    || Input.GetKeyDown(KeyCode.Return)); // 마우스 클릭 / 엔터키 / 스페이스 바 입력 대기
                     uIManager.ChangeIsSkipping(true);
                 }
             }
@@ -241,5 +239,10 @@ public class ConversationManager : MonoBehaviour
         // 코루틴이 끝난 후에 실행할 코드
         player.GetComponent<Player>().UnactivateIsTalking();
         RemoveNPCRole();
+    }
+
+    public bool GetIsTalking()
+    {
+        return isTalking;
     }
 }

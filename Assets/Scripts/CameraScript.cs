@@ -72,6 +72,7 @@ public class CameraScript : MonoBehaviour
                 else if (IsNPCLayer(other.gameObject.layer))
                 {
                     NPCRole npcRole = other.GetComponent<NPCRole>();
+
                     player.ActivateIsTalking();
                     conversationManager.GetNPCRole(npcRole);
                     conversationManager.AddListenersResponse();

@@ -360,7 +360,7 @@ public class UIManager : MonoBehaviour
     }
 
     public void SetActivePulsing(bool isOn)
-    {
+    {        
         pulsing.gameObject.SetActive(isOn);
     }
 

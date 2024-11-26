@@ -66,7 +66,6 @@ public class EvidenceManager : MonoBehaviour
             GetEvidenceDescription(evidenceName),
             GetEvidenceInformation(evidenceName),
             GetEvidenceFoundAt(evidenceName),
-            GetEvidenceRelationship(evidenceName),            
             GetEvidenceNotes(evidenceName));
         evidences.Add(evidence);
     }
@@ -97,9 +96,8 @@ public class EvidenceManager : MonoBehaviour
         // Text 컴포넌트를 효율적으로 설정하는 헬퍼 함수 호출
         SetTextInChild(evidencePageInstance.transform.GetChild(0), GetEvidenceName(evidenceName));
         SetTextInChild(evidencePageInstance.transform.GetChild(1), GetEvidenceInformation(evidenceName));
-        SetTextInChild(evidencePageInstance.transform.GetChild(2), "연관인물 : " + GetEvidenceRelationship(evidenceName));
-        SetTextInChild(evidencePageInstance.transform.GetChild(3), "추가 힌트 : " + GetEvidenceNotes(evidenceName));
-        SetRawImage(evidencePageInstance.transform.GetChild(4), GetEvidenceRenderTexture(evidenceName));
+        SetTextInChild(evidencePageInstance.transform.GetChild(2), "추가 힌트 : " + GetEvidenceNotes(evidenceName));
+        SetRawImage(evidencePageInstance.transform.GetChild(3), GetEvidenceRenderTexture(evidenceName));
         evidenceButtonInstance.SetAnchor();
         evidenceButtonInstance.SetText(evidence);
         evidenceButtonInstance.GetComponent<Button>().onClick.AddListener(SetActiveFalseAllIntroductions);
@@ -169,7 +167,6 @@ public class EvidenceManager : MonoBehaviour
             string evidenceName;
             string evidenceInformation;
             string evidenceFoundAt;
-            string evidenceRealtionship;
             string evidenceNotes;
 
             string extraInformation;
@@ -182,7 +179,6 @@ public class EvidenceManager : MonoBehaviour
                 evidenceName = GetEvidenceName(evidence.GetName());
                 evidenceInformation = GetEvidenceInformation(evidence.GetName());
                 evidenceFoundAt = GetEvidenceFoundAt(evidence.GetName());
-                evidenceRealtionship = GetEvidenceRelationship(evidence.GetName());
                 evidenceNotes = GetEvidenceNotes(evidence.GetName());
                 extraInformation = GetEvidenceExtraInformation(evidence.GetName(), npcRole[i]);
                 string completeEvidenceMessage =
@@ -190,7 +186,6 @@ public class EvidenceManager : MonoBehaviour
                 $"증거 이름 : {evidenceName}.\n" +
                 $"증거 내용 : {evidenceInformation}.\n" +
                 $"증거가 발견된 장소 : {evidenceFoundAt}.\n" +
-                $"증거와 관련된 주요 인물 : {evidenceRealtionship}.\n" +
                 $"추가적으로 필요한 증거나 단서 : {evidenceNotes}.\n" +
                 $"증거가 {npcRole[i].currentCharacter.ToString()}와 관련된 사실 : {extraInformation}.\n";
 
@@ -243,12 +238,6 @@ public class EvidenceManager : MonoBehaviour
     {
         EvidenceInfo evidence = GetEvidenceByName(evidenceName);
         return evidence?.foundAt;
-    }
-
-    public string GetEvidenceRelationship(string evidenceName)
-    {
-        EvidenceInfo evidence = GetEvidenceByName(evidenceName);
-        return evidence?.relationship;
     }
 
     public string GetEvidenceNotes(string evidenceName)

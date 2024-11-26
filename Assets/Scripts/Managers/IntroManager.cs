@@ -14,7 +14,7 @@ public class IntroManager : MonoBehaviour
 
     short textIndex = 0;
     int currentSceneIndex;
-    float verticalSpacing = 100f; // 텍스트 간의 수직 간격
+    float verticalSpacing = 150f; // 텍스트 간의 수직 간격
 
     string[] dispatch = {
             "차량 42, 사건 번호 1375에 응답 바랍니다.",

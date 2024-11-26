@@ -51,9 +51,9 @@ public class SpawnManager : MonoBehaviour
                 NPCs[i] = npc.GetComponent<NPCRole>();
 
                 npc.transform.position = chosenPosition.position;
-                spawnPositionUsage[chosenPosition] = true;
+                spawnPositionUsage[chosenPosition] = true;                
             }
-        }
+        }        
     }
 
     public NPCRole[] SendNPCsToEvidenceManager()
