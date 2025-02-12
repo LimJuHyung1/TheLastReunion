@@ -142,6 +142,8 @@ public class TutorialManager : MonoBehaviour
 
             uIManager.SetActiveTimer(true);
             uIManager.BeginCountdown();
+
+            CursorManager.Instance.OffVisualization();
         }
         else
         {

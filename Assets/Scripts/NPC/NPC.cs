@@ -32,15 +32,7 @@ public class NPC : MonoBehaviour
         if (cc != null)
         {
             cc.InitColors();
-        }
-    }
-
-    private void OnEnable()
-    {
-        // 객체 활성화 시 색상 초기화
-        if (cc != null)
-        {
-            cc.InitColors();
+            Debug.Log(name + "의 색상이 초기화되었습니다, start");
         }
     }
 

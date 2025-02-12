@@ -50,6 +50,7 @@ public class NPCRole : NPC
         }
     }
 
+    // 각 NPC 역할 학습
     public void SetRole()
     {
         string npcName = currentCharacter.ToString();

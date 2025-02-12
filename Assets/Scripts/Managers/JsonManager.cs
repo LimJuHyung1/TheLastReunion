@@ -313,12 +313,12 @@ public class JsonManager : MonoBehaviour
         },
         // 앨런의 책장에서 발견된 편지
         new EvidenceInfo {
-            name = "앨런의 책장에서 발견된 편지",
+            name = "커튼 밑에서 발견된 편지",
             description = "누군가 앨런을 위협하는 내용이 적혀 있습니다.\n",
-            information = "앨런의 책장에서 어떠한 편지가 발견되었습니다.\n" +
+            information = "게스트룸의 커튼 밑에서 어떠한 편지가 발견되었습니다.\n" +
             "이 편지에는 누군가 앨런을 위협하는 내용이 적혀 있습니다.\n" +
             "앨런에 대한 분노의 감정이 글로 나타나고 있습니다.",
-            foundAt = "앨런의 방",
+            foundAt = "게스트룸",
             notes = "앨런에게 원한을 산 사람에 대해 조사하세요.",
 
 

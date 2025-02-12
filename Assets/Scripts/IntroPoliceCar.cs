@@ -1,21 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class IntroPoliceCar : MonoBehaviour
 {
     AudioSource audio;
+
     public int loopCount; // 반복 횟수 설정
+    [SerializeField] short currentLoop = 0;
 
     public GameObject[] wheels;
-
-    short currentLoop = 0;
+    
     float currentTime = 0f;
     float wheelRotationSpeed = 120f; // 바퀴 회전 속도 설정
     float targetVolume = 0.6f; // 목표 볼륨
     float fadeInDuration = 4f; // 페이드 인 지속 시간 (초 단위)
     float fadeOutDuration = 4f; // 페이드 아웃 지속 시간 (초 단위)
     float moveSpeed = 2f; // 경찰차가 앞으로 이동하는 속도
+
+    bool isEndSetQuality = false;
 
     void Start()
     {
@@ -24,39 +28,50 @@ public class IntroPoliceCar : MonoBehaviour
         // AudioSource 설정
         audio.volume = 0f; // 초기 볼륨을 0으로 설정
         audio.loop = false; // Loop를 비활성화하여 직접 제어
-        audio.Play();
-        StartCoroutine(StartSiren());
+        audio.Stop();
     }
 
     void Update()
     {
-        // AudioSource가 멈추면 반복 횟수를 체크하여 재생
-        if (!audio.isPlaying && currentLoop < loopCount)
+        if (isEndSetQuality)
         {
-            // 횟수를 다 채운 경우
-            if (currentLoop == loopCount)
+            // AudioSource가 멈추면 반복 횟수를 체크하여 재생
+            if (!audio.isPlaying && currentLoop < loopCount)
             {
-                StopCoroutine(StartSiren());
-                StartCoroutine(EndSiren());
+                // 횟수를 다 채운 경우
+                if (currentLoop == loopCount)
+                {
+                    StopCoroutine(StartSiren());
+                    StartCoroutine(EndSiren());
+                }
+                // 게임 시작 시 소리 출력
+                else
+                {
+                    audio.Play();
+                }
+                currentLoop++;
             }
-            // 게임 시작 시 소리 출력
-            else
-            {
-                audio.Play();
-            }
-            currentLoop++;
         }
     }
 
     void FixedUpdate()
     {
-        // 앞 방향으로 이동 (z축 기준)
-        transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
-
-        foreach (var wheel in wheels)
+        if (isEndSetQuality)
         {
-            wheel.transform.Rotate(wheelRotationSpeed * Time.deltaTime, 0, 0);
-        }        
+            // 앞 방향으로 이동 (z축 기준)
+            transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
+
+            foreach (var wheel in wheels)
+            {
+                wheel.transform.Rotate(wheelRotationSpeed * Time.deltaTime, 0, 0);
+            }
+        }
+    }
+
+    public void StartPoliceCar()
+    {        
+        audio.Play();
+        StartCoroutine(StartSiren());
     }
 
     private IEnumerator StartSiren()
@@ -91,4 +106,10 @@ public class IntroPoliceCar : MonoBehaviour
         audio.Stop(); // 오디오 중지
         StopCoroutine(EndSiren());
     }
+
+    public void ReadyToSiren()
+    {
+        isEndSetQuality = true;
+    }
 }
+
