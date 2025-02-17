@@ -20,6 +20,19 @@ public class NPCRole : NPC
     private Player player;
     private OpenAIApi openAI;
 
+    /*
+    private void Awake()
+    {
+        // OpenAI API를 생성하기 전에 API 키가 로드되었는지 확인
+        string apiKey = APIKeyManager.LoadDecryptedAPIKey();
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            Debug.LogError("API 키가 설정되지 않았습니다! 게임을 시작하기 전에 설정하세요.");
+            return;
+        }
+    }
+    */
+
     // Start is called before the first frame update
     protected override void Start()
     {

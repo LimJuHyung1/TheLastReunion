@@ -163,7 +163,6 @@ public class TutorialManager : MonoBehaviour
     IEnumerator EndTutorial()
     {
         player.UnactivateIsTalking();
-        uIManager.SetActiveCursor(true);
         cameraManager.ChangeCam();
         index = 0;
         yield return null;

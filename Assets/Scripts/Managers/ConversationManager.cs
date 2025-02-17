@@ -1,11 +1,8 @@
 using OpenAI;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UI;
-using static UnityEngine.Rendering.DebugUI;
 
 
 public class ConversationManager : MonoBehaviour
@@ -13,9 +10,9 @@ public class ConversationManager : MonoBehaviour
     public class OnResponse : UnityEvent<string> { }
 
     public AudioClip[] typeSounds;
-    public GameObject player;    
+    public GameObject player;
 
-    public CameraManager cameraManager;    
+    public CameraManager cameraManager;
     public LogManager logManager;
     public SpawnManager spawnManager;
     public UIManager uIManager;
@@ -23,16 +20,16 @@ public class ConversationManager : MonoBehaviour
     private bool isTalking = false;
     private bool isAbleToGoNext = false;
 
-    private Coroutine displayCoroutine;    
+    private Coroutine displayCoroutine;
     private Queue<string> sentencesQueue = new Queue<string>();
 
     [SerializeField] NPCRole npcRole;
 
     // Start is called before the first frame update
     void Start()
-    {        
+    {
         SoundManager.Instance.SetNullAudioMixerGroup();
-    }    
+    }
 
     /// <summary>
     /// Player 스크립트에서 접촉 npc 반환 받음
@@ -40,16 +37,16 @@ public class ConversationManager : MonoBehaviour
     /// <param NPC Object="col"></param>    
     public void GetNPCRole(NPCRole npc)
     {
-        npcRole = npc;        
+        npcRole = npc;
     }
 
     public void AddListenersResponse()
     {
-        if(npcRole != null)
+        if (npcRole != null)
         {
             uIManager.OnEndEditAskField(npcRole.GetResponse);
-            uIManager.OnEndEditAskField(uIManager.SetNullInputField);            
-        }                        
+            uIManager.OnEndEditAskField(uIManager.SetNullInputField);
+        }
     }
 
     public void RemoveNPCRole()
@@ -79,7 +76,7 @@ public class ConversationManager : MonoBehaviour
                     npcRole.currentCharacter.ToString(npcRole.currentCharacter.ToString());
                     break;
             }
-        }        
+        }
         else
             Debug.LogError("ShowName - npc가 없습니다!");
     }
@@ -141,8 +138,8 @@ public class ConversationManager : MonoBehaviour
 
                 if (sentencesQueue.Count > 0 && isAbleToGoNext)
                 {
-                    yield return new WaitUntil(() => Input.GetMouseButtonDown(0) 
-                    || Input.GetKeyDown(KeyCode.Space) 
+                    yield return new WaitUntil(() => Input.GetMouseButtonDown(0)
+                    || Input.GetKeyDown(KeyCode.Space)
                     || Input.GetKeyDown(KeyCode.Return)); // 마우스 클릭 / 엔터키 / 스페이스 바 입력 대기
                     uIManager.ChangeIsSkipping(true);
                 }
@@ -154,7 +151,7 @@ public class ConversationManager : MonoBehaviour
         uIManager.SetInteractableAskField(true);
         uIManager.ChangeIsSkipping(true);
         uIManager.FocusOnAskField();
-        displayCoroutine = null; // 코루틴이 끝나면 변수 초기화                
+        displayCoroutine = null; // 코루틴이 끝나면 변수 초기화                 
     }
 
     public void IsAbleToGoNextTrue()
@@ -169,12 +166,12 @@ public class ConversationManager : MonoBehaviour
     /// </summary>
     void SetAudio()
     {
-        if(npcRole != null)
+        if (npcRole != null)
         {
             switch (npcRole.currentCharacter.ToString())
             {
                 case "Nason":
-                    SoundManager.Instance.ChangeTextAudioClip(typeSounds[0]);                    
+                    SoundManager.Instance.ChangeTextAudioClip(typeSounds[0]);
                     break;
                 case "Mina":
                     SoundManager.Instance.ChangeTextAudioClip(typeSounds[1]);
@@ -210,7 +207,7 @@ public class ConversationManager : MonoBehaviour
 
         // 코루틴이 끝난 후에 대화 UI 활성화
         uIManager.SetConversationUI(true);
-        isTalking = true;        
+        isTalking = true;
 
         // 나머지 작업 수행
         uIManager.SetSpeakingUI();  // 로딩 이미지 비활성화
@@ -222,7 +219,7 @@ public class ConversationManager : MonoBehaviour
     public void EndConversation()
     {
         isTalking = false;
-        StartCoroutine(EndConversationCoroutine());        
+        StartCoroutine(EndConversationCoroutine());
     }
 
     private IEnumerator EndConversationCoroutine()
@@ -230,11 +227,11 @@ public class ConversationManager : MonoBehaviour
         uIManager.SetNullInputField();
         uIManager.SetConversationUI(false);
         uIManager.RemoveOnEndEditListener();
-        uIManager.SetBlankAnswerText();        
+        uIManager.SetBlankAnswerText();
 
         // SwitchCameraWithFade 코루틴이 완료될 때까지 대기
         yield return StartCoroutine(FadeUtility.Instance.SwitchCameraWithFade
-            (uIManager.screen, cameraManager, player, npcRole, spawnManager));        
+            (uIManager.screen, cameraManager, player, npcRole, spawnManager));
 
         // 코루틴이 끝난 후에 실행할 코드
         player.GetComponent<Player>().UnactivateIsTalking();

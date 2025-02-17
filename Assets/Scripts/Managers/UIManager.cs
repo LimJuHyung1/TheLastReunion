@@ -19,7 +19,7 @@ public class UIManager : MonoBehaviour
     public InputField askField;
     public Image boundaryUI;
     public Image chatBox;
-    public Image cursor;
+    // public Image cursor;
     public Image screen;
     public Image[] keys;
     public Text keyDescriptionText;
@@ -60,7 +60,7 @@ public class UIManager : MonoBehaviour
         askField.gameObject.SetActive(false);
         boundaryUI.gameObject.SetActive(false);
         chatBox.gameObject.SetActive(false);
-        cursor.gameObject.SetActive(false);
+        // cursor.gameObject.SetActive(false);
         endConversationBtn.gameObject.SetActive(false);
         pulsing.gameObject.SetActive(false);
 
@@ -68,14 +68,14 @@ public class UIManager : MonoBehaviour
 
         // 게임 인트로 부터 실행시킬 때는 true로 설정하기 - UIManager도 같이
         screen.gameObject.SetActive(true);
-    }    
+    }
 
     //---------------------------------------------------------------//
     // 아래 함수들은 NPC 스크립트에서 호출됨
 
     // InputField 텍스트 길이 반환
     public int GetAskFieldTextLength()
-    {        
+    {
         return askField.text.Length;
     }
 
@@ -115,7 +115,7 @@ public class UIManager : MonoBehaviour
             element.SetActive(b);
         }
 
-        cursor.gameObject.SetActive(!b);
+        // cursor.gameObject.SetActive(!b);
     }
 
     // 대화 시 NPC 이름 출력
@@ -135,7 +135,7 @@ public class UIManager : MonoBehaviour
     {
         waitingMark.gameObject.SetActive(false);
         clickMark.gameObject.SetActive(false);
-    }    
+    }
 
     /// <summary>
     /// NPC의 발언 상태에 따라 UI 설정
@@ -179,8 +179,14 @@ public class UIManager : MonoBehaviour
     /// <param name="action"></param>
     public void OnEndEditAskField(UnityAction action)
     {
-        askField.onEndEdit.AddListener((string text) => {            
-            tmpQuestion = text;
+        askField.onEndEdit.AddListener((string text) => {
+            if (string.IsNullOrWhiteSpace(text)) // 공백 입력이면 실행하지 않음
+            {
+                Debug.LogWarning("공백 입력은 허용되지 않습니다.");
+                return;
+            }
+
+            tmpQuestion = text.Trim(); // 입력값의 앞뒤 공백 제거
             action();
         });
     }
@@ -303,7 +309,7 @@ public class UIManager : MonoBehaviour
 
     public void SetActiveCursor(bool isOn)
     {
-        cursor.gameObject.SetActive(isOn);
+        // cursor.gameObject.SetActive(isOn);
     }
 
     public Image GetScreen()
@@ -360,7 +366,7 @@ public class UIManager : MonoBehaviour
     }
 
     public void SetActivePulsing(bool isOn)
-    {        
+    {
         pulsing.gameObject.SetActive(isOn);
     }
 
@@ -413,10 +419,10 @@ public class UIManagerSup
         actionDescriptions[0] = "네이슨과 대화하다";
         actionDescriptions[1] = "제니와 대화하다";
         actionDescriptions[2] = "미나와 대화하다";
-        actionDescriptions[3] = "문을 연다";        
+        actionDescriptions[3] = "문을 연다";
         actionDescriptions[4] = "증거를 수집하다";
 
-        foreach(var key in keys)
+        foreach (var key in keys)
         {
             key.gameObject.SetActive(false);
         }
@@ -467,7 +473,7 @@ public class UIManagerSup
 
     public void HideKeyAndDescriontion()
     {
-        foreach(var key in keys)
+        foreach (var key in keys)
         {
             if (key.gameObject.activeSelf)
             {

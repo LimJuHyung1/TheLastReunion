@@ -24,10 +24,46 @@ public class EvidenceManager : MonoBehaviour
     private int currentEvidenceLength = 0;
     private float space = 40f;
 
+    private int resWidth;   // 사용자 모니터 가로 길이
+    private int resHeight;  // 사용자 모니터 세로 길이
+
+    private float scrollRectBlank;  // evidenceScrollRect 여백 길이
+    private float scrollRectWidth;  // evidenceScrollRect 가로 길이
+    private float scrollRectHeight;  // evidenceScrollRect 세로 길이
+
+
     void Start()
     {        
         evidenceButton = Resources.Load<GameObject>("EvidenceButton");
         evidenceIntroductionPage = Resources.Load<GameObject>("EvidenceIntroductionPage");
+
+        SetEvidenceScrollRect();
+    }
+
+    //----------------------------------------------------------//
+
+    void SetEvidenceScrollRect()
+    {
+        Resolution currentRes = Screen.currentResolution;
+        resWidth = currentRes.width;
+        resHeight = currentRes.height;
+
+        // scrollRect 여백 길이 설정
+        Vector2 newPosition = evidenceScrollRect.GetComponent<RectTransform>().anchoredPosition;
+        scrollRectBlank = resWidth * 0.1f;   // 증거 스크롤과 모니터 좌측 간의 간격 설정
+        newPosition.x = scrollRectBlank;
+        evidenceScrollRect.GetComponent<RectTransform>().anchoredPosition = newPosition;
+
+        // scrollRect 가로 길이 설정
+        Vector2 newDeltaSize = evidenceScrollRect.GetComponent<RectTransform>().sizeDelta;
+        scrollRectWidth = resWidth * 0.2f;  // 증거 스크롤 가로 길이(모니터 가로 길이의 25%)
+        scrollRectHeight = resHeight * 0.6f;    // 증거 스크롤 세로 길이(모니터 세로 길이의 80%)
+        newDeltaSize.x = scrollRectWidth;
+        newDeltaSize.y = scrollRectHeight;
+
+        evidenceScrollRect.GetComponent<RectTransform>().sizeDelta = newDeltaSize;
+
+
     }
 
     //----------------------------------------------------------//
@@ -85,19 +121,23 @@ public class EvidenceManager : MonoBehaviour
     {
         // 증거 버튼 생성 및 설정
         EvidenceButton evidenceButtonInstance = Instantiate(evidenceButton, evidenceScrollRect.content).GetComponent<EvidenceButton>();
+        SetEviedenceButton(evidenceButtonInstance.GetComponent<RectTransform>());
+
         findedEvidenceRectTransformList.Add(evidenceButtonInstance.GetComponent<RectTransform>());
 
         // 증거 소개 페이지 생성 및 설정
         GameObject evidencePageInstance = Instantiate(evidenceIntroductionPage, evidencePage.transform);
+        SetEvidencePage(evidencePageInstance.GetComponent<RectTransform>());
+
         evidencePageInstance.SetActive(false);
 
         string evidenceName = evidence.GetName();
 
         // Text 컴포넌트를 효율적으로 설정하는 헬퍼 함수 호출
-        SetTextInChild(evidencePageInstance.transform.GetChild(0), GetEvidenceName(evidenceName));
-        SetTextInChild(evidencePageInstance.transform.GetChild(1), GetEvidenceInformation(evidenceName));
-        SetTextInChild(evidencePageInstance.transform.GetChild(2), "추가 힌트 : " + GetEvidenceNotes(evidenceName));
-        SetRawImage(evidencePageInstance.transform.GetChild(3), GetEvidenceRenderTexture(evidenceName));
+        SetRawImage(evidencePageInstance.transform.GetChild(0), GetEvidenceRenderTexture(evidenceName));
+        SetTextInChild(evidencePageInstance.transform.GetChild(1), GetEvidenceName(evidenceName));
+        SetTextInChild(evidencePageInstance.transform.GetChild(2), GetEvidenceInformation(evidenceName));
+        SetTextInChild(evidencePageInstance.transform.GetChild(3), "추가 힌트 : " + GetEvidenceNotes(evidenceName));        
         evidenceButtonInstance.SetAnchor();
         evidenceButtonInstance.SetText(evidence);
         evidenceButtonInstance.GetComponent<Button>().onClick.AddListener(SetActiveFalseAllIntroductions);
@@ -106,6 +146,76 @@ public class EvidenceManager : MonoBehaviour
 
         // 버튼 위치 업데이트
         UpdateEvidenceButtonPositions(findedEvidenceRectTransformList, evidenceScrollRect);
+    }
+
+    void SetEviedenceButton(RectTransform param)
+    {
+        // 증거 버튼 생성 및 설정        
+        Vector2 buttonSizeDelta = param.sizeDelta;
+        buttonSizeDelta.x = scrollRectWidth * 0.9f;
+        param.GetComponent<RectTransform>().sizeDelta = buttonSizeDelta;
+    }
+
+    void SetEvidencePage(RectTransform param)
+    {
+        // 여백 설정
+        Vector2 newPosition = param.anchoredPosition;
+        newPosition.x = -scrollRectBlank;
+        param.anchoredPosition = newPosition;
+
+        // 가로, 세로 길이 설정
+        Vector2 newDeltaSize = param.sizeDelta;
+        newDeltaSize.x = resWidth * 0.35f;
+        newDeltaSize.y = scrollRectHeight;
+        param.sizeDelta = newDeltaSize;
+
+        // SetEvidencePageChildern(param);
+    }
+
+    void SetEvidencePageChildern(RectTransform parent)
+    {
+        float parentWidth = parent.sizeDelta.x;
+        float parentHeight = parent.sizeDelta.y;
+
+        Debug.Log($"초기 부모 크기 - Width: {parentWidth}, Height: {parentHeight}");
+
+        // Anchor를 부모의 오른쪽 중앙으로 설정
+        parent.anchorMin = new Vector2(1, 0.5f);
+        parent.anchorMax = new Vector2(1, 0.5f);
+        parent.pivot = new Vector2(1, 0.5f); // 기준점을 오른쪽 중앙으로 설정
+
+        Vector2 newPosition;
+        Vector2 newDeltaSize;
+
+        Graphic[] graphics = parent.GetComponentsInChildren<Graphic>();
+        if (graphics.Length == 0)
+        {
+            Debug.LogError("자식 UI 요소(Graphic)가 없습니다!");
+            return;
+        }
+
+        RectTransform tmpRectTransform = graphics[0].GetComponent<RectTransform>();
+        if (tmpRectTransform == null)
+        {
+            Debug.LogError($"{graphics[0].gameObject.name} 에 RectTransform이 없습니다!");
+            return;
+        }
+
+        //-------------------- 증거 제목 --------------------//        
+
+        // 여백 설정 (오른쪽 중앙을 기준으로 조정)
+        newPosition = tmpRectTransform.anchoredPosition;
+        newPosition.x = -parentWidth * 0.1f; // 오른쪽 중앙을 기준으로 왼쪽으로 이동
+        newPosition.y = parentHeight * 0.1f;
+        tmpRectTransform.anchoredPosition = newPosition;
+
+        // 가로, 세로 길이 설정
+        newDeltaSize = tmpRectTransform.sizeDelta;
+        newDeltaSize.x = parentWidth * 0.8f;
+        newDeltaSize.y = parentHeight * 0.2f;
+        tmpRectTransform.sizeDelta = newDeltaSize;
+
+        Debug.Log($"최종 부모 크기 - Width: {parent.sizeDelta.x}, Height: {parent.sizeDelta.y}");
     }
 
     // 텍스트 설정을 반복적으로 처리하는 헬퍼 함수

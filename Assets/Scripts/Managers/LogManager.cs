@@ -183,8 +183,7 @@ public class LogManager : MonoBehaviour
 
     void UpdateLogPositions(List<RectTransform> logs, ScrollRect scrollRect)
     {
-        float y = 50f;
-        float extraY = 150f;
+        float y = 50f;        
 
         for (int i = 0; i < logs.Count; i++)
         {
