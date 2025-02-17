@@ -33,9 +33,17 @@ public class UIManager : MonoBehaviour
     [SerializeField] GameObject clickMark;
 
     UIManagerSup sup;
+    
+    [SerializeField] private bool waitToSkip = true;
 
-    [SerializeField]
-    private bool isAbleToSkip = true;
+    public bool isReadyToSkip = false;  // NPC가 문장 출력 시작 시에 true로 변경됨
+    public bool IsReadyToSkip
+    {
+        get { return isReadyToSkip; }
+        set { isReadyToSkip = value; }
+    }
+
+    [SerializeField] private bool isSkipping = false;
     [SerializeField]
     private bool isShowingDescription = false; // 코루틴 실행 여부를 확인하는 변수
 
@@ -45,6 +53,19 @@ public class UIManager : MonoBehaviour
         SetUI();
 
         sup = new UIManagerSup(keys, keyDescriptionText, evidenceManager);
+    }
+
+    void Update()
+    {
+        if (isReadyToSkip)
+        {
+            if (((Input.GetMouseButtonDown(0)
+            || Input.GetKeyDown(KeyCode.Space)
+            || Input.GetKeyDown(KeyCode.Return)))) // 마우스 왼쪽 클릭 or 엔터키 감지
+            {             
+                isSkipping = true;
+            }
+        }            
     }
 
     /// <summary>
@@ -179,10 +200,17 @@ public class UIManager : MonoBehaviour
     /// <param name="action"></param>
     public void OnEndEditAskField(UnityAction action)
     {
-        askField.onEndEdit.AddListener((string text) => {
-            if (string.IsNullOrWhiteSpace(text)) // 공백 입력이면 실행하지 않음
+        askField.onEndEdit.AddListener((string text) =>
+        {
+            // 공백 입력이면 실행하지 않음
+            if (string.IsNullOrWhiteSpace(text))
             {
-                Debug.LogWarning("공백 입력은 허용되지 않습니다.");
+                return;
+            }
+
+            // 현재 엔터 키가 눌렸을 때만 실행되도록 확인
+            if (!Input.GetKeyDown(KeyCode.Return) && !Input.GetKeyDown(KeyCode.KeypadEnter))
+            {
                 return;
             }
 
@@ -218,12 +246,13 @@ public class UIManager : MonoBehaviour
         SetNPCSpeakingUI(true);
         dialogSoundCoroutine = StartCoroutine(PlayDialogSound());
 
-        yield return new WaitUntil(() => isAbleToSkip);
+        yield return new WaitUntil(() => waitToSkip);
         for (int i = 0; i < answer.Length; i++)
         {
-            if ((Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)) && isAbleToSkip) // 마우스 왼쪽 클릭 or 엔터키 감지
+            if (isSkipping) // 마우스 왼쪽 클릭 or 엔터키 감지
             {
-                isAbleToSkip = false;
+                isSkipping = false;
+                waitToSkip = false;
                 t.text = answer; // 전체 텍스트 즉시 표시
                 break; // 루프를 중단하고 전체 텍스트를 표시하도록 이동
             }
@@ -233,6 +262,7 @@ public class UIManager : MonoBehaviour
         }
 
         tmpAnswer = t.text;
+        isReadyToSkip = false;
         ChangeIsSkipping(false);
 
         // 코루틴이 실행되었을 경우에만 종료 처리
@@ -287,12 +317,12 @@ public class UIManager : MonoBehaviour
 
     public bool GetIsSkipping()
     {
-        return isAbleToSkip;
+        return waitToSkip;
     }
 
     public void ChangeIsSkipping(bool b)
     {
-        isAbleToSkip = b;
+        waitToSkip = b;
     }
 
     IEnumerator PlayDialogSound()

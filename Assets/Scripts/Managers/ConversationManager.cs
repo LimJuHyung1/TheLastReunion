@@ -121,37 +121,57 @@ public class ConversationManager : MonoBehaviour
     /// <returns></returns>
     private IEnumerator DisplaySentences()
     {
+        // NPC가 대화 중일 경우 실행
         if (isTalking)
         {
             do
             {
+                // 대사 큐에서 다음 문장을 가져옴
                 string sentence = sentencesQueue.Dequeue();
                 isAbleToGoNext = false; // 다음 문장으로 넘어갈 수 없도록 설정
+                uIManager.IsReadyToSkip = true;
 
+                // NPC 감정 표현 실행 (예: 애니메이션, 표정 변화 등)
                 ChatMessage message = new ChatMessage { Content = sentence };
                 npcRole.PlayEmotion(message);
 
-                yield return StartCoroutine(uIManager.ShowLine(uIManager.GetNPCAnswer(), sentence)); // 텍스트 표시 코루틴 실행
+                // UI에서 텍스트를 한 글자씩 출력하는 코루틴 실행
+                yield return StartCoroutine(uIManager.ShowLine(uIManager.GetNPCAnswer(), sentence));
 
-                // 마우스 클릭을 기다리기 전에 다음 문장으로 넘어갈 수 있도록 대기
+                // 다음 문장으로 넘어가기 전에 사용자의 입력을 기다림
                 yield return new WaitUntil(() => isAbleToGoNext);
 
+                // 대사 큐에 문장이 남아 있고, 다음 문장으로 넘어갈 수 있는 상태라면 실행
                 if (sentencesQueue.Count > 0 && isAbleToGoNext)
                 {
+                    // 마우스 클릭 / 스페이스 바 / 엔터 키 입력을 기다림
                     yield return new WaitUntil(() => Input.GetMouseButtonDown(0)
                     || Input.GetKeyDown(KeyCode.Space)
-                    || Input.GetKeyDown(KeyCode.Return)); // 마우스 클릭 / 엔터키 / 스페이스 바 입력 대기
+                    || Input.GetKeyDown(KeyCode.Return));
+
+                    // 대사 스킵 여부를 변경 (사용자가 다음 문장을 빠르게 넘길 수 있도록 설정)
                     uIManager.ChangeIsSkipping(true);
                 }
             }
-            while (sentencesQueue.Count > 0);
+            while (sentencesQueue.Count > 0); // 모든 문장을 출력할 때까지 반복
         }
 
+        uIManager.IsReadyToSkip = false;
+
+        // 대화가 끝났으므로 "대화 종료" 버튼을 활성화
         uIManager.SetActiveEndConversationButton(true);
+
+        // 플레이어가 질문 입력 필드를 다시 사용할 수 있도록 설정
         uIManager.SetInteractableAskField(true);
+
+        // 대사 스킵 가능 여부를 다시 설정
         uIManager.ChangeIsSkipping(true);
+
+        // 플레이어가 질문을 입력할 수 있도록 입력 필드에 포커스
         uIManager.FocusOnAskField();
-        displayCoroutine = null; // 코루틴이 끝나면 변수 초기화                 
+
+        // 현재 실행 중인 코루틴을 초기화하여 다음 실행을 준비
+        displayCoroutine = null;
     }
 
     public void IsAbleToGoNextTrue()
