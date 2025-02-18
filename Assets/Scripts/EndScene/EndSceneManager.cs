@@ -1,7 +1,4 @@
-using JetBrains.Annotations;
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,7 +15,7 @@ public class EndSceneManager : MonoBehaviour
     public GameObject mouseDescription;
     public Image screen;
     public Image chatBox;
-    public Text endText;
+    public Text finalDialogueText;
     public Text endingCredit;
     public Text finalStatement;
     public Text selectNPC;
@@ -43,6 +40,9 @@ public class EndSceneManager : MonoBehaviour
 
     private AudioClip[][] allClips;
     private GameObject hoveredObject = null;
+
+
+    private bool isEndingStarted = false; // 중복 실행 방지용 플래그
 
     // Start is called before the first frame update
     void Start()
@@ -240,39 +240,45 @@ public class EndSceneManager : MonoBehaviour
         StartCoroutine(ShowLine(finalStatement, allFinalStatements[npcIndex][index++ % 3], NPCTransform[npcIndex].parent.GetComponent<EndNPC>()));
     }
 
-
     public void OButtton()
     {
+        if (isEndingStarted) return; // 이미 실행 중이라면 return
+        isEndingStarted = true; // 실행 시작 플래그 설정
+
         StartCoroutine(SoundManager.Instance.FadeOutAndChangeClip(SoundManager.Instance.GetEndingBGM()));
         StartCoroutine(OButtonCourutine(GetEnd()));
     }
 
     public IEnumerator OButtonCourutine(string[] endStrings)
     {
-        int tmpIndex = 0;
+        int tmpIndex = 0; // 오디오 클립의 인덱스를 추적하는 변수
+
+        // 화면을 페이드 인하여 엔딩 화면으로 전환 (2초 동안)
         yield return StartCoroutine(FadeUtility.Instance.FadeIn(screen, 2f));
 
+        // 엔딩 텍스트 배열을 하나씩 출력
         foreach (string str in endStrings)
         {
-            endText.text = "";
+            finalDialogueText.text = ""; // 기존 텍스트 초기화
 
-            // str이 \"로 시작하는지 확인
+            // 대사가 "로 시작하는 경우 (NPC가 말하는 부분)
             if (str.StartsWith("\""))
             {
-                yield return StartCoroutine(PlayNPCSound(endText, str, allClips[npcNum][tmpIndex++], 0.1f));
+                // 해당 NPC의 음성을 재생하면서 대사 출력 (글자 하나씩 표시)
+                yield return StartCoroutine(PlayNPCSound(finalDialogueText, str, allClips[npcNum][tmpIndex++], 0.1f));
             }
             else
             {
-                yield return StartCoroutine(ShowEnding(endText, str, 0.05f));
+                // 일반적인 내레이션 텍스트 출력 (글자 하나씩 표시)
+                yield return StartCoroutine(ShowEnding(finalDialogueText, str, 0.05f));
             }
-            
-            yield return new WaitForSeconds(2.5f);
+
+            yield return new WaitForSeconds(2.5f); // 각 대사 출력 후 2.5초 대기
         }
 
-        endText.text = "";
+        finalDialogueText.text = ""; // 마지막 텍스트 초기화
 
-        StopCoroutine(OButtonCourutine(GetEnd()));
-
+        // 엔딩 크레딧 출력 코루틴 실행
         StartCoroutine(ShowEndingCredit());
     }
 
@@ -403,27 +409,15 @@ public class EndSceneManager : MonoBehaviour
 
     private IEnumerator ShowEndingCredit()
     {
-        RectTransform rectTransform = endingCredit.GetComponent<RectTransform>();
-        Vector3 startPosition = rectTransform.localPosition;
-        Vector3 endPosition = startPosition + new Vector3(0, moveDistance, 0);
-        float elapsedTime = 0f;
-
-        while (elapsedTime < duration)
-        {
-            rectTransform.localPosition = Vector3.Lerp(startPosition, endPosition, elapsedTime / duration);
-            elapsedTime += Time.deltaTime;
-            yield return null;
-        }
-
-        rectTransform.localPosition = endPosition; // 정확한 끝 위치로 설정
-
+        yield return new WaitForSeconds(2f); // 2초 대기
+        StartCoroutine(FadeUtility.Instance.FadeIn(endingCredit.GetComponent<Graphic>(), 3f));
+        yield return new WaitForSeconds(10f); // 10초 대기                
         StartCoroutine(EndGameAfterDelay());
     }
 
     private IEnumerator EndGameAfterDelay()
     {
-        FadeUtility.Instance.FadeOut(endingCredit, 2f);
-        yield return new WaitForSeconds(10f); // 10초 대기                
+        yield return FadeUtility.Instance.FadeOut(endingCredit, 3f);        
         Application.Quit(); // 빌드된 게임 종료
     }
 }
