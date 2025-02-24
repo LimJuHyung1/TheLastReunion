@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,20 +15,23 @@ public class EndSceneManager : MonoBehaviour
     public GameObject ox;
     public GameObject mouseDescription;
     public Image screen;
-    public Image chatBox;
+    public Image chatBox;    
     public Text finalDialogueText;
     public Text endingCredit;
     public Text finalStatement;
     public Text selectNPC;
     public Transform[] NPCTransform;        // 3명의 NPC
 
+    public GameObject _2x_Parent;       // 2배속 클래스
 
-    private bool isClicked = false;     // npc가 클릭되었는가
-    private int index = 0;              // 최후의 진술 인덱스
+    private bool isClicked = false;         // npc가 클릭되었는가
+    private bool isReadyToClick = false;    // 엔드 씬 클릭 버그 방지
+    private int index = 0;                  // 최후의 진술 인덱스
     private int npcNum = -1;
 
     private float moveDistance = Screen.height * 1.6f;
     private float duration = 15f; // 이동하는 데 걸리는 시간
+    private _2x _2xClass;
 
     private string[] nasonFinalStatement;
     private string[] jennyFinalStatement;
@@ -48,11 +52,12 @@ public class EndSceneManager : MonoBehaviour
     void Start()
     {
         screen.gameObject.SetActive(true);
-        StartCoroutine(FadeUtility.Instance.FadeOut(screen, 2f));        
+        StartCoroutine(FadeUtility.Instance.FadeOut(screen, 2f));
 
         selectNPC.gameObject.SetActive(false);
         ox.gameObject.SetActive(false);
         chatBox.gameObject.SetActive(false);
+        _2xClass = new _2x(_2x_Parent);
 
         StartCoroutine(SoundManager.Instance.FadeOutAndChangeClip(SoundManager.Instance.GetSelectCriminalBGM()));
 
@@ -60,76 +65,80 @@ public class EndSceneManager : MonoBehaviour
         SetEndText();
         SetClips();
 
-        StartCoroutine(FadeUtility.Instance.FadeIn(selectNPC, 1));
+        StartCoroutine(WaitClick(false, screen, 2f));
     }
 
     void Update()
     {
-        // 마우스 위치에서 레이 생성
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-
-        // 마우스가 npcLayer에 해당하는 오브젝트 위에 있는지 확인
-        if (Physics.Raycast(ray, out hit, Mathf.Infinity, npcLayer))
+        if (isReadyToClick)
         {
-            GameObject currentHoveredObject = hit.collider.gameObject;
+            // 마우스 위치에서 레이 생성
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
 
-            // Hover 상태 처리
-            if (hoveredObject != currentHoveredObject && !isClicked)
+            // 마우스가 npcLayer에 해당하는 오브젝트 위에 있는지 확인
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, npcLayer))
             {
-                hoveredObject = currentHoveredObject;
-                mouseDescription.gameObject.SetActive(true);
+                GameObject currentHoveredObject = hit.collider.gameObject;
 
-                switch (hoveredObject.name)
+                // Hover 상태 처리
+                if (hoveredObject != currentHoveredObject && !isClicked)
                 {
-                    case "Nason":
-                        mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "네이슨";
-                        break;
-                    case "Jenny":                        
-                        mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "제니";
-                        break;
-                    case "Mina":                        
-                        mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "미나";
-                        break;
+                    hoveredObject = currentHoveredObject;
+                    mouseDescription.gameObject.SetActive(true);
+
+                    switch (hoveredObject.name)
+                    {
+                        case "Nason":
+                            mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "네이슨";
+                            break;
+                        case "Jenny":
+                            mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "제니";
+                            break;
+                        case "Mina":
+                            mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "미나";
+                            break;
+                    }
+                }
+
+                // 클릭했을 때 실행
+                if (Input.GetMouseButtonDown(0) && !isClicked)
+                {
+                    int tmpIndex = -1;
+                    isClicked = true;
+
+                    switch (hoveredObject.name)
+                    {
+                        case "Nason":
+                            tmpIndex = 2;
+                            chatBox.transform.GetChild(1).GetComponent<Text>().text = "네이슨";
+                            break;
+                        case "Jenny":
+                            tmpIndex = 1;
+                            chatBox.transform.GetChild(1).GetComponent<Text>().text = "제니";
+                            break;
+                        case "Mina":
+                            tmpIndex = 0;
+                            chatBox.transform.GetChild(1).GetComponent<Text>().text = "미나";
+                            break;
+                    }
+
+                    mouseDescription.gameObject.SetActive(false);
+                    mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "";
+
+                    SelectCriminal(tmpIndex);
                 }
             }
-
-            // 클릭했을 때 실행
-            if (Input.GetMouseButtonDown(0) && !isClicked)
+            else
             {
-                int tmpIndex = -1;
-                isClicked = true;
-
-                switch (hoveredObject.name)
-                {
-                    case "Nason":
-                        tmpIndex = 2;
-                        chatBox.transform.GetChild(1).GetComponent<Text>().text = "네이슨";
-                        break;
-                    case "Jenny":
-                        tmpIndex = 1;
-                        chatBox.transform.GetChild(1).GetComponent<Text>().text = "제니";
-                        break;
-                    case "Mina":
-                        tmpIndex = 0;
-                        chatBox.transform.GetChild(1).GetComponent<Text>().text = "미나";
-                        break;
-                }
-
+                // 마우스가 NPC에서 벗어났을 때 hoveredObject 초기화
+                hoveredObject = null;
                 mouseDescription.gameObject.SetActive(false);
                 mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "";
-
-                SelectCriminal(tmpIndex);
             }
         }
-        else
-        {
-            // 마우스가 NPC에서 벗어났을 때 hoveredObject 초기화
-            hoveredObject = null;
-            mouseDescription.gameObject.SetActive(false);
-            mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "";
-        }
     }
+
     /// <summary>
     /// 최후의 진술 대사 설정
     /// </summary>
@@ -246,7 +255,7 @@ public class EndSceneManager : MonoBehaviour
         isEndingStarted = true; // 실행 시작 플래그 설정
 
         StartCoroutine(SoundManager.Instance.FadeOutAndChangeClip(SoundManager.Instance.GetEndingBGM()));
-        StartCoroutine(OButtonCourutine(GetEnd()));
+        StartCoroutine(OButtonCourutine(GetEnd()));        
     }
 
     public IEnumerator OButtonCourutine(string[] endStrings)
@@ -255,6 +264,8 @@ public class EndSceneManager : MonoBehaviour
 
         // 화면을 페이드 인하여 엔딩 화면으로 전환 (2초 동안)
         yield return StartCoroutine(FadeUtility.Instance.FadeIn(screen, 2f));
+
+        _2xClass.FadeIn2xButton();
 
         // 엔딩 텍스트 배열을 하나씩 출력
         foreach (string str in endStrings)
@@ -301,7 +312,7 @@ public class EndSceneManager : MonoBehaviour
 
     public void XButton()
     {
-        cam.FocusAndReturnToOriginal();
+        isReadyToClick = false;        
 
         if (chatBox.gameObject.activeSelf)
         {
@@ -314,11 +325,26 @@ public class EndSceneManager : MonoBehaviour
             StartCoroutine(FadeUtility.Instance.FadeOut(ox.transform.GetChild(1).GetComponent<Graphic>(), 1f));            
             ox.gameObject.SetActive(false);
         }
-
+        
         isClicked = false;
-        StartCoroutine(FadeUtility.Instance.FadeIn(selectNPC, 1));
-    }
 
+        StartCoroutine(WaitClick(true, selectNPC, 1f));
+    }
+    
+    IEnumerator WaitClick(bool fadeIn, Graphic target, float duration)
+    {        
+        if (fadeIn)
+        {
+            cam.FocusAndReturnToOriginal();
+            yield return StartCoroutine(FadeUtility.Instance.FadeIn(target, duration)); // FadeIn 실행
+        }
+        else
+        {            
+            yield return StartCoroutine(FadeUtility.Instance.FadeOut(target, duration)); // FadeOut 실행
+        }
+
+        isReadyToClick = true;
+    }
 
 
 
@@ -409,6 +435,7 @@ public class EndSceneManager : MonoBehaviour
 
     private IEnumerator ShowEndingCredit()
     {
+        _2xClass.Disable2xClass();
         yield return new WaitForSeconds(2f); // 2초 대기
         StartCoroutine(FadeUtility.Instance.FadeIn(endingCredit.GetComponent<Graphic>(), 3f));
         yield return new WaitForSeconds(10f); // 10초 대기                
@@ -419,5 +446,92 @@ public class EndSceneManager : MonoBehaviour
     {
         yield return FadeUtility.Instance.FadeOut(endingCredit, 3f);        
         Application.Quit(); // 빌드된 게임 종료
+    }
+
+    /// <summary>
+    /// 2배속 버튼 OnClick 등록 이벤트
+    /// </summary>
+    public void OnClick2x()
+    {
+        _2xClass.OnClick2xButton();
+    }
+}
+
+/// <summary>
+/// 2x 속도를 조절하는 클래스
+/// </summary>
+class _2x : MonoBehaviour
+{
+    private bool is2x; // 현재 2x 속도가 활성화되어 있는지 여부
+    private float originTimeScale = 1f; // 기본 시간 속도
+    private float _2xTimeScale = 1.75f; // 2배속 시 적용할 시간 속도
+    private float originAlpha = 0.3f;
+    private float maxAlpha = 1f;
+
+
+    private GameObject _2x_Parent; // 2x 부모 오브젝트
+    private GameObject circle; // 2x 모드 활성화 시 애니메이션 오브젝트
+    private Button _2x_Button; // 2x 모드를 토글하는 버튼
+
+    /// <summary>
+    /// 생성자: 2x 모드의 UI 요소를 초기화
+    /// </summary>
+    /// <param name="parent">2x 모드 UI의 부모 오브젝트</param>
+    public _2x(GameObject parent)
+    {
+        _2x_Parent = parent;
+        circle = parent.transform.GetChild(0).gameObject; // 첫 번째 자식 오브젝트 (원형 UI)
+        _2x_Button = parent.transform.GetChild(1).GetComponent<Button>(); // 두 번째 자식 오브젝트 (버튼)
+
+        is2x = false; // 기본적으로 2x 모드는 비활성화 상태
+    }
+
+    /// <summary>
+    /// 2x 버튼을 페이드 인하여 활성화
+    /// </summary>
+    public void FadeIn2xButton()
+    {
+        _2x_Parent.gameObject.SetActive(true);  // 2x UI 부모 오브젝트 활성화
+        circle.SetActive(false);                // 원형 UI 비활성화
+        _2x_Button.gameObject.SetActive(true);  // 2x 버튼 활성화
+    }
+
+    /// <summary>
+    /// 2x 버튼 클릭 시 실행 (2x 모드 On/Off)
+    /// </summary>
+    public void OnClick2xButton()
+    {
+        is2x = !is2x; // 현재 상태를 반전 (true ↔ false)
+
+        // 시간 속도 변경: 2x 모드 활성화 시 1.75배, 비활성화 시 기본 속도
+        Time.timeScale = is2x ? _2xTimeScale : originTimeScale;
+
+        // 원형 UI를 2x 활성 상태에 따라 표시 또는 숨김
+        circle.gameObject.SetActive(is2x);
+
+        // 버튼의 알파값을 조절하여 활성화 상태를 반영
+        SetButtonAlpha(_2x_Button.GetComponent<Image>(), is2x ? maxAlpha : originAlpha);
+    }
+
+    /// <summary>
+    /// 버튼의 알파 값을 변경하여 투명도 조절
+    /// </summary>
+    /// <param name="_2x_Button_Image">알파 값을 변경할 버튼의 이미지</param>
+    /// <param name="alpha">설정할 알파 값 (0 ~ 1)</param>
+    private void SetButtonAlpha(Image _2x_Button_Image, float alpha)
+    {
+        Color newColor = _2x_Button_Image.color;
+        newColor.a = alpha; // 알파 값 변경
+        _2x_Button_Image.color = newColor;
+    }
+
+    /// <summary>
+    /// 2x 모드를 비활성화하고 원래 속도로 복구
+    /// </summary>
+    public void Disable2xClass()
+    {
+        Time.timeScale = originTimeScale; // 시간 속도를 기본 값으로 변경
+        is2x = false; // 2x 모드 비활성화
+        _2x_Parent.gameObject.SetActive(false); // 2x UI 전체 비활성화
     }
 }

@@ -15,7 +15,7 @@ public class LogManager : MonoBehaviour
     [SerializeField] ScrollRect[] npcLogScrollRects;
     [SerializeField] Button exitLogButton;
 
-    float space = 80f;
+    float space = 80f; // 대화 내용 간 간격
 
     [SerializeField] GameObject log; // Resources 폴더에 존재
     List<RectTransform> nasonLogs = new List<RectTransform>();
@@ -183,7 +183,7 @@ public class LogManager : MonoBehaviour
 
     void UpdateLogPositions(List<RectTransform> logs, ScrollRect scrollRect)
     {
-        float y = 50f;        
+        float y = 200f;        
 
         for (int i = 0; i < logs.Count; i++)
         {

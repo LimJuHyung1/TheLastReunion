@@ -17,10 +17,10 @@ public class TutorialManager : MonoBehaviour
     public Player player;
     public Timer timer;
     public UIManager uIManager;
-    
+
+    int index = 0;
     bool isPlayingTutorial = true;
-    [SerializeField] Image[] tutorialPages;
-    [SerializeField] int index = 0;
+    Image[] tutorialPages;    
 
 
     // Start is called before the first frame update
@@ -39,15 +39,13 @@ public class TutorialManager : MonoBehaviour
     {
         if (tutorialPage != null)
         {
-            int index = 0;
-            foreach (Transform page in tutorialPage.transform)
+            int i = 0;
+            tutorialPages = new Image[tutorialPage.transform.childCount - 3];            
+
+            while (i < tutorialPage.transform.childCount - 3)
             {
-                if(page.GetComponent<Button>() == null)
-                {
-                    tutorialPages[index] = page.GetComponent<Image>();
-                    index++;
-                }                    
-            }
+                tutorialPages[i++] = tutorialPage.transform.GetChild(i).GetComponent<Image>();               
+            }            
         }
     }
 
@@ -166,12 +164,5 @@ public class TutorialManager : MonoBehaviour
         cameraManager.ChangeCam();
         index = 0;
         yield return null;
-    }
-
-    //-------------------------------------------------------------//
-
-    public bool GetIsPlayingTutorial()
-    {
-        return isPlayingTutorial;
     }
 }
