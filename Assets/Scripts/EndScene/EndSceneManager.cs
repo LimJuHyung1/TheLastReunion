@@ -54,7 +54,7 @@ public class EndSceneManager : MonoBehaviour
         screen.gameObject.SetActive(true);
         StartCoroutine(FadeUtility.Instance.FadeOut(screen, 2f));
 
-        selectNPC.gameObject.SetActive(false);
+        selectNPC.gameObject.SetActive(true);
         ox.gameObject.SetActive(false);
         chatBox.gameObject.SetActive(false);
         _2xClass = new _2x(_2x_Parent);

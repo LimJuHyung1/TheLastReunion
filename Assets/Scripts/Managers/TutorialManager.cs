@@ -44,7 +44,8 @@ public class TutorialManager : MonoBehaviour
 
             while (i < tutorialPage.transform.childCount - 3)
             {
-                tutorialPages[i++] = tutorialPage.transform.GetChild(i).GetComponent<Image>();               
+                tutorialPages[i] = tutorialPage.transform.GetChild(i).GetComponent<Image>();
+                i++;
             }            
         }
     }
@@ -108,7 +109,7 @@ public class TutorialManager : MonoBehaviour
         {
             nextBtn.gameObject.SetActive(false);
             exitTutorialBtn.gameObject.SetActive(true);
-        }            
+        }
 
         tutorialPages[index].gameObject.SetActive(false); // 현재 페이지 비활성화
         index++;

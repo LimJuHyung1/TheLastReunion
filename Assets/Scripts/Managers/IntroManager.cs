@@ -2,7 +2,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using System.Runtime.CompilerServices;
 
 public class IntroManager : MonoBehaviour
 {
@@ -42,6 +41,7 @@ public class IntroManager : MonoBehaviour
     };
 
     string officerResponse2 = "Unit 42, acknowledged. En route.";
+
 
     // Start is called before the first frame update
     void Start()
