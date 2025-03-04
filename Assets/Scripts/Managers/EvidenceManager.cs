@@ -6,38 +6,52 @@ using static Evidence;
 
 
 public class EvidenceManager : MonoBehaviour
-{    
-    public ScrollRect evidenceScrollRect;
-    public SpawnManager spawnManager;
-    public Image evidencePage;
+{
+    [Header("Evidence UI")]
+    public ScrollRect evidenceScrollRect;   // 증거 버튼을 표시하는 스크롤 UI
+    public Image evidencePage;              // 증거 소개 페이지 UI
 
+    [Header("Managers")]
+    public SpawnManager spawnManager;
+        
     GameObject evidenceButton; // Resources 폴더에 존재
     GameObject evidenceIntroductionPage; // Resources 폴더에 존재
-    [SerializeField] private List<RectTransform> findedEvidenceRectTransformList = new List<RectTransform>();
-    [SerializeField] private List<Image> evidenceIntroductionList = new List<Image>();
-    [SerializeField] private List<Evidence> evidences = new List<Evidence>();
-    [SerializeField] private Queue<Evidence> evidenceQueue = new Queue<Evidence>();
+
+    [SerializeField] // 발견한 증거 버튼 위치 리스트
+    private List<RectTransform> findedEvidenceRectTransformList = new List<RectTransform>();
+    [SerializeField] // 증거 소개 페이지 리스트
+    private List<Image> evidenceIntroductionList = new List<Image>();
+    [SerializeField] // 증거 리스트
+    private List<Evidence> evidences = new List<Evidence>();
+    [SerializeField] // 증거 초기화 대기 큐
+    private Queue<Evidence> evidenceQueue = new Queue<Evidence>();
 
     private NPCRole[] npcRole = new NPCRole[3];
 
-    private const int totalEvidenceLength = 11;      // 증거 개수
-    private int currentEvidenceLength = 0;
-    private float space = 40f;
+    private const int totalEvidenceLength = 11;         // 증거 개수
+    private int currentEvidenceLength = 0;              // 현재 발견한 증거 개수
+    private float space = 40f;                          // 버튼 간 간격
 
     void Start()
-    {        
+    {
+        // Resources 폴더에서 프리팹 불러오기
         evidenceButton = Resources.Load<GameObject>("EvidenceButton");
         evidenceIntroductionPage = Resources.Load<GameObject>("EvidenceIntroductionPage");
     }
 
     //----------------------------------------------------------//
 
+    /// <summary>
+    /// NPC 정보를 받아 저장
+    /// </summary>
     public void ReceiveNPCRole(NPCRole[] npcs)
     {
         npcRole = npcs;
     }
 
-    // 증거 초기화
+    /// <summary>
+    /// 증거 초기화
+    /// </summary>
     public void SetEvidence(Evidence evidence)
     {
         evidenceQueue.Enqueue(evidence);
@@ -49,6 +63,9 @@ public class EvidenceManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 큐에 있는 모든 증거를 초기화하는 메서드
+    /// </summary>
     private void DequeueAllEvidence()
     {
         // 큐에 남아 있는 모든 증거 초기화
@@ -58,6 +75,9 @@ public class EvidenceManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 증거 객체를 초기화하는 메서드
+    /// </summary>
     private void InitializeEvidence(Evidence evidence)
     {
         EvidenceInfo evidenceInfo = GetEvidenceByName(evidence.GetName());
@@ -75,8 +95,9 @@ public class EvidenceManager : MonoBehaviour
         }
     }
 
-
-
+    /// <summary>
+    /// 증거를 찾았을 때 호출되는 메서드
+    /// </summary>
     public void FindEvidence(Evidence evidence)
     {
         SendEvidenceInfo(evidence);
@@ -86,6 +107,9 @@ public class EvidenceManager : MonoBehaviour
         SetLayerRecursively(evidence.gameObject, targetLayer);
     }
 
+    /// <summary>
+    /// 증거 페이지를 업데이트하는 메서드
+    /// </summary>
     private void UpdateEvidencePage(Evidence evidence)
     {
         // 증거 버튼 생성 및 설정
@@ -113,12 +137,17 @@ public class EvidenceManager : MonoBehaviour
         UpdateEvidenceButtonPositions(findedEvidenceRectTransformList, evidenceScrollRect);
     }
 
-    // 텍스트 설정을 반복적으로 처리하는 헬퍼 함수
+    /// <summary>
+    /// 증거 UI의 텍스트 설정 헬퍼 메서드
+    /// </summary>
     private void SetTextInChild(Transform childTransform, string text)
     {
         childTransform.GetComponent<Text>().text = text;
     }
 
+    /// <summary>
+    /// 증거 UI의 이미지 설정 헬퍼 메서드
+    /// </summary>
     private void SetRawImage(Transform childTransform, RenderTexture evidenceRenderTexture)
     {
         if (evidenceRenderTexture != null)
@@ -128,6 +157,9 @@ public class EvidenceManager : MonoBehaviour
         else Debug.Log("texture 없음");
     }
 
+    /// <summary>
+    /// 모든 증거 소개 페이지 비활성화
+    /// </summary>
     void SetActiveFalseAllIntroductions()
     {
         foreach (var page in evidenceIntroductionList)
@@ -137,6 +169,9 @@ public class EvidenceManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 증거 버튼들의 위치를 업데이트하는 메서드
+    /// </summary>
     void UpdateEvidenceButtonPositions(List<RectTransform> foundEvidenceList, ScrollRect scrollRect)
     {
         float y = 30f;
@@ -151,7 +186,9 @@ public class EvidenceManager : MonoBehaviour
     }
 
 
-    // 재귀적으로 레이어를 설정하는 함수
+    /// <summary>
+    /// 객체 및 자식 객체들의 레이어를 변경하는 재귀 함수
+    /// </summary>
     void SetLayerRecursively(GameObject obj, int newLayer)
     {
         obj.layer = newLayer;
@@ -164,7 +201,9 @@ public class EvidenceManager : MonoBehaviour
 
     //----------------------------------------------------------//
 
-    // npc들에게 증거에 대한 정보 전달
+    /// <summary>
+    /// NPC에게 증거 정보를 전달하는 메서드
+    /// </summary>
     public void SendEvidenceInfo(Evidence evidence)
     {
         if (JsonManager.evidenceInfoList != null)

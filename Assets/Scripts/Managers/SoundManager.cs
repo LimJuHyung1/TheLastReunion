@@ -1,31 +1,38 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 public class SoundManager : MonoBehaviour
 {
-    public static SoundManager Instance { get; private set; }
+    public static SoundManager Instance { get; private set; }   // 싱글톤 패턴 적용
 
-    public AudioClip typingClip;
+    [Header("Sounds")]
+    public AudioClip typingClip;            // 타이핑 효과음
     public AudioClip[] endBGM;              // 0 - 범인 고를 때  // 1 - 범인 고른 후
-    public AudioClip[] footStepSounds;
-    public AudioClip[] buttonSounds;        // 0 - 나가기  // 1 - 메뉴   // 2 - 화살표  // 3 - 프로필
+    public AudioClip[] footStepSounds;      // 발소리 효과음
+    public AudioClip[] buttonSounds;        // 버튼 클릭 효과음 (0: 나가기, 1: 메뉴, 2: 화살표, 3: 프로필)
+
+    [Header("Buttons")]
     public Button[] closeButtons;
     public Button[] menuButtons;
     public Button[] arrowButtons;
     public Button[] profileButtons;
-    public StepCycle stepCycleManager;
 
-    public LayerMask groundLayer; // 땅으로 인식할 레이어
+    [Header("Footstep SoundManager")]
+    public StepCycle stepCycleManager;       // 발소리 주기를 관리하는 클래스
 
-    private AudioSource[] audioSources; // 0 - 발소리  // 1 - 타이핑 소리   // 2 - BGM  // 3 - 버튼 클릭 소리
+    public LayerMask groundLayer;            // 땅으로 인식할 레이어
+
+    private AudioSource[] audioSources;      // 0 - 발소리  // 1 - 타이핑 소리   // 2 - BGM  // 3 - 버튼 클릭 소리
     private CharacterController characterController;
     private GameObject player;
 
     private float fadeOutDuration = 1f; // 볼륨 감소 시간
     private float fadeInDuration = 1f;  // 볼륨 증가 시간
     private float targetVolume = 1f;    // 최종 목표 볼륨 값
+
+    private Dictionary<string, AudioClip> footstepMap;  // 발소리 사운드 매핑
 
     void Awake()
     {
@@ -49,69 +56,80 @@ public class SoundManager : MonoBehaviour
 
         audioSources[0].loop = false;
 
-        // audioSources[2].Play();
-        SetButtonsSound();
+        SetButtonsSound();   // 버튼 사운드 설정
+
+        // 발소리 맵핑 초기화
+        footstepMap = new Dictionary<string, AudioClip>
+        {
+            { "Ground", footStepSounds[0] },
+            { "Tile", footStepSounds[1] },
+            { "House", footStepSounds[2] }
+        };
 
         stepCycleManager.SetFootStepSound(GetComponent<AudioSource>(), footStepSounds[0]);
+
         SetNullAudioMixerGroup();
     }
 
+    /// <summary>
+    /// 오디오 믹서를 null로 설정하여 기본 출력을 사용하도록 변경
+    /// </summary>
     public void SetNullAudioMixerGroup()
     {
         audioSources[0].outputAudioMixerGroup = null;
     }
 
+    /// <summary>
+    /// 발소리를 재생하는 메서드
+    /// </summary>
     void PlayFootstep(AudioClip audioClip)
     {
-        if (audioSources[0].clip != null)
-        {
-            audioSources[0].clip = audioClip;
-            audioSources[0].Play();
-        }
+        audioSources[0].clip = audioClip;
+        audioSources[0].Play();
     }
 
     /// <summary>
-    /// Player 스크립트에서 호출
+    /// 플레이어의 현재 바닥 레이어에 따라 발소리를 재생
     /// </summary>
-    /// <param name="layer"></param>
+    /// <param 접촉중인_레이어="layer">플레이어가 서 있는 바닥의 레이어</param>
     public void PlayFootStepSound(string layer)
     {
         player = GameObject.Find("Player");
         characterController = player.GetComponent<CharacterController>();
 
-        switch (layer)
+        if (!footstepMap.TryGetValue(layer, out AudioClip clip))
         {
-            case "Ground":
-                stepCycleManager.ProgressStepCycle(characterController.velocity.magnitude, PlayFootstep, footStepSounds[0]);
-                break;
-            case "Tile":
-                stepCycleManager.ProgressStepCycle(characterController.velocity.magnitude, PlayFootstep, footStepSounds[1]);
-                break;
-            case "House":
-                stepCycleManager.ProgressStepCycle(characterController.velocity.magnitude, PlayFootstep, footStepSounds[2]);
-                break;
-
-            default:
-                stepCycleManager.ProgressStepCycle(characterController.velocity.magnitude, PlayFootstep, footStepSounds[1]);
-                break;
+            clip = footStepSounds[1]; // 기본값
         }
+
+        // 플레이어 속도에 맞춰 발소리 주기를 적용
+        stepCycleManager.ProgressStepCycle(characterController.velocity.magnitude, PlayFootstep, clip);
     }
 
     //-----------------------------------------------//
     // 타이핑 소리 관련 메서드
 
+    /// <summary>
+    /// 타이핑 효과음을 재생
+    /// </summary>
     public void PlayTextSound()
     {
         if (audioSources[1] != null)
             audioSources[1].Play();
     }
 
+    /// <summary>
+    /// 타이핑 효과음을 정지
+    /// </summary>
     public void StopTextSound()
     {
         if (audioSources[1] != null)
             audioSources[1].Stop();
     }
 
+    /// <summary>
+    /// 타이핑 효과음을 변경
+    /// </summary>
     public void SetTypingClip()
     {
         if (audioSources[1] != null)
@@ -126,15 +144,28 @@ public class SoundManager : MonoBehaviour
 
     //-----------------------------------------------//
 
+    /// <summary>
+    /// 버튼 클릭 사운드 설정
+    /// </summary>
     void SetButtonsSound()
     {
-        // 버튼 그룹과 사운드 인덱스를 매핑
-        AddButtonListeners(closeButtons, 0);
-        AddButtonListeners(menuButtons, 1);
-        AddButtonListeners(arrowButtons, 2);
-        AddButtonListeners(profileButtons, 3);
+        Dictionary<Button[], int> buttonMapping = new Dictionary<Button[], int>
+        {
+            { closeButtons, 0 },
+            { menuButtons, 1 },
+            { arrowButtons, 2 },
+            { profileButtons, 3 }
+        };
+
+        foreach (var entry in buttonMapping)
+        {
+            AddButtonListeners(entry.Key, entry.Value);
+        }
     }
 
+    /// <summary>
+    /// 버튼 클릭 시 사운드를 재생하도록 리스너 추가
+    /// </summary>
     void AddButtonListeners(Button[] buttons, int soundIndex)
     {
         foreach (Button button in buttons)
@@ -143,6 +174,9 @@ public class SoundManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 버튼 클릭 시 사운드 재생
+    /// </summary>
     void PlayButtonSound(int soundIndex)
     {
         audioSources[3].clip = buttonSounds[soundIndex];
@@ -151,38 +185,52 @@ public class SoundManager : MonoBehaviour
 
     //-----------------------------------------------//
 
+    /// <summary>
+    /// 범인 선택 씬 BGM 반환
+    /// </summary>
     public AudioClip GetSelectCriminalBGM()
     {
         return endBGM[0];
     }
 
+    /// <summary>
+    /// 엔딩 BGM 반환
+    /// </summary>
     public AudioClip GetEndingBGM()
     {
         return endBGM[1];
     }
 
+    /// <summary>
+    /// BGM을 서서히 줄인 후 변경하는 코루틴
+    /// </summary>
     public IEnumerator FadeOutAndChangeClip(AudioClip audio)
     {
-        // 1. 볼륨을 천천히 줄여 0으로 만들기
+        // 볼륨을 천천히 0으로 감소
         float startVolume = audioSources[2].volume;
-        for (float t = 0; t < fadeOutDuration; t += Time.deltaTime)
+        float t = 0f;
+
+        while (t < fadeOutDuration)
         {
+            t += Time.deltaTime;
             audioSources[2].volume = Mathf.Lerp(startVolume, 0, t / fadeOutDuration);
             yield return null;
         }
-        audioSources[2].volume = 0;
 
-        // 2. 오디오 클립 변경
+        audioSources[2].volume = 0; // 볼륨을 0으로 강제 설정
         audioSources[2].clip = audio;
         audioSources[2].Play();
 
-        // 3. 볼륨을 서서히 증가시켜 목표 볼륨으로 맞추기
-        for (float t = 0; t < fadeInDuration; t += Time.deltaTime)
+        t = 0f;
+        // 볼륨을 다시 목표 볼륨까지 증가
+        while (t < fadeInDuration)
         {
+            t += Time.deltaTime;
             audioSources[2].volume = Mathf.Lerp(0, targetVolume, t / fadeInDuration);
             yield return null;
         }
-        audioSources[2].volume = targetVolume;
+
+        audioSources[2].volume = targetVolume; // 목표 볼륨 설정
     }
 }
 
