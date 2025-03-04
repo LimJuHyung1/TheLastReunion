@@ -5,50 +5,67 @@ using System.Text;
 
 public static class EncryptionHelper
 {
-    private static readonly string encryptionKey = "My16CharKey12345"; // 16, 24, 32글자 길이의 키 사용 (AES-256)
+    // 안전한 32바이트 (256비트) 암호화 키 생성
+    private static readonly byte[] encryptionKey = CreateEncryptionKey("YourSecretKey1234");
 
-    // 문자열을 AES로 암호화
+    // AES 암호화
     public static string Encrypt(string plainText)
     {
-        byte[] keyBytes = Encoding.UTF8.GetBytes(encryptionKey);
         using (Aes aes = Aes.Create())
         {
-            aes.Key = keyBytes;
-            aes.IV = new byte[16]; // 초기화 벡터 (IV)를 0으로 초기화 (보안 강화 시에는 난수 생성 사용)
+            aes.Key = encryptionKey;
+            aes.GenerateIV(); // 16바이트 IV 자동 생성
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
 
-            using (MemoryStream memoryStream = new MemoryStream())
+            byte[] iv = aes.IV;
+
+            using (MemoryStream ms = new MemoryStream())
             {
-                using (CryptoStream cryptoStream = new CryptoStream(memoryStream, aes.CreateEncryptor(), CryptoStreamMode.Write))
+                ms.Write(iv, 0, iv.Length);
+                using (ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, iv))
+                using (CryptoStream cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+                using (StreamWriter sw = new StreamWriter(cs))
                 {
-                    byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
-                    cryptoStream.Write(plainBytes, 0, plainBytes.Length);
-                    cryptoStream.FlushFinalBlock();
-
-                    return Convert.ToBase64String(memoryStream.ToArray());
+                    sw.Write(plainText);
                 }
+                return Convert.ToBase64String(ms.ToArray());
             }
         }
     }
 
-    // 암호화된 문자열을 AES로 복호화
+    // AES 복호화
     public static string Decrypt(string encryptedText)
     {
-        byte[] keyBytes = Encoding.UTF8.GetBytes(encryptionKey);
+        byte[] fullCipher = Convert.FromBase64String(encryptedText);
         using (Aes aes = Aes.Create())
         {
-            aes.Key = keyBytes;
-            aes.IV = new byte[16];
+            aes.Key = encryptionKey;
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
 
-            using (MemoryStream memoryStream = new MemoryStream(Convert.FromBase64String(encryptedText)))
+            byte[] iv = new byte[16];
+            byte[] cipherText = new byte[fullCipher.Length - iv.Length];
+
+            Array.Copy(fullCipher, iv, iv.Length);
+            Array.Copy(fullCipher, iv.Length, cipherText, 0, cipherText.Length);
+
+            using (ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, iv))
+            using (MemoryStream ms = new MemoryStream(cipherText))
+            using (CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+            using (StreamReader sr = new StreamReader(cs))
             {
-                using (CryptoStream cryptoStream = new CryptoStream(memoryStream, aes.CreateDecryptor(), CryptoStreamMode.Read))
-                {
-                    byte[] decryptedBytes = new byte[memoryStream.Length];
-                    int bytesRead = cryptoStream.Read(decryptedBytes, 0, decryptedBytes.Length);
-
-                    return Encoding.UTF8.GetString(decryptedBytes, 0, bytesRead);
-                }
+                return sr.ReadToEnd();
             }
+        }
+    }
+
+    // 문자열을 32바이트 AES 키로 변환하는 메서드
+    private static byte[] CreateEncryptionKey(string key)
+    {
+        using (SHA256 sha256 = SHA256.Create())
+        {
+            return sha256.ComputeHash(Encoding.UTF8.GetBytes(key));
         }
     }
 }

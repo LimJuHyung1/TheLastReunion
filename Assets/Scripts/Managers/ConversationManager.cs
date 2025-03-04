@@ -9,13 +9,16 @@ public class ConversationManager : MonoBehaviour
 {
     public class OnResponse : UnityEvent<string> { }
 
+    [Header("Dialogue Sounds")]
     public AudioClip[] typeSounds;
+
+    [Header("Player")]
     public GameObject player;
 
+    [Header("Managers")]
     public CameraManager cameraManager;
-    public LogManager logManager;
+    public GameManager gameManager;
     public SpawnManager spawnManager;
-    public UIManager uIManager;
 
     private bool isTalking = false;
     private bool isAbleToGoNext = false;
@@ -23,32 +26,62 @@ public class ConversationManager : MonoBehaviour
     private Coroutine displayCoroutine;
     private Queue<string> sentencesQueue = new Queue<string>();
 
-    [SerializeField] NPCRole npcRole;
+    private NPCRole npcRole;
+
+    // NPC 이름 매핑
+    private static readonly Dictionary<NPCRole.Character, string> npcNameMap = new Dictionary<NPCRole.Character, string>
+    {
+        { NPCRole.Character.Nason, "네이슨" },
+        { NPCRole.Character.Mina, "미나" },
+        { NPCRole.Character.Jenny, "제니" }
+    };
+
+    // NPC별 대사 소리 설정
+    private static readonly Dictionary<NPCRole.Character, AudioClip> npcAudioMap = new Dictionary<NPCRole.Character, AudioClip>();
+
+
+
+    void Awake()
+    {
+        // NPC별 대사 소리 설정
+        npcAudioMap[NPCRole.Character.Nason] = typeSounds[0];
+        npcAudioMap[NPCRole.Character.Mina] = typeSounds[1];
+        npcAudioMap[NPCRole.Character.Jenny] = typeSounds[2];
+    }
 
     // Start is called before the first frame update
     void Start()
     {
+        // 사운드 설정 초기화
         SoundManager.Instance.SetNullAudioMixerGroup();
     }
 
+
+
+
     /// <summary>
-    /// Player 스크립트에서 접촉 npc 반환 받음
-    /// </summary>
-    /// <param NPC Object="col"></param>    
+    /// Player 스크립트에서 현재 대화하는 NPC를 설정하는 메서드
+    /// </summary>    
     public void GetNPCRole(NPCRole npc)
     {
         npcRole = npc;
     }
 
+    /// <summary>
+    /// InputField에서 실행되는 이벤트 리스너 등록
+    /// </summary>
     public void AddListenersResponse()
     {
         if (npcRole != null)
         {
-            uIManager.OnEndEditAskField(npcRole.GetResponse);
-            uIManager.OnEndEditAskField(uIManager.SetNullInputField);
+            gameManager.uIManager.OnEndEditAskField(npcRole.GetResponse);
+            gameManager.uIManager.OnEndEditAskField(gameManager.uIManager.SetNullInputField);
         }
     }
 
+    /// <summary>
+    /// 참조중인 NPC 제거 (대화가 종료될 때 호출됨)
+    /// </summary>
     public void RemoveNPCRole()
     {
         npcRole = null;
@@ -56,124 +89,114 @@ public class ConversationManager : MonoBehaviour
 
     //-------------------------------------------------------------//
 
+    /// <summary>
+    /// NPC 이름을 UI에 표시
+    /// </summary>
     public void ShowName()
     {
-        if (npcRole != null)
+        // TryGetValue - 키가 존재하면 true, 그렇지 않으면 false 반환
+        // (out 키워드를 통해 key 값이 존재한다면 value 값이 반환됨)
+        if (npcRole != null && npcNameMap.TryGetValue(npcRole.currentCharacter, out string npcName))
         {
-            switch (npcRole.currentCharacter.ToString())
-            {
-                case "Nason":
-                    uIManager.ChangeNPCName("네이슨");
-                    break;
-                case "Mina":
-                    uIManager.ChangeNPCName("미나");
-                    break;
-                case "Jenny":
-                    uIManager.ChangeNPCName("제니");
-                    break;
-
-                default:
-                    npcRole.currentCharacter.ToString(npcRole.currentCharacter.ToString());
-                    break;
-            }
+            gameManager.uIManager.ChangeNPCName(npcName);
         }
         else
-            Debug.LogError("ShowName - npc가 없습니다!");
+        {
+            Debug.LogError("ShowName - NPC가 없거나 매핑되지 않았습니다!");
+        }
     }
 
+    /// <summary>
+    /// NPC의 답변을 받아 화면에 출력 (문장 단위로 나누어 대사 큐에 저장)
+    /// </summary>
     public void ShowAnswer(string answer)
     {
-        if (npcRole != null)
+        if (npcRole == null)
         {
-            logManager.AddLog(npcRole, uIManager.GetQuestion(), answer);
-            uIManager.SetInteractableAskField(false);
-            uIManager.SetActiveEndConversationButton(false);
-            SetAudio();
+            Debug.LogError("NPC가 없습니다!");
+            return;
+        }
 
-            sentencesQueue.Clear();
+        gameManager.logManager.AddLog(npcRole, gameManager.uIManager.GetQuestion(), answer);
+        gameManager.uIManager.SetInteractableAskField(false);
+        gameManager.uIManager.SetActiveEndConversationButton(false);
+        SetAudio();
 
-            // 정규식을 이용해 '.', '?', '!'로 분할하면서 "..." 예외 처리
-            string[] sentences = System.Text.RegularExpressions.Regex.Split(answer, @"(?<=[^\.]\.|[!?])");
+        sentencesQueue.Clear();
 
-            foreach (string part in sentences)
+        // 정규식을 이용해 '.', '?', '!'로 분할하면서 "..." 예외 처리
+        // 리팩토링 당시 System.Text.RegularExpressions.Regex.Split - 이 과정은 요구되는 연산량이 많으나
+        // '.', '!', '?' 등의 문자를 표시해야 하기 때문에 리팩토링을 진행하지 않음
+        string[] sentences = System.Text.RegularExpressions.Regex.Split(answer, @"(?<=[^\.]\.|[!?])");
+
+        foreach (string part in sentences)
+        {
+            if (!string.IsNullOrWhiteSpace(part)) // 공백이 아닌 유효한 문자열만 처리
             {
-                if (!string.IsNullOrWhiteSpace(part)) // 공백이 아닌 유효한 문자열만 처리
-                {
-                    string trimmedSentence = part.Trim();
-                    sentencesQueue.Enqueue(trimmedSentence);
-                }
-            }
-
-            if (displayCoroutine == null)
-            {
-                displayCoroutine = StartCoroutine(DisplaySentences());
+                string trimmedSentence = part.Trim();
+                sentencesQueue.Enqueue(trimmedSentence);
             }
         }
-        else
+
+        if (displayCoroutine == null)
         {
-            Debug.LogError("npc가 없습니다!");
+            displayCoroutine = StartCoroutine(DisplaySentences());
         }
     }
 
     /// <summary>
     /// NPC의 답변을 한문장 씩 화면에 출력
     /// </summary>
-    /// <returns></returns>
     private IEnumerator DisplaySentences()
     {
-        // NPC가 대화 중일 경우 실행
-        if (isTalking)
+        if (!isTalking) yield break;
+
+        var uiManager = gameManager.uIManager; // 참조를 지역 변수로 저장
+
+        while (sentencesQueue.Count > 0)
         {
-            do
+            string sentence = sentencesQueue.Dequeue();
+            isAbleToGoNext = false;
+            uiManager.IsReadyToSkip = true;
+
+            ChatMessage message = new ChatMessage { Content = sentence };
+            npcRole.PlayEmotion(message);
+
+            yield return StartCoroutine(uiManager.ShowLine(uiManager.GetNPCAnswer(), sentence));
+
+            yield return new WaitUntil(() => isAbleToGoNext);
+
+            if (sentencesQueue.Count > 0)
             {
-                // 대사 큐에서 다음 문장을 가져옴
-                string sentence = sentencesQueue.Dequeue();
-                isAbleToGoNext = false; // 다음 문장으로 넘어갈 수 없도록 설정
-                uIManager.IsReadyToSkip = true;
+                yield return new WaitUntil(() => Input.GetMouseButtonDown(0)
+                || Input.GetKeyDown(KeyCode.Space)
+                || Input.GetKeyDown(KeyCode.Return));
 
-                // NPC 감정 표현 실행 (예: 애니메이션, 표정 변화 등)
-                ChatMessage message = new ChatMessage { Content = sentence };
-                npcRole.PlayEmotion(message);
-
-                // UI에서 텍스트를 한 글자씩 출력하는 코루틴 실행
-                yield return StartCoroutine(uIManager.ShowLine(uIManager.GetNPCAnswer(), sentence));
-
-                // 다음 문장으로 넘어가기 전에 사용자의 입력을 기다림
-                yield return new WaitUntil(() => isAbleToGoNext);
-
-                // 대사 큐에 문장이 남아 있고, 다음 문장으로 넘어갈 수 있는 상태라면 실행
-                if (sentencesQueue.Count > 0 && isAbleToGoNext)
-                {
-                    // 마우스 클릭 / 스페이스 바 / 엔터 키 입력을 기다림
-                    yield return new WaitUntil(() => Input.GetMouseButtonDown(0)
-                    || Input.GetKeyDown(KeyCode.Space)
-                    || Input.GetKeyDown(KeyCode.Return));
-
-                    // 대사 스킵 여부를 변경 (사용자가 다음 문장을 빠르게 넘길 수 있도록 설정)
-                    uIManager.ChangeIsSkipping(true);
-                }
+                uiManager.ChangeIsSkipping(true);
             }
-            while (sentencesQueue.Count > 0); // 모든 문장을 출력할 때까지 반복
         }
 
-        uIManager.IsReadyToSkip = false;
+        gameManager.uIManager.IsReadyToSkip = false;
 
         // 대화가 끝났으므로 "대화 종료" 버튼을 활성화
-        uIManager.SetActiveEndConversationButton(true);
+        gameManager.uIManager.SetActiveEndConversationButton(true);
 
         // 플레이어가 질문 입력 필드를 다시 사용할 수 있도록 설정
-        uIManager.SetInteractableAskField(true);
+        gameManager.uIManager.SetInteractableAskField(true);
 
         // 대사 스킵 가능 여부를 다시 설정
-        uIManager.ChangeIsSkipping(true);
+        gameManager.uIManager.ChangeIsSkipping(true);
 
         // 플레이어가 질문을 입력할 수 있도록 입력 필드에 포커스
-        uIManager.FocusOnAskField();
+        gameManager.uIManager.FocusOnAskField();
 
         // 현재 실행 중인 코루틴을 초기화하여 다음 실행을 준비
         displayCoroutine = null;
     }
 
+    /// <summary>
+    /// 다음 문장으로 넘어갈 수 있도록 상태 변경
+    /// </summary>
     public void IsAbleToGoNextTrue()
     {
         isAbleToGoNext = true;
@@ -186,35 +209,21 @@ public class ConversationManager : MonoBehaviour
     /// </summary>
     void SetAudio()
     {
-        if (npcRole != null)
+        if (npcRole != null && npcAudioMap.TryGetValue(npcRole.currentCharacter, out AudioClip clip))
         {
-            switch (npcRole.currentCharacter.ToString())
-            {
-                case "Nason":
-                    SoundManager.Instance.ChangeTextAudioClip(typeSounds[0]);
-                    break;
-                case "Mina":
-                    SoundManager.Instance.ChangeTextAudioClip(typeSounds[1]);
-                    break;
-                case "Jenny":
-                    SoundManager.Instance.ChangeTextAudioClip(typeSounds[2]);
-                    break;
-
-                default:
-                    SoundManager.Instance.ChangeTextAudioClip(typeSounds[0]);
-                    break;
-            }
+            SoundManager.Instance.ChangeTextAudioClip(clip);
         }
-        // Intro 시작?
         else
         {
-            SoundManager.Instance.ChangeTextAudioClip(typeSounds[0]);
+            SoundManager.Instance.ChangeTextAudioClip(typeSounds[0]); // 기본값
         }
     }
 
     //-------------------------------------------------------------//
 
-    // 대화 시작 함수
+    /// <summary>
+    /// 대화를 시작하는 메서드 (마우스 클릭 시 실행)
+    /// </summary>
     public void StartConversation()
     {
         StartCoroutine(StartConversationCoroutine());
@@ -222,20 +231,18 @@ public class ConversationManager : MonoBehaviour
 
     private IEnumerator StartConversationCoroutine()
     {
-        // SwitchCameraWithFade 코루틴이 끝날 때까지 대기
-        yield return StartCoroutine(FadeUtility.Instance.SwitchCameraWithFade(uIManager.screen, cameraManager, player, npcRole));
+        yield return FadeUtility.Instance.SwitchCameraWithFade(gameManager.uIManager.screen, cameraManager, player, npcRole);
 
-        // 코루틴이 끝난 후에 대화 UI 활성화
-        uIManager.SetConversationUI(true);
+        gameManager.uIManager.SetConversationUI(true);
         isTalking = true;
-
-        // 나머지 작업 수행
-        uIManager.SetSpeakingUI();  // 로딩 이미지 비활성화
+        gameManager.uIManager.SetSpeakingUI();
         SetAudio();
     }
 
 
-    // 대화 종료 함수 - 버튼에 적용
+    /// <summary>
+    /// 대화를 종료하는 메서드 (NPC와 대화 종료 시 실행)
+    /// </summary>
     public void EndConversation()
     {
         isTalking = false;
@@ -244,20 +251,21 @@ public class ConversationManager : MonoBehaviour
 
     private IEnumerator EndConversationCoroutine()
     {
-        uIManager.SetNullInputField();
-        uIManager.SetConversationUI(false);
-        uIManager.RemoveOnEndEditListener();
-        uIManager.SetBlankAnswerText();
+        gameManager.uIManager.SetNullInputField();
+        gameManager.uIManager.SetConversationUI(false);
+        gameManager.uIManager.RemoveOnEndEditListener();
+        gameManager.uIManager.SetBlankAnswerText();
 
-        // SwitchCameraWithFade 코루틴이 완료될 때까지 대기
-        yield return StartCoroutine(FadeUtility.Instance.SwitchCameraWithFade
-            (uIManager.screen, cameraManager, player, npcRole, spawnManager));
+        yield return FadeUtility.Instance.SwitchCameraWithFade(
+            gameManager.uIManager.screen, cameraManager, player, npcRole, spawnManager);
 
-        // 코루틴이 끝난 후에 실행할 코드
         player.GetComponent<Player>().UnactivateIsTalking();
         RemoveNPCRole();
     }
 
+    /// <summary>
+    /// 대화 중인지 여부 반환
+    /// </summary>
     public bool GetIsTalking()
     {
         return isTalking;

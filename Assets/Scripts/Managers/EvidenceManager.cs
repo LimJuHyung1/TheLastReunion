@@ -24,11 +24,6 @@ public class EvidenceManager : MonoBehaviour
     private int currentEvidenceLength = 0;
     private float space = 40f;
 
-    private float scrollRectBlank;  // evidenceScrollRect 여백 길이
-    private float scrollRectWidth;  // evidenceScrollRect 가로 길이
-    private float scrollRectHeight;  // evidenceScrollRect 세로 길이
-
-
     void Start()
     {        
         evidenceButton = Resources.Load<GameObject>("EvidenceButton");
@@ -65,14 +60,19 @@ public class EvidenceManager : MonoBehaviour
 
     private void InitializeEvidence(Evidence evidence)
     {
-        string evidenceName = evidence.GetName();
-        evidence.Initialize
-            (GetEvidenceName(evidenceName),
-            GetEvidenceDescription(evidenceName),
-            GetEvidenceInformation(evidenceName),
-            GetEvidenceFoundAt(evidenceName),
-            GetEvidenceNotes(evidenceName));
-        evidences.Add(evidence);
+        EvidenceInfo evidenceInfo = GetEvidenceByName(evidence.GetName());
+
+        if (evidenceInfo != null)
+        {
+            evidence.Initialize(
+                evidenceInfo.name,
+                evidenceInfo.description,
+                evidenceInfo.information,
+                evidenceInfo.foundAt,
+                evidenceInfo.notes);
+
+            evidences.Add(evidence);
+        }
     }
 
 
@@ -169,36 +169,35 @@ public class EvidenceManager : MonoBehaviour
     {
         if (JsonManager.evidenceInfoList != null)
         {
-            string evidenceName;
-            string evidenceInformation;
-            string evidenceFoundAt;
-            string evidenceNotes;
+            EvidenceInfo evidenceInfo = GetEvidenceByName(evidence.GetName());
 
-            string extraInformation;
+            if (evidenceInfo == null)
+            {
+                Debug.LogWarning("증거 정보를 찾을 수 없습니다.");
+                return;
+            }
 
-            for (int i = 0; i < npcRole.Length; i++)
+            foreach (var npc in npcRole)
             {
                 ChatMessage evidenceMessage = new ChatMessage();
                 evidenceMessage.Role = "system";
 
-                evidenceName = GetEvidenceName(evidence.GetName());
-                evidenceInformation = GetEvidenceInformation(evidence.GetName());
-                evidenceFoundAt = GetEvidenceFoundAt(evidence.GetName());
-                evidenceNotes = GetEvidenceNotes(evidence.GetName());
-                extraInformation = GetEvidenceExtraInformation(evidence.GetName(), npcRole[i]);
+                string extraInformation = GetEvidenceExtraInformation(evidenceInfo.name, npc);
+
                 string completeEvidenceMessage =
-                "지금 플레이어가 발견한 증거에 대한 정보를 알려줄께.\n" +
-                $"증거 이름 : {evidenceName}.\n" +
-                $"증거 내용 : {evidenceInformation}.\n" +
-                $"증거가 발견된 장소 : {evidenceFoundAt}.\n" +
-                $"추가적으로 필요한 증거나 단서 : {evidenceNotes}.\n" +
-                $"증거가 {npcRole[i].currentCharacter.ToString()}와 관련된 사실 : {extraInformation}.\n";
+                    $"지금 플레이어가 발견한 증거에 대한 정보를 알려줄께.\n" +
+                    $"증거 이름 : {evidenceInfo.name}.\n" +
+                    $"증거 내용 : {evidenceInfo.information}.\n" +
+                    $"증거가 발견된 장소 : {evidenceInfo.foundAt}.\n" +
+                    $"추가적으로 필요한 증거나 단서 : {evidenceInfo.notes}.\n" +
+                    $"증거가 {npc.currentCharacter}와 관련된 사실 : {extraInformation}.\n";
 
                 evidenceMessage.Content = completeEvidenceMessage;
-                npcRole[i].AddMessage(evidenceMessage);
+                npc.AddMessage(evidenceMessage);
             }
         }
     }
+
 
     //----------------------------------------------------------//
 
