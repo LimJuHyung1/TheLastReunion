@@ -7,36 +7,37 @@ using System.Collections.Generic;
 
 public class UIManager : MonoBehaviour
 {
+    // 전역적으로 사용되는 변수들
     public static string tmpAnswer = "";
     public string tmpQuestion = "";
-    public static bool isAttachedToEvidence = false;
+    public static bool isAttachedToEvidence = false; // 증거와의 상호작용 여부
 
+    [Header("Managers")]
     public ConversationManager conversationManager;
     public EvidenceManager evidenceManager;
 
-    public Button endConversationBtn;
-    public GameObject pulsing;
-    public InputField askField;
+    [Header("UI")]
+    public Button endConversationBtn;  // 대화 종료 버튼
+    public GameObject pulsing;  // 특정 이벤트 시 깜빡이는 UI
+    public InputField askField;  // 플레이어 질문 입력 필드
     public Image boundaryUI;
     public Image chatBox;
-    // public Image cursor;
     public Image screen;
-    public Image[] keys;
+    public Image[] keys;  // 게임 내 상호작용 키
     public Text keyDescriptionText;
     public Text thingDescriptionText;
     public Text thingNameText;
-    public Timer timer;
+    public Timer timer;  // 게임 타이머
 
     [SerializeField] Text NPCName;
     [SerializeField] Text NPCAnswer;
-    [SerializeField] GameObject waitingMark;
-    [SerializeField] GameObject clickMark;
+    [SerializeField] GameObject waitingMark;  // NPC가 발언 준비 중 표시
+    [SerializeField] GameObject clickMark;  // 플레이어가 입력 가능할 때 표시
 
-    UIManagerSup sup;
-    
+    UIManagerSup sup; // 서브 UI 관리 클래스
+
     [SerializeField] private bool waitToSkip = true;
-
-    public bool isReadyToSkip = false;  // NPC가 문장 출력 시작 시에 true로 변경됨
+    public bool isReadyToSkip = false;  // NPC가 문장 출력 시작 시 true로 변경됨
     public bool IsReadyToSkip
     {
         get { return isReadyToSkip; }
@@ -44,29 +45,34 @@ public class UIManager : MonoBehaviour
     }
 
     [SerializeField] private bool isSkipping = false;
-    [SerializeField]
-    private bool isShowingDescription = false; // 코루틴 실행 여부를 확인하는 변수
+    [SerializeField] private bool isShowingDescription = false; // 코루틴 실행 여부 확인
 
-    // Start is called before the first frame update
     void Start()
     {
-        SetUI();
-
+        SetUI();    // UI 요소 비활성화 및 초기 설정
         sup = new UIManagerSup(keys, keyDescriptionText, evidenceManager);
     }
 
-    void Update()
+    /// <summary>
+    /// 키 입력 감지 후 대화 스킵 기능 활성화
+    /// </summary>
+    void OnEnable()
     {
-        if (isReadyToSkip)
+        StartCoroutine(WaitForSkipInput());
+    }
+
+    IEnumerator WaitForSkipInput()
+    {
+        while (true)
         {
-            if (((Input.GetMouseButtonDown(0)
-            || Input.GetKeyDown(KeyCode.Space)
-            || Input.GetKeyDown(KeyCode.Return)))) // 마우스 왼쪽 클릭 or 엔터키 감지
-            {             
+            if (isReadyToSkip && (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return)))
+            {
                 isSkipping = true;
             }
-        }            
+            yield return null;
+        }
     }
+
 
     /// <summary>
     /// 초기 UI 세팅
@@ -120,26 +126,27 @@ public class UIManager : MonoBehaviour
     //ConversationManager에서 호출됨
 
     /// <summary>
-    /// 대화 시작 시 UI 세팅
+    /// 대화 UI를 활성화/비활성화
     /// </summary>
-    /// <param 시각화_여부="b"></param>
     public void SetConversationUI(bool b)
     {
-        GameObject[] uiElements = {
-        askField.gameObject,
-        chatBox.gameObject,
-        endConversationBtn.gameObject
-    };
-
-        foreach (GameObject element in uiElements)
-        {
-            element.SetActive(b);
-        }
-
-        // cursor.gameObject.SetActive(!b);
+        SetActiveUIElements(b, askField.gameObject, chatBox.gameObject, endConversationBtn.gameObject);
     }
 
-    // 대화 시 NPC 이름 출력
+    /// <summary>
+    /// UI 요소들을 활성화/비활성화하는 헬퍼 메서드
+    /// </summary>
+    private void SetActiveUIElements(bool isActive, params GameObject[] elements)
+    {
+        foreach (GameObject element in elements)
+        {
+            element.SetActive(isActive);
+        }
+    }
+
+    /// <summary>
+    /// NPC 이름 변경
+    /// </summary>
     public void ChangeNPCName(string name)
     {
         NPCName.text = name;
@@ -151,7 +158,9 @@ public class UIManager : MonoBehaviour
         return NPCAnswer;
     }
 
-    // 대화 시 마크 표시(?)
+    /// <summary>
+    /// NPC가 말할 때 마커 UI 업데이트
+    /// </summary>
     public void SetSpeakingUI()
     {
         waitingMark.gameObject.SetActive(false);
@@ -202,20 +211,11 @@ public class UIManager : MonoBehaviour
     {
         askField.onEndEdit.AddListener((string text) =>
         {
-            // 공백 입력이면 실행하지 않음
-            if (string.IsNullOrWhiteSpace(text))
+            if (!string.IsNullOrWhiteSpace(text) && (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)))
             {
-                return;
+                tmpQuestion = text.Trim();
+                action();
             }
-
-            // 현재 엔터 키가 눌렸을 때만 실행되도록 확인
-            if (!Input.GetKeyDown(KeyCode.Return) && !Input.GetKeyDown(KeyCode.KeypadEnter))
-            {
-                return;
-            }
-
-            tmpQuestion = text.Trim(); // 입력값의 앞뒤 공백 제거
-            action();
         });
     }
 
@@ -235,9 +235,6 @@ public class UIManager : MonoBehaviour
     /// <summary>
     /// 대사를 한 글자씩 출력하는 코루틴
     /// </summary>
-    /// <param UI-Text="t"></param>
-    /// <param 출력할_문자열="answer"></param>
-    /// <returns></returns>
     public IEnumerator ShowLine(Text t, string answer, float second = 0.1f, bool isTyping = true)
     {
         t.text = ""; // 텍스트 초기화
@@ -431,7 +428,6 @@ public class UIManagerSup
 
     string[] actionDescriptions = new string[5];
     string evidenceDescription;
-
     public UIManagerSup(Image[] keys, Text t, EvidenceManager evidenceManager)
     {
         foreach (Image key in keys)
