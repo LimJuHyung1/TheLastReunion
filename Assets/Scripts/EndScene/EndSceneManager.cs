@@ -6,47 +6,47 @@ using UnityEngine.UI;
 public class EndSceneManager : MonoBehaviour
 {
     public LayerMask npcLayer;
-
-    public AudioClip[] nasonClips;
-    public AudioClip[] jennyClips;
-    public AudioClip[] minaClips;
-
     public EndCamera cam;
+    public Transform[] NPCTransform;        // 3명의 NPC
+
+    [Header("UI")]
     public GameObject ox;
     public GameObject mouseDescription;
     public Image screen;
-    public Image chatBox;    
+    public Image chatBox;
     public Text finalDialogueText;
     public Text endingCredit;
     public Text finalStatement;
     public Text selectNPC;
-    public Transform[] NPCTransform;        // 3명의 NPC
 
+    [Header("Audio")]
+    public AudioClip[] nasonClips;
+    public AudioClip[] jennyClips;
+    public AudioClip[] minaClips;
+
+    [Header("2배속 모드")]
     public GameObject _2x_Parent;       // 2배속 클래스
+    private _2x _2xClass;
 
     private bool isClicked = false;         // npc가 클릭되었는가
     private bool isReadyToClick = false;    // 엔드 씬 클릭 버그 방지
+    private bool isEndingStarted = false; // 중복 실행 방지용 플래그
     private int index = 0;                  // 최후의 진술 인덱스
-    private int npcNum = -1;
+    private int npcNum = -1;                // 선택된 NPC의 번호
 
-    private float moveDistance = Screen.height * 1.6f;
-    private float duration = 15f; // 이동하는 데 걸리는 시간
-    private _2x _2xClass;
-
+    // NPC별 최후의 진술
     private string[] nasonFinalStatement;
     private string[] jennyFinalStatement;
     private string[] minaFinalStatement;
     private string[][] allFinalStatements;
 
+    // NPC별 엔딩 대사
     private string[] nasonEnd;
     private string[] jennyEnd;
     private string[] minaEnd;
 
     private AudioClip[][] allClips;
-    private GameObject hoveredObject = null;
-
-
-    private bool isEndingStarted = false; // 중복 실행 방지용 플래그
+    private GameObject hoveredObject = null;    // 마우스가 가리키는 NPC    
 
     // Start is called before the first frame update
     void Start()
@@ -229,6 +229,9 @@ public class EndSceneManager : MonoBehaviour
         allClips = new AudioClip[][] { minaClips, jennyClips, nasonClips };
     }
 
+    /// <summary>
+    /// 선택된 NPC의 엔딩 진행
+    /// </summary>
     public void SelectCriminal(int npcIndex)
     {
         npcNum = npcIndex;
@@ -249,6 +252,9 @@ public class EndSceneManager : MonoBehaviour
         StartCoroutine(ShowLine(finalStatement, allFinalStatements[npcIndex][index++ % 3], NPCTransform[npcIndex].parent.GetComponent<EndNPC>()));
     }
 
+    /// <summary>
+    /// O 버튼 클릭 시 엔딩 진행
+    /// </summary>
     public void OButtton()
     {
         if (isEndingStarted) return; // 이미 실행 중이라면 return
@@ -433,6 +439,9 @@ public class EndSceneManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 엔딩 크레딧 출력
+    /// </summary>
     private IEnumerator ShowEndingCredit()
     {
         _2xClass.Disable2xClass();

@@ -22,9 +22,30 @@ public class EndCamera : MonoBehaviour
     /// </summary>
     void Start()
     {
-        cam = GetComponent<Camera>(); // 현재 오브젝트의 Camera 컴포넌트 가져오기
-        originalFOV = cam.fieldOfView; // 초기 FOV 저장
-        originalRotation = transform.rotation; // 초기 회전 값 저장
+        cam = GetComponent<Camera>();
+        ResetOriginalState();
+    }
+
+    /// <summary>
+    /// 현재 카메라 상태를 원래 상태로 설정 (초기화 가능)
+    /// </summary>
+    public void ResetOriginalState()
+    {
+        originalFOV = cam.fieldOfView;
+        originalRotation = transform.rotation;
+    }
+
+    /// <summary>
+    /// 새로운 카메라 이동 코루틴을 실행하기 전에 기존 코루틴을 정리하는 메서드
+    /// - 기존에 실행 중인 카메라 이동 코루틴이 있다면 중지하고 새로운 코루틴을 실행
+    /// </summary>
+    private void StartSmoothTransition(IEnumerator newRoutine)
+    {
+        if (activeCoroutine != null)
+        {
+            StopCoroutine(activeCoroutine);
+        }
+        activeCoroutine = StartCoroutine(newRoutine);
     }
 
     /// <summary>
@@ -33,11 +54,7 @@ public class EndCamera : MonoBehaviour
     /// <param name="target">초점을 맞출 NPC의 Transform</param>
     public void FocusNPC(Transform target)
     {
-        if (activeCoroutine != null)
-        {
-            StopCoroutine(activeCoroutine); // 기존 실행 중인 코루틴이 있다면 중지
-        }
-        activeCoroutine = StartCoroutine(FocusOnTargetRoutine(target)); // 새로운 코루틴 실행
+        StartSmoothTransition(FocusOnTargetRoutine(target));
     }
 
     /// <summary>
@@ -46,22 +63,20 @@ public class EndCamera : MonoBehaviour
     /// <param name="target">초점을 맞출 NPC의 Transform</param>
     private IEnumerator FocusOnTargetRoutine(Transform target)
     {
-        Quaternion targetRotation = Quaternion.LookRotation(target.position - transform.position); // NPC 방향으로 회전 값 설정
+        Quaternion targetRotation = Quaternion.LookRotation(target.position - transform.position);
 
-        while (Quaternion.Angle(transform.rotation, targetRotation) > 0.1f || Mathf.Abs(cam.fieldOfView - targetFOV) > 0.1f)
+        // 현재 카메라 회전과 줌이 목표 상태에 도달할 때까지 반복
+        while (!Mathf.Approximately(Quaternion.Angle(transform.rotation, targetRotation), 0f) ||
+               !Mathf.Approximately(cam.fieldOfView, targetFOV))
         {
-            // 회전을 부드럽게 변경
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
-            // 줌인 효과를 부드럽게 적용
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
             cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, targetFOV, Time.deltaTime * zoomSpeed);
-            yield return null; // 다음 프레임까지 대기
+            yield return null;
         }
 
-        // 최종적으로 목표 위치로 설정
         transform.rotation = targetRotation;
         cam.fieldOfView = targetFOV;
-
-        activeCoroutine = null; // 코루틴 종료 후 초기화
+        activeCoroutine = null;
     }
 
     /// <summary>
@@ -69,31 +84,34 @@ public class EndCamera : MonoBehaviour
     /// </summary>
     public void FocusAndReturnToOriginal()
     {
-        if (activeCoroutine != null)
-        {
-            StopCoroutine(activeCoroutine); // 실행 중인 코루틴 중지
-        }
-        activeCoroutine = StartCoroutine(ReturnToOriginalRoutine()); // 원래 상태로 되돌리는 코루틴 실행
+        StartSmoothTransition(ReturnToOriginalRoutine());
     }
 
     /// <summary>
-    /// 원래 카메라 위치 및 줌 상태로 부드럽게 복귀하는 코루틴
+    /// 원래 위치 및 줌 상태로 부드럽게 복귀하는 코루틴
     /// </summary>
     private IEnumerator ReturnToOriginalRoutine()
     {
-        while (Quaternion.Angle(transform.rotation, originalRotation) > 0.1f || Mathf.Abs(cam.fieldOfView - originalFOV) > 0.1f)
+        yield return SmoothTransition(originalRotation, originalFOV);
+    }
+
+    /// <summary>
+    /// 부드러운 카메라 회전 및 줌을 처리하는 공통 메서드
+    /// </summary>
+    private IEnumerator SmoothTransition(Quaternion targetRotation, float targetFOV)
+    {
+        // 목표 회전 및 FOV에 도달할 때까지 반복
+        while (!Mathf.Approximately(Quaternion.Angle(transform.rotation, targetRotation), 0f) ||
+               !Mathf.Approximately(cam.fieldOfView, targetFOV))
         {
-            // 회전을 원래 상태로 부드럽게 변경
-            transform.rotation = Quaternion.Lerp(transform.rotation, originalRotation, Time.deltaTime * rotationSpeed);
-            // 줌을 원래 상태로 부드럽게 변경
-            cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, originalFOV, Time.deltaTime * zoomSpeed);
-            yield return null; // 다음 프레임까지 대기
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+            cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, targetFOV, Time.deltaTime * zoomSpeed);
+            yield return null;
         }
 
-        // 최종적으로 원래 위치로 설정
-        transform.rotation = originalRotation;
-        cam.fieldOfView = originalFOV;
-
-        activeCoroutine = null; // 코루틴 종료 후 초기화
+        // 최종 값 설정
+        transform.rotation = targetRotation;
+        cam.fieldOfView = targetFOV;
+        activeCoroutine = null;     // 실행 중인 코루틴 해제
     }
 }
