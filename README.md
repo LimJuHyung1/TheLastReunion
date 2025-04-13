@@ -14,7 +14,7 @@
   - 이를 통해 사용자 편의성과 보안성을 동시에 확보함
 - **OpenAI API - Unity 연동 API 분석**:
   > ### 🔧 주요 파일 및 기능 설명
-  > PDF()
+  > [Unity에서의 ChatGPT 연동 및 내부 실행 과정 (PDF)](Images/Unity에서의 ChatGPT 연동 및 내부 실행 과정.pdf)
   > 
   > #### ✅ `OpenAIApi.cs` – API 통신 관리
   > - OpenAI API와의 HTTP 요청을 비동기 처리
