@@ -37,7 +37,7 @@
   > - `role: system` → NPC의 성격 및 대화 스타일을 지정하는 초기 지침
 
 - **성과**: Steam 정식 출시  
-- 🛒 [Steam 페이지](https://store.steampowered.com/app/3600510/The_Last_Reunion/)
+  - 🛒 [Steam 페이지](https://store.steampowered.com/app/3600510/The_Last_Reunion/)
 
 ---
 
