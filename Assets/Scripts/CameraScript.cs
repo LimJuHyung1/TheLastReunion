@@ -5,8 +5,7 @@ public class CameraScript : MonoBehaviour
 {
     public ConversationManager conversationManager;
     public UIManager uIManager;    
-
-    int[] layers = new int[4];
+    
     [SerializeField] float mouseSensitivity = 115f; // 마우스 감도
     float xRotation = 0f;
     [SerializeField] Transform playerBody;          // 플레이어의 Transform (카메라가 붙어있을 대상)

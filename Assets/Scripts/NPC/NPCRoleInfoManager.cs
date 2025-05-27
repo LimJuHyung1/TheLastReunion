@@ -3,11 +3,13 @@ using System.Diagnostics;
 public class NPCRoleInfoManager
 {
     public string GetRole(string npcName) => GetNPCRoleByName(npcName)?.role;
-    public string GetInstructions(string npcName) => GetNPCRoleByName(npcName)?.instructions;
-    public string GetBackground(string npcName) => GetNPCRoleByName(npcName)?.background;
-    public string GetFriends(string npcName) => GetNPCRoleByName(npcName)?.friends;
-    public string GetAlibi(string npcName) => GetNPCRoleByName(npcName)?.alibi;
-    public string GetResponseGuidelines(string npcName) => GetNPCRoleByName(npcName)?.responseGuidelines;
+    public string GetAudience(string npcName) => GetNPCRoleByName(npcName)?.audience;
+    public string GetInformation(string npcName) => GetNPCRoleByName(npcName)?.information;
+    public string GetTask(string npcName) => GetNPCRoleByName(npcName)?.task;
+    public string GetRule(string npcName) => GetNPCRoleByName(npcName)?.rule;
+    public string GetStyle(string npcName) => GetNPCRoleByName(npcName)?.style;
+    public string GetConstraint(string npcName) => GetNPCRoleByName(npcName)?.constraint;
+    public string GetFormat(string npcName) => GetNPCRoleByName(npcName)?.format;
 
     /// <summary>
     /// string name 받는 로직 수정 필요함 - jsonManager에서 이름을 잘라서 받음

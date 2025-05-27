@@ -46,6 +46,11 @@ public class UIManager : MonoBehaviour
 
     [SerializeField] private bool isSkipping = false;
     [SerializeField] private bool isShowingDescription = false; // 코루틴 실행 여부 확인
+    public bool IsShowingDescription
+    {
+        get { return isShowingDescription; }
+        set { isShowingDescription = value; }
+    }
 
     void Start()
     {
@@ -235,9 +240,18 @@ public class UIManager : MonoBehaviour
     /// <summary>
     /// 대사를 한 글자씩 출력하는 코루틴
     /// </summary>
-    public IEnumerator ShowLine(Text t, string answer, float second = 0.1f, bool isTyping = true)
+    public IEnumerator ShowLine(Text t, string answer, int interrogation_pressure, float second = 0.1f, bool isTyping = true)
     {
         t.text = ""; // 텍스트 초기화
+
+        t.color = interrogation_pressure switch
+        {
+            <= 5 => Color.black,
+            <= 8 => Color.yellow,
+            _ => Color.red
+        };
+
+
         Coroutine dialogSoundCoroutine = null;
 
         SetNPCSpeakingUI(true);
@@ -284,7 +298,7 @@ public class UIManager : MonoBehaviour
         {
             yield break; // 이미 실행 중이면 무시
         }
-
+        
         isShowingDescription = true; // 코루틴 실행 중
 
         thingDescriptionText.text = "";

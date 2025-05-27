@@ -35,7 +35,7 @@ public class APIKeyManager : MonoBehaviour
     /// </summary>
     private void CreateEncryptedAuthFile()
     {
-        string sourceAuthFilePath = Path.Combine(Application.dataPath, "auth.json");
+        string sourceAuthFilePath = Path.Combine(Application.streamingAssetsPath, "auth.json");
 
         if (!File.Exists(sourceAuthFilePath))
         {

@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEngine;
 
 public class CursorManager : MonoBehaviour
@@ -34,5 +35,25 @@ public class CursorManager : MonoBehaviour
     {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+    }
+
+    void OnApplicationQuit()
+    {
+        string userFolder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile);
+        string targetFolder = Path.Combine(userFolder, ".openai");
+
+        // 게임 종료 시 폴더 삭제
+        if (Directory.Exists(targetFolder))
+        {
+            try
+            {
+                Directory.Delete(targetFolder, true); // true = 하위 폴더 및 파일도 포함하여 삭제
+                Debug.Log($"게임 종료 시 폴더 삭제됨: {targetFolder}");
+            }
+            catch (IOException e)
+            {
+                Debug.LogError($"폴더 삭제 중 오류 발생: {e.Message}");
+            }
+        }
     }
 }

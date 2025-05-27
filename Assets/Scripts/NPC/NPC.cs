@@ -41,11 +41,13 @@ public class NPC : MonoBehaviour
     }
 
     public string GetRole(string npcName) => roleInfoManager.GetRole(npcName);
-    public string GetInstructions(string npcName) => roleInfoManager.GetInstructions(npcName);
-    public string GetBackground(string npcName) => roleInfoManager.GetBackground(npcName);
-    public string GetFriends(string npcName) => roleInfoManager.GetFriends(npcName);
-    public string GetAlibi(string npcName) => roleInfoManager.GetAlibi(npcName);
-    public string GetResponseGuidelines(string npcName) => roleInfoManager.GetResponseGuidelines(npcName);
+    public string GetAudience(string npcName) => roleInfoManager.GetAudience(npcName);
+    public string GetInformation(string npcName) => roleInfoManager.GetInformation(npcName);
+    public string GetTask(string npcName) => roleInfoManager.GetTask(npcName);
+    public string GetRule(string npcName) => roleInfoManager.GetRule(npcName);
+    public string GetStyle(string npcName) => roleInfoManager.GetStyle(npcName);
+    public string GetConstraint(string npcName) => roleInfoManager.GetConstraint(npcName);
+    public string GetFormat(string npcName) => roleInfoManager.GetFormat(npcName);
 
     // 내부 클래스: 감정 표현 처리
     private class NPCEmotionHandler

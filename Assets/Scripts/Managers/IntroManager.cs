@@ -51,6 +51,8 @@ public class IntroManager : MonoBehaviour
 
     void Start()
     {
+        Application.targetFrameRate = 90; // 프레임 제한
+
         currentSceneIndex = SceneManager.GetActiveScene().buildIndex; // 현재 씬 인덱스 저장
         SetTextsPosition(); // 텍스트 위치 설정
 

@@ -1,6 +1,8 @@
+using Newtonsoft.Json.Linq;
 using OpenAI;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -117,21 +119,40 @@ public class ConversationManager : MonoBehaviour
             return;
         }
 
-        gameManager.logManager.AddLog(npcRole, gameManager.uIManager.GetQuestion(), answer);
+        int interrogation_pressure = 0;
+        string responseText = "";
+
+        try
+        {
+            JObject json = JObject.Parse(answer); // JSON 파싱
+            interrogation_pressure = int.Parse(json["interrogation_pressure"].ToString());
+            responseText = json["response"]?.ToString();
+
+            if (string.IsNullOrWhiteSpace(responseText))
+            {
+                Debug.LogWarning("response 항목이 비어있습니다.");
+                return;
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"JSON 파싱 중 오류 발생: {ex.Message}");
+            return;
+        }
+
+        gameManager.logManager.AddLog(npcRole, gameManager.uIManager.GetQuestion(), responseText);
         gameManager.uIManager.SetInteractableAskField(false);
         gameManager.uIManager.SetActiveEndConversationButton(false);
         SetAudio();
 
         sentencesQueue.Clear();
 
-        // 정규식을 이용해 '.', '?', '!'로 분할하면서 "..." 예외 처리
-        // 리팩토링 당시 System.Text.RegularExpressions.Regex.Split - 이 과정은 요구되는 연산량이 많으나
-        // '.', '!', '?' 등의 문자를 표시해야 하기 때문에 리팩토링을 진행하지 않음
-        string[] sentences = System.Text.RegularExpressions.Regex.Split(answer, @"(?<=[^\.]\.|[!?])");
+        // '.', '?', '!' 기준으로 문장 분할하되 "..."은 예외 처리        
+        string[] sentences = Regex.Split(responseText, @"(?<!(\.{2,}))(?<=[.!?])\s+");
 
         foreach (string part in sentences)
         {
-            if (!string.IsNullOrWhiteSpace(part)) // 공백이 아닌 유효한 문자열만 처리
+            if (!string.IsNullOrWhiteSpace(part))
             {
                 string trimmedSentence = part.Trim();
                 sentencesQueue.Enqueue(trimmedSentence);
@@ -140,14 +161,14 @@ public class ConversationManager : MonoBehaviour
 
         if (displayCoroutine == null)
         {
-            displayCoroutine = StartCoroutine(DisplaySentences());
+            displayCoroutine = StartCoroutine(DisplaySentences(interrogation_pressure));
         }
     }
 
     /// <summary>
     /// NPC의 답변을 한문장 씩 화면에 출력
     /// </summary>
-    private IEnumerator DisplaySentences()
+    private IEnumerator DisplaySentences(int interrogation_pressure)
     {
         if (!isTalking) yield break;
 
@@ -162,7 +183,7 @@ public class ConversationManager : MonoBehaviour
             ChatMessage message = new ChatMessage { Content = sentence };
             npcRole.PlayEmotion(message);
 
-            yield return StartCoroutine(uiManager.ShowLine(uiManager.GetNPCAnswer(), sentence));
+            yield return StartCoroutine(uiManager.ShowLine(uiManager.GetNPCAnswer(), sentence, interrogation_pressure));
 
             yield return new WaitUntil(() => isAbleToGoNext);
 
