@@ -1,4 +1,4 @@
-### 🎯 The Last Reunion (Steam 출시작)
+### 🎯 The Last Reunion
 - **장르**: 미스터리 추리 게임
 - **개발 기간**: 2024.07 ~ 2024.11
 - **사용 기술**: Unity, C#, OpenAI API
@@ -31,8 +31,9 @@
   > - `role: assistant` → ChatGPT 응답
   > - `role: system` → NPC의 성격 및 대화 스타일을 지정하는 초기 지침
 
-- **성과**: Steam 정식 출시  
-  - 🛒 [Steam 페이지](https://store.steampowered.com/app/3600510/The_Last_Reunion/)
+- Steam, itch.io 출시 
+  - 🛒 [Steam](https://store.steampowered.com/app/3600510/The_Last_Reunion/)
+  - 🛒 [itch.io](https://jusangjusang.itch.io/the-last-reunion)
 
 ---
 
