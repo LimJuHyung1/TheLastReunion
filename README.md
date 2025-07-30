@@ -31,7 +31,7 @@
   > - `role: assistant` → ChatGPT 응답
   > - `role: system` → NPC의 성격 및 대화 스타일을 지정하는 초기 지침
 
-- Steam, itch.io 출시 
+- **Steam, itch.io** 출시 
   - 🛒 [Steam](https://store.steampowered.com/app/3600510/The_Last_Reunion/)
   - 🛒 [itch.io](https://jusangjusang.itch.io/the-last-reunion)
 
