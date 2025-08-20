@@ -1,10 +1,11 @@
-using Newtonsoft.Json.Linq;
+ï»¿using Newtonsoft.Json.Linq;
 using OpenAI;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Localization.Settings;
 
 
 public class ConversationManager : MonoBehaviour
@@ -20,7 +21,7 @@ public class ConversationManager : MonoBehaviour
     [Header("Managers")]
     public CameraManager cameraManager;
     public GameManager gameManager;
-    public SpawnManager spawnManager;
+    public SpawnManager spawnManager;    
 
     private bool isTalking = false;
     private bool isAbleToGoNext = false;
@@ -30,22 +31,37 @@ public class ConversationManager : MonoBehaviour
 
     private NPCRole npcRole;
 
-    // NPC ÀÌ¸§ ¸ÅÇÎ
-    private static readonly Dictionary<NPCRole.Character, string> npcNameMap = new Dictionary<NPCRole.Character, string>
+    // NPC ì´ë¦„ ë§¤í•‘
+    private static readonly Dictionary<NPCRole.Character, string> npcNameEnMap = new Dictionary<NPCRole.Character, string>
     {
-        { NPCRole.Character.Nason, "³×ÀÌ½¼" },
-        { NPCRole.Character.Mina, "¹Ì³ª" },
-        { NPCRole.Character.Jenny, "Á¦´Ï" }
+        { NPCRole.Character.Nason, "Nason" },
+        { NPCRole.Character.Mina, "Mina" },
+        { NPCRole.Character.Jenny, "Jenny" }
     };
 
-    // NPCº° ´ë»ç ¼Ò¸® ¼³Á¤
+    private static readonly Dictionary<NPCRole.Character, string> npcNameJaMap = new Dictionary<NPCRole.Character, string>
+    {
+        { NPCRole.Character.Nason, "ãƒã‚¤ã‚½ãƒ³" },
+        { NPCRole.Character.Mina, "ãƒŸãƒŠ" },
+        { NPCRole.Character.Jenny, "ã‚¸ã‚§ãƒ‹ãƒ¼" }
+    };
+
+    private static readonly Dictionary<NPCRole.Character, string> npcNameKoMap = new Dictionary<NPCRole.Character, string>
+    {
+        { NPCRole.Character.Nason, "ë„¤ì´ìŠ¨" },
+        { NPCRole.Character.Mina, "ë¯¸ë‚˜" },
+        { NPCRole.Character.Jenny, "ì œë‹ˆ" }
+    };
+
+
+    // NPCë³„ ëŒ€ì‚¬ ì†Œë¦¬ ì„¤ì •
     private static readonly Dictionary<NPCRole.Character, AudioClip> npcAudioMap = new Dictionary<NPCRole.Character, AudioClip>();
 
 
 
     void Awake()
     {
-        // NPCº° ´ë»ç ¼Ò¸® ¼³Á¤
+        // NPCë³„ ëŒ€ì‚¬ ì†Œë¦¬ ì„¤ì •
         npcAudioMap[NPCRole.Character.Nason] = typeSounds[0];
         npcAudioMap[NPCRole.Character.Mina] = typeSounds[1];
         npcAudioMap[NPCRole.Character.Jenny] = typeSounds[2];
@@ -54,7 +70,7 @@ public class ConversationManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // »ç¿îµå ¼³Á¤ ÃÊ±âÈ­
+        // ì‚¬ìš´ë“œ ì„¤ì • ì´ˆê¸°í™”
         SoundManager.Instance.SetNullAudioMixerGroup();
     }
 
@@ -62,7 +78,7 @@ public class ConversationManager : MonoBehaviour
 
 
     /// <summary>
-    /// Player ½ºÅ©¸³Æ®¿¡¼­ ÇöÀç ´ëÈ­ÇÏ´Â NPC¸¦ ¼³Á¤ÇÏ´Â ¸Ş¼­µå
+    /// Player ìŠ¤í¬ë¦½íŠ¸ì—ì„œ í˜„ì¬ ëŒ€í™”í•˜ëŠ” NPCë¥¼ ì„¤ì •í•˜ëŠ” ë©”ì„œë“œ
     /// </summary>    
     public void GetNPCRole(NPCRole npc)
     {
@@ -70,7 +86,7 @@ public class ConversationManager : MonoBehaviour
     }
 
     /// <summary>
-    /// InputField¿¡¼­ ½ÇÇàµÇ´Â ÀÌº¥Æ® ¸®½º³Ê µî·Ï
+    /// InputFieldì—ì„œ ì‹¤í–‰ë˜ëŠ” ì´ë²¤íŠ¸ ë¦¬ìŠ¤ë„ˆ ë“±ë¡
     /// </summary>
     public void AddListenersResponse()
     {
@@ -82,7 +98,7 @@ public class ConversationManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ÂüÁ¶ÁßÀÎ NPC Á¦°Å (´ëÈ­°¡ Á¾·áµÉ ¶§ È£ÃâµÊ)
+    /// ì°¸ì¡°ì¤‘ì¸ NPC ì œê±° (ëŒ€í™”ê°€ ì¢…ë£Œë  ë•Œ í˜¸ì¶œë¨)
     /// </summary>
     public void RemoveNPCRole()
     {
@@ -92,30 +108,44 @@ public class ConversationManager : MonoBehaviour
     //-------------------------------------------------------------//
 
     /// <summary>
-    /// NPC ÀÌ¸§À» UI¿¡ Ç¥½Ã
+    /// NPC ì´ë¦„ì„ UIì— í‘œì‹œ
     /// </summary>
     public void ShowName()
     {
-        // TryGetValue - Å°°¡ Á¸ÀçÇÏ¸é true, ±×·¸Áö ¾ÊÀ¸¸é false ¹İÈ¯
-        // (out Å°¿öµå¸¦ ÅëÇØ key °ªÀÌ Á¸ÀçÇÑ´Ù¸é value °ªÀÌ ¹İÈ¯µÊ)
-        if (npcRole != null && npcNameMap.TryGetValue(npcRole.currentCharacter, out string npcName))
+        var currentLocale = LocalizationSettings.SelectedLocale;
+
+        // ì–¸ì–´ ì½”ë“œë¡œ í™•ì¸ (ê¶Œì¥)
+        if (currentLocale.Identifier.Code == "en")
         {
-            gameManager.uIManager.ChangeNPCName(npcName);
+            if (npcRole != null && npcNameEnMap.TryGetValue(npcRole.currentCharacter, out string npcName))
+            {
+                gameManager.uIManager.ChangeNPCName(npcName);
+            }
         }
-        else
+        else if (currentLocale.Identifier.Code == "ja")
         {
-            Debug.LogError("ShowName - NPC°¡ ¾ø°Å³ª ¸ÅÇÎµÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            if (npcRole != null && npcNameJaMap.TryGetValue(npcRole.currentCharacter, out string npcName))
+            {
+                gameManager.uIManager.ChangeNPCName(npcName);
+            }
+        }
+        else if (currentLocale.Identifier.Code == "ko")
+        {
+            if (npcRole != null && npcNameKoMap.TryGetValue(npcRole.currentCharacter, out string npcName))
+            {
+                gameManager.uIManager.ChangeNPCName(npcName);
+            }
         }
     }
 
     /// <summary>
-    /// NPCÀÇ ´äº¯À» ¹Ş¾Æ È­¸é¿¡ Ãâ·Â (¹®Àå ´ÜÀ§·Î ³ª´©¾î ´ë»ç Å¥¿¡ ÀúÀå)
+    /// NPCì˜ ë‹µë³€ì„ ë°›ì•„ í™”ë©´ì— ì¶œë ¥ (ë¬¸ì¥ ë‹¨ìœ„ë¡œ ë‚˜ëˆ„ì–´ ëŒ€ì‚¬ íì— ì €ì¥)
     /// </summary>
     public void ShowAnswer(string answer)
     {
         if (npcRole == null)
         {
-            Debug.LogError("NPC°¡ ¾ø½À´Ï´Ù!");
+            Debug.LogError("NPCê°€ ì—†ìŠµë‹ˆë‹¤!");
             return;
         }
 
@@ -124,19 +154,19 @@ public class ConversationManager : MonoBehaviour
 
         try
         {
-            JObject json = JObject.Parse(answer); // JSON ÆÄ½Ì
+            JObject json = JObject.Parse(answer); // JSON íŒŒì‹±
             interrogation_pressure = int.Parse(json["interrogation_pressure"].ToString());
             responseText = json["response"]?.ToString();
 
             if (string.IsNullOrWhiteSpace(responseText))
             {
-                Debug.LogWarning("response Ç×¸ñÀÌ ºñ¾îÀÖ½À´Ï´Ù.");
+                Debug.LogWarning("response í•­ëª©ì´ ë¹„ì–´ìˆìŠµë‹ˆë‹¤.");
                 return;
             }
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"JSON ÆÄ½Ì Áß ¿À·ù ¹ß»ı: {ex.Message}");
+            Debug.LogError($"JSON íŒŒì‹± ì¤‘ ì˜¤ë¥˜ ë°œìƒ: {ex.Message}");
             return;
         }
 
@@ -147,8 +177,8 @@ public class ConversationManager : MonoBehaviour
 
         sentencesQueue.Clear();
 
-        // '.', '?', '!' ±âÁØÀ¸·Î ¹®Àå ºĞÇÒÇÏµÇ "..."Àº ¿¹¿Ü Ã³¸®        
-        string[] sentences = Regex.Split(responseText, @"(?<!(\.{2,}))(?<=[.!?])\s+");
+        // '?', '!', 'ã€‚', 'ï¼Ÿ', 'ï¼' ê¸°ì¤€ìœ¼ë¡œ ë¬¸ì¥ ë¶„í• í•˜ë˜ ... ì˜ˆì™¸ ì²˜ë¦¬ ë° ì—°ì† êµ¬ë‘ì  í•˜ë‚˜ë¡œ ì²˜ë¦¬
+        string[] sentences = Regex.Split(responseText, @"(?<!(\.{2,}))(?<=[\.!?ã€‚ï¼Ÿï¼]+)(?![\.!?ã€‚ï¼Ÿï¼])\s*");
 
         foreach (string part in sentences)
         {
@@ -166,13 +196,13 @@ public class ConversationManager : MonoBehaviour
     }
 
     /// <summary>
-    /// NPCÀÇ ´äº¯À» ÇÑ¹®Àå ¾¿ È­¸é¿¡ Ãâ·Â
+    /// NPCì˜ ë‹µë³€ì„ í•œë¬¸ì¥ ì”© í™”ë©´ì— ì¶œë ¥
     /// </summary>
     private IEnumerator DisplaySentences(int interrogation_pressure)
     {
         if (!isTalking) yield break;
 
-        var uiManager = gameManager.uIManager; // ÂüÁ¶¸¦ Áö¿ª º¯¼ö·Î ÀúÀå
+        var uiManager = gameManager.uIManager; // ì°¸ì¡°ë¥¼ ì§€ì—­ ë³€ìˆ˜ë¡œ ì €ì¥
 
         while (sentencesQueue.Count > 0)
         {
@@ -199,24 +229,24 @@ public class ConversationManager : MonoBehaviour
 
         gameManager.uIManager.IsReadyToSkip = false;
 
-        // ´ëÈ­°¡ ³¡³µÀ¸¹Ç·Î "´ëÈ­ Á¾·á" ¹öÆ°À» È°¼ºÈ­
+        // ëŒ€í™”ê°€ ëë‚¬ìœ¼ë¯€ë¡œ "ëŒ€í™” ì¢…ë£Œ" ë²„íŠ¼ì„ í™œì„±í™”
         gameManager.uIManager.SetActiveEndConversationButton(true);
 
-        // ÇÃ·¹ÀÌ¾î°¡ Áú¹® ÀÔ·Â ÇÊµå¸¦ ´Ù½Ã »ç¿ëÇÒ ¼ö ÀÖµµ·Ï ¼³Á¤
+        // í”Œë ˆì´ì–´ê°€ ì§ˆë¬¸ ì…ë ¥ í•„ë“œë¥¼ ë‹¤ì‹œ ì‚¬ìš©í•  ìˆ˜ ìˆë„ë¡ ì„¤ì •
         gameManager.uIManager.SetInteractableAskField(true);
 
-        // ´ë»ç ½ºÅµ °¡´É ¿©ºÎ¸¦ ´Ù½Ã ¼³Á¤
+        // ëŒ€ì‚¬ ìŠ¤í‚µ ê°€ëŠ¥ ì—¬ë¶€ë¥¼ ë‹¤ì‹œ ì„¤ì •
         gameManager.uIManager.ChangeIsSkipping(true);
 
-        // ÇÃ·¹ÀÌ¾î°¡ Áú¹®À» ÀÔ·ÂÇÒ ¼ö ÀÖµµ·Ï ÀÔ·Â ÇÊµå¿¡ Æ÷Ä¿½º
+        // í”Œë ˆì´ì–´ê°€ ì§ˆë¬¸ì„ ì…ë ¥í•  ìˆ˜ ìˆë„ë¡ ì…ë ¥ í•„ë“œì— í¬ì»¤ìŠ¤
         gameManager.uIManager.FocusOnAskField();
 
-        // ÇöÀç ½ÇÇà ÁßÀÎ ÄÚ·çÆ¾À» ÃÊ±âÈ­ÇÏ¿© ´ÙÀ½ ½ÇÇàÀ» ÁØºñ
+        // í˜„ì¬ ì‹¤í–‰ ì¤‘ì¸ ì½”ë£¨í‹´ì„ ì´ˆê¸°í™”í•˜ì—¬ ë‹¤ìŒ ì‹¤í–‰ì„ ì¤€ë¹„
         displayCoroutine = null;
     }
 
     /// <summary>
-    /// ´ÙÀ½ ¹®ÀåÀ¸·Î ³Ñ¾î°¥ ¼ö ÀÖµµ·Ï »óÅÂ º¯°æ
+    /// ë‹¤ìŒ ë¬¸ì¥ìœ¼ë¡œ ë„˜ì–´ê°ˆ ìˆ˜ ìˆë„ë¡ ìƒíƒœ ë³€ê²½
     /// </summary>
     public void IsAbleToGoNextTrue()
     {
@@ -226,7 +256,7 @@ public class ConversationManager : MonoBehaviour
     //-------------------------------------------------------------//    
 
     /// <summary>
-    /// NPC¿¡ µû¶ó dialogue ´ë»ç ¼Ò¸® º¯°æ
+    /// NPCì— ë”°ë¼ dialogue ëŒ€ì‚¬ ì†Œë¦¬ ë³€ê²½
     /// </summary>
     void SetAudio()
     {
@@ -236,14 +266,14 @@ public class ConversationManager : MonoBehaviour
         }
         else
         {
-            SoundManager.Instance.ChangeTextAudioClip(typeSounds[0]); // ±âº»°ª
+            SoundManager.Instance.ChangeTextAudioClip(typeSounds[0]); // ê¸°ë³¸ê°’
         }
     }
 
     //-------------------------------------------------------------//
 
     /// <summary>
-    /// ´ëÈ­¸¦ ½ÃÀÛÇÏ´Â ¸Ş¼­µå (¸¶¿ì½º Å¬¸¯ ½Ã ½ÇÇà)
+    /// ëŒ€í™”ë¥¼ ì‹œì‘í•˜ëŠ” ë©”ì„œë“œ (ë§ˆìš°ìŠ¤ í´ë¦­ ì‹œ ì‹¤í–‰)
     /// </summary>
     public void StartConversation()
     {
@@ -262,7 +292,7 @@ public class ConversationManager : MonoBehaviour
 
 
     /// <summary>
-    /// ´ëÈ­¸¦ Á¾·áÇÏ´Â ¸Ş¼­µå (NPC¿Í ´ëÈ­ Á¾·á ½Ã ½ÇÇà)
+    /// ëŒ€í™”ë¥¼ ì¢…ë£Œí•˜ëŠ” ë©”ì„œë“œ (NPCì™€ ëŒ€í™” ì¢…ë£Œ ì‹œ ì‹¤í–‰)
     /// </summary>
     public void EndConversation()
     {
@@ -285,7 +315,7 @@ public class ConversationManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ´ëÈ­ ÁßÀÎÁö ¿©ºÎ ¹İÈ¯
+    /// ëŒ€í™” ì¤‘ì¸ì§€ ì—¬ë¶€ ë°˜í™˜
     /// </summary>
     public bool GetIsTalking()
     {

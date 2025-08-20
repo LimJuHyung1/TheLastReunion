@@ -1,57 +1,72 @@
+ï»¿using Steamworks;
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
+using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.UI;
 
 public class EndSceneManager : MonoBehaviour
 {
     public LayerMask npcLayer;
     public EndCamera cam;
-    public Transform[] NPCTransform;        // 3¸íÀÇ NPC
+    public Transform[] NPCTransform;        // 3ëª…ì˜ NPC
 
     [Header("UI")]
     public GameObject ox;
     public GameObject mouseDescription;
     public Image screen;
     public Image chatBox;
-    public Text finalDialogueText;
-    public Text endingCredit;
     public Text finalStatement;
     public Text selectNPC;
 
+    [Header("EndingCredit")]
+    public Text finalDialogueText;
+    public Graphic endingCredit;
+    public Image NPCEndingImage;
+    public Sprite[] nasonEndingImages;
+    public Sprite[] jennyEndingImages;
+    public Sprite[] minaEndingImages;
+    private int[] nasonEndingIndex = { 0, 4, 9, 11, 13 };
+    private int[] jennyEndingIndex = { 0, 3, 8, 10, 13 };
+    private int[] minaEndingIndex = { 0, 2, 6, 9, 11 };
+    
     [Header("Audio")]
     public AudioClip[] nasonClips;
     public AudioClip[] jennyClips;
     public AudioClip[] minaClips;
 
-    [Header("2¹è¼Ó ¸ğµå")]
-    public GameObject _2x_Parent;       // 2¹è¼Ó Å¬·¡½º
+    [Header("2ë°°ì† ëª¨ë“œ")]
+    public GameObject _2x_Parent;       // 2ë°°ì† í´ë˜ìŠ¤
     private _2x _2xClass;
 
-    private bool isClicked = false;         // npc°¡ Å¬¸¯µÇ¾ú´Â°¡
-    private bool isReadyToClick = false;    // ¿£µå ¾À Å¬¸¯ ¹ö±× ¹æÁö
-    private bool isEndingStarted = false; // Áßº¹ ½ÇÇà ¹æÁö¿ë ÇÃ·¡±×
-    private int index = 0;                  // ÃÖÈÄÀÇ Áø¼ú ÀÎµ¦½º
-    private int npcNum = -1;                // ¼±ÅÃµÈ NPCÀÇ ¹øÈ£
+    private bool isClicked = false;         // npcê°€ í´ë¦­ë˜ì—ˆëŠ”ê°€
+    private bool isReadyToClick = false;    // ì—”ë“œ ì”¬ í´ë¦­ ë²„ê·¸ ë°©ì§€
+    private bool isEndingStarted = false; // ì¤‘ë³µ ì‹¤í–‰ ë°©ì§€ìš© í”Œë˜ê·¸
+    private int index = 0;                  // ìµœí›„ì˜ ì§„ìˆ  ì¸ë±ìŠ¤
+    private int npcNum = -1;                // ì„ íƒëœ NPCì˜ ë²ˆí˜¸
 
-    // NPCº° ÃÖÈÄÀÇ Áø¼ú
+    // NPCë³„ ìµœí›„ì˜ ì§„ìˆ 
     private string[] nasonFinalStatement;
     private string[] jennyFinalStatement;
     private string[] minaFinalStatement;
     private string[][] allFinalStatements;
 
-    // NPCº° ¿£µù ´ë»ç
+    // NPCë³„ ì—”ë”© ëŒ€ì‚¬
     private string[] nasonEnd;
     private string[] jennyEnd;
     private string[] minaEnd;
 
     private AudioClip[][] allClips;
-    private GameObject hoveredObject = null;    // ¸¶¿ì½º°¡ °¡¸®Å°´Â NPC    
+    private GameObject hoveredObject = null;    // ë§ˆìš°ìŠ¤ê°€ ê°€ë¦¬í‚¤ëŠ” NPC    
+    private Locale locale; // ë¡œì»¬ë¼ì´ì œì´ì…˜ ì„¤ì •
 
     // Start is called before the first frame update
     void Start()
     {
         screen.gameObject.SetActive(true);
+        NPCEndingImage.gameObject.SetActive(false);
         StartCoroutine(FadeUtility.Instance.FadeOut(screen, 2f));
 
         selectNPC.gameObject.SetActive(true);
@@ -61,9 +76,11 @@ public class EndSceneManager : MonoBehaviour
 
         StartCoroutine(SoundManager.Instance.FadeOutAndChangeClip(SoundManager.Instance.GetSelectCriminalBGM()));
 
+        locale = LocalizationSettings.SelectedLocale;
+
         SetStatements();
         SetEndText();
-        SetClips();
+        SetClips();        
 
         StartCoroutine(WaitClick(false, screen, 2f));
     }
@@ -72,16 +89,16 @@ public class EndSceneManager : MonoBehaviour
     {
         if (isReadyToClick)
         {
-            // ¸¶¿ì½º À§Ä¡¿¡¼­ ·¹ÀÌ »ı¼º
+            // ë§ˆìš°ìŠ¤ ìœ„ì¹˜ì—ì„œ ë ˆì´ ìƒì„±
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
 
-            // ¸¶¿ì½º°¡ npcLayer¿¡ ÇØ´çÇÏ´Â ¿ÀºêÁ§Æ® À§¿¡ ÀÖ´ÂÁö È®ÀÎ
+            // ë§ˆìš°ìŠ¤ê°€ npcLayerì— í•´ë‹¹í•˜ëŠ” ì˜¤ë¸Œì íŠ¸ ìœ„ì— ìˆëŠ”ì§€ í™•ì¸
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, npcLayer))
             {
                 GameObject currentHoveredObject = hit.collider.gameObject;
 
-                // Hover »óÅÂ Ã³¸®
+                // Hover ìƒíƒœ ì²˜ë¦¬
                 if (hoveredObject != currentHoveredObject && !isClicked)
                 {
                     hoveredObject = currentHoveredObject;
@@ -90,18 +107,51 @@ public class EndSceneManager : MonoBehaviour
                     switch (hoveredObject.name)
                     {
                         case "Nason":
-                            mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "³×ÀÌ½¼";
+                            if (locale.Identifier.Code == "en")
+                            {
+                                mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "Nason";
+                            }
+                            else if (locale.Identifier.Code == "ja")
+                            {
+                                mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "ãƒã‚¤ã‚½ãƒ³";
+                            }
+                            else if (locale.Identifier.Code == "ko")
+                            {
+                                mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "ë„¤ì´ìŠ¨";
+                            }                            
                             break;
                         case "Jenny":
-                            mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "Á¦´Ï";
+                            if (locale.Identifier.Code == "en")
+                            {
+                                mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "Jenny";
+                            }
+                            else if (locale.Identifier.Code == "ja")
+                            {
+                                mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "ã‚¸ã‚§ãƒ‹ãƒ¼";
+                            }
+                            else if (locale.Identifier.Code == "ko")
+                            {
+                                mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "ì œë‹ˆ";
+                            }
                             break;
                         case "Mina":
-                            mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "¹Ì³ª";
+                            if (locale.Identifier.Code == "en")
+                            {
+                                mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "Mina";
+                            }
+                            else if (locale.Identifier.Code == "ja")
+                            {
+                                mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "ãƒŸãƒŠ";
+                            }
+                            else if (locale.Identifier.Code == "ko")
+                            {
+                                mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "ë¯¸ë‚˜";
+                            }
                             break;
                     }
                 }
 
-                // Å¬¸¯ÇßÀ» ¶§ ½ÇÇà
+                // í´ë¦­í–ˆì„ ë•Œ ì‹¤í–‰
                 if (Input.GetMouseButtonDown(0) && !isClicked)
                 {
                     int tmpIndex = -1;
@@ -110,16 +160,55 @@ public class EndSceneManager : MonoBehaviour
                     switch (hoveredObject.name)
                     {
                         case "Nason":
-                            tmpIndex = 2;
-                            chatBox.transform.GetChild(1).GetComponent<Text>().text = "³×ÀÌ½¼";
+                            if (locale.Identifier.Code == "en")
+                            {
+                                tmpIndex = 2;
+                                chatBox.transform.GetChild(1).GetComponent<Text>().text = "Nason";
+                            }
+                            else if (locale.Identifier.Code == "ja")
+                            {
+                                tmpIndex = 2;
+                                chatBox.transform.GetChild(1).GetComponent<Text>().text = "ãƒã‚¤ã‚½ãƒ³";
+                            }
+                            else if (locale.Identifier.Code == "ko")
+                            {
+                                tmpIndex = 2;
+                                chatBox.transform.GetChild(1).GetComponent<Text>().text = "ë„¤ì´ìŠ¨";
+                            }                            
                             break;
                         case "Jenny":
-                            tmpIndex = 1;
-                            chatBox.transform.GetChild(1).GetComponent<Text>().text = "Á¦´Ï";
+                            if (locale.Identifier.Code == "en")
+                            {
+                                tmpIndex = 1;
+                                chatBox.transform.GetChild(1).GetComponent<Text>().text = "Jenny";
+                            }
+                            else if (locale.Identifier.Code == "ja")
+                            {
+                                tmpIndex = 1;
+                                chatBox.transform.GetChild(1).GetComponent<Text>().text = "ã‚¸ã‚§ãƒ‹ãƒ¼";
+                            }
+                            else if (locale.Identifier.Code == "ko")
+                            {
+                                tmpIndex = 1;
+                                chatBox.transform.GetChild(1).GetComponent<Text>().text = "ì œë‹ˆ";
+                            }
                             break;
                         case "Mina":
-                            tmpIndex = 0;
-                            chatBox.transform.GetChild(1).GetComponent<Text>().text = "¹Ì³ª";
+                            if (locale.Identifier.Code == "en")
+                            {
+                                tmpIndex = 0;
+                                chatBox.transform.GetChild(1).GetComponent<Text>().text = "Mina";
+                            }
+                            else if (locale.Identifier.Code == "ja")
+                            {
+                                tmpIndex = 0;
+                                chatBox.transform.GetChild(1).GetComponent<Text>().text = "ãƒŸãƒŠ";
+                            }
+                            else if (locale.Identifier.Code == "ko")
+                            {
+                                tmpIndex = 0;
+                                chatBox.transform.GetChild(1).GetComponent<Text>().text = "ë¯¸ë‚˜";
+                            }
                             break;
                     }
 
@@ -131,7 +220,7 @@ public class EndSceneManager : MonoBehaviour
             }
             else
             {
-                // ¸¶¿ì½º°¡ NPC¿¡¼­ ¹ş¾î³µÀ» ¶§ hoveredObject ÃÊ±âÈ­
+                // ë§ˆìš°ìŠ¤ê°€ NPCì—ì„œ ë²—ì–´ë‚¬ì„ ë•Œ hoveredObject ì´ˆê¸°í™”
                 hoveredObject = null;
                 mouseDescription.gameObject.SetActive(false);
                 mouseDescription.transform.GetChild(1).GetComponent<Text>().text = "";
@@ -140,88 +229,248 @@ public class EndSceneManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ÃÖÈÄÀÇ Áø¼ú ´ë»ç ¼³Á¤
+    /// ìµœí›„ì˜ ì§„ìˆ  ëŒ€ì‚¬ ì„¤ì •
     /// </summary>
     void SetStatements()
     {
-        nasonFinalStatement = new string[] {
-            "Àü Àı´ë·Î ¾Ù·±À» Á×ÀÌÁö ¾Ê¾Ò½À´Ï´Ù!",
-            "Àü µ¶¿¡ ´ëÇØ ¾Æ´Â °ÍÀÌ ¾Æ¹«°Íµµ ¾ø¾î¿ä!",
-            "¾ÖÃÊ¿¡ ÀúÈñ Áß ¹üÀÎÀÌ ÀÖ´Â °ÍÀÌ È®½ÇÇÕ´Ï±î?"
+        if (locale.Identifier.Code == "en")
+        {
+            nasonFinalStatement = new string[] {
+            "I would never kill Alan!",
+            "I donâ€™t know anything about poison!",
+            "Are we even sure the culprit is one of us?"
         };
 
-        jennyFinalStatement = new string[] {
-            "¾àÇĞ¿¡ ¹Ú½ÄÇÏ´Ù´Â ÀÌÀ¯¸¸À¸·Î Àú¸¦ ¹üÀÎÀ¸·Î Áö¸ñÇÒ ¼ö´Â ¾ø¾î¿ä!",
-            "Á¦ ÇÁ·ÎÁ§Æ®°¡ ¾Ù·±¿¡ ÀÇÇØ ¹«»êµÇ¾ú´Ù ÇØµµ ±×°Ô »ìÀÎ µ¿±â°¡ µÉ ¼ö ÀÖ´Ù´Â °ÍÀÎ°¡¿ä?",
-            "Àü ¿¬ÀÎÀÌ¿´´ø ¹Ì³ª°¡ ¿ÀÈ÷·Á ¾Ù·±À» »ìÇØÇÒ µ¿±â°¡ ÀÖ¾îº¸¿©¿ä."
+            jennyFinalStatement = new string[] {
+            "You canâ€™t accuse me just because Iâ€™m knowledgeable in pharmacology!",
+            "Even if Alan sabotaged my project, does that really make it a motive for murder?",
+            "Mina, his ex-girlfriend, seems to have more of a motive to kill Alan than I do."
         };
 
-        minaFinalStatement = new string[] {
-            "Àü ¾Ù·±À» Á×ÀÎ ¹üÀÎÀÌ ¾Æ´Ï¿¡¿ä!",
-            "¾Ù·±À» Á×ÀÎ ¹üÀÎÀÌ ¹àÇôÁø´Ù¸é ¹İµå½Ã º¹¼öÇÏ°Ú¾î¿ä!",
-            "°æÂû°ü´ÔÀÇ Çö¸íÇÑ ÆÇ´ÜÀ» ¹Ù¶ö²²¿ä."
+            minaFinalStatement = new string[] {
+            "Iâ€™m not the one who killed Alan!",
+            "If the one who killed Alan is revealed, Iâ€™ll make sure to get revenge!",
+            "I trust in your wise judgment, officer."
         };
+        }
+        else if (locale.Identifier.Code == "ja")
+        {
+            nasonFinalStatement = new string[] {
+            "åƒ•ãŒã‚¢ãƒ©ãƒ³ã‚’æ®ºã™ãªã‚“ã¦ã€çµ¶å¯¾ã«ã‚ã‚Šãˆã¾ã›ã‚“ï¼",
+            "æ¯’ã«ã¤ã„ã¦ã¯ä½•ã‚‚çŸ¥ã‚Šã¾ã›ã‚“ï¼",
+            "ãã‚‚ãã‚‚ã€çŠ¯äººãŒåƒ•ãŸã¡ã®ä¸­ã«ã„ã‚‹ã¨ç¢ºä¿¡ã§ãã¾ã™ã‹ï¼Ÿ"
+        };
+
+            jennyFinalStatement = new string[] {
+            "è–¬å­¦ã«è©³ã—ã„ã¨ã„ã†ç†ç”±ã ã‘ã§ã€ç§ã‚’çŠ¯äººæ‰±ã„ã—ãªã„ã§ãã ã•ã„ï¼",
+            "ã‚¢ãƒ©ãƒ³ã«ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆã‚’æ½°ã•ã‚ŒãŸã¨ã—ã¦ã‚‚ã€ãã‚ŒãŒæ®ºäººã®å‹•æ©Ÿã«ãªã‚‹ã‚“ã§ã™ã‹ï¼Ÿ",
+            "å…ƒæ‹äººã®ãƒŸãƒŠã®æ–¹ãŒã€ã‚¢ãƒ©ãƒ³ã‚’æ®ºã™å‹•æ©ŸãŒã‚ã‚‹ã‚ˆã†ã«æ€ãˆã¾ã™ã€‚"
+        };
+
+            minaFinalStatement = new string[] {
+            "ç§ã¯ã‚¢ãƒ©ãƒ³ã‚’æ®ºã—ãŸçŠ¯äººã˜ã‚ƒã‚ã‚Šã¾ã›ã‚“ï¼",
+            "ã‚¢ãƒ©ãƒ³ã‚’æ®ºã—ãŸçŠ¯äººãŒåˆ†ã‹ã£ãŸã‚‰ã€å¿…ãšå¾©è®ã—ã¾ã™ï¼",
+            "è­¦å¯Ÿå®˜ã•ã‚“ã®è³¢æ˜ãªåˆ¤æ–­ã‚’ä¿¡ã˜ã¦ã„ã¾ã™ã€‚"
+        };
+        }
+        else if (locale.Identifier.Code == "ko")
+        {
+            nasonFinalStatement = new string[] {
+            "ì „ ì ˆëŒ€ë¡œ ì•¨ëŸ°ì„ ì£½ì´ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!",
+            "ì „ ë…ì— ëŒ€í•´ ì•„ëŠ” ê²ƒì´ ì•„ë¬´ê²ƒë„ ì—†ì–´ìš”!",
+            "ì• ì´ˆì— ì €í¬ ì¤‘ ë²”ì¸ì´ ìˆëŠ” ê²ƒì´ í™•ì‹¤í•©ë‹ˆê¹Œ?"
+        };
+
+            jennyFinalStatement = new string[] {
+            "ì•½í•™ì— ë°•ì‹í•˜ë‹¤ëŠ” ì´ìœ ë§Œìœ¼ë¡œ ì €ë¥¼ ë²”ì¸ìœ¼ë¡œ ì§€ëª©í•  ìˆ˜ëŠ” ì—†ì–´ìš”!",
+            "ì œ í”„ë¡œì íŠ¸ê°€ ì•¨ëŸ°ì— ì˜í•´ ë¬´ì‚°ë˜ì—ˆë‹¤ í•´ë„ ê·¸ê²Œ ì‚´ì¸ ë™ê¸°ê°€ ë  ìˆ˜ ìˆë‹¤ëŠ” ê²ƒì¸ê°€ìš”?",
+            "ì „ ì—°ì¸ì´ì˜€ë˜ ë¯¸ë‚˜ê°€ ì˜¤íˆë ¤ ì•¨ëŸ°ì„ ì‚´í•´í•  ë™ê¸°ê°€ ìˆì–´ë³´ì—¬ìš”."
+        };
+
+            minaFinalStatement = new string[] {
+            "ì „ ì•¨ëŸ°ì„ ì£½ì¸ ë²”ì¸ì´ ì•„ë‹ˆì—ìš”!",
+            "ì•¨ëŸ°ì„ ì£½ì¸ ë²”ì¸ì´ ë°í˜€ì§„ë‹¤ë©´ ë°˜ë“œì‹œ ë³µìˆ˜í•˜ê² ì–´ìš”!",
+            "ê²½ì°°ê´€ë‹˜ì˜ í˜„ëª…í•œ íŒë‹¨ì„ ë°”ë„ê»˜ìš”."
+        };
+
+        }
+
 
         allFinalStatements = new string[][] { minaFinalStatement, jennyFinalStatement, nasonFinalStatement };
     }
 
     /// <summary>
-    /// °á¸» Àü°³ ÅØ½ºÆ® ¼³Á¤
+    /// ê²°ë§ ì „ê°œ í…ìŠ¤íŠ¸ ì„¤ì •
     /// </summary>
     void SetEndText()
     {
-        nasonEnd = new string[] {
-            "³×ÀÌ½¼À» ¹üÀÎÀ¸·Î Áö¸ñÇÏÀÚ,\n³×ÀÌ½¼Àº °í°³¸¦ ¼÷ÀÎ Ã¤ ÇÑ¼ûÀ» ³»½±´Ï´Ù.",
-            "±×´Â ÇÑÂü µ¿¾È Ä§¹¬ÇÏ´Ù°¡\nÂ÷ºĞÇÑ ¸ñ¼Ò¸®·Î ¸»ÇÕ´Ï´Ù.",
-            "\"Á¤¸»·Î Á¦°¡ ¹üÀÎÀÌ¶ó°í »ı°¢ÇÏ½Ê´Ï±î?\"",
-            "\"¾Ù·±°ú ¿À·£ Ä£±¸·Î¼­ °¥µîµµ ÀÖ¾ú°í\n±×ÀÇ Áöº´À¸·Î ÀÎÇØ È­°¡ ³­ Àûµµ ¸¹¾Ò½À´Ï´Ù.\"",
-            "\"ÇÏÁö¸¸, ¾Ù·±À» Á×ÀÏ ÀÌÀ¯´Â ¾ø½À´Ï´Ù!\"",
-            "\"Àú´Â ±×¸¦ µµ¿ì·Á ÇßÀ» »ÓÀÔ´Ï´Ù.\"",
-            "³×ÀÌ½¼ÀÇ ´«Àº ½½ÇÄÀ¸·Î °¡µæ Â÷ ÀÖÀ¸¸ç",
-            "ÀÚ½ÅÀÌ Ä£±¸¸¦ Á×¿´´Ù°í\n¿ÀÇØ¹ŞÀº °Í¿¡ ´ëÇÑ »óÃ³°¡ ±íÀÌ ¹è¾î ÀÖ½À´Ï´Ù.",
-            "Á¶»ç °úÁ¤¿¡¼­ ±×´Â ¾Ù·±À» À§ÇØ Çå½ÅÇßÁö¸¸\n»ç¾÷ ¹®Á¦¿Í ¾Ù·±ÀÇ ¿ì¿ïÁõ ¶§¹®¿¡ ÀÚÁÖ Ãæµ¹ÇÏ°Ô µÇ¾úÀ½À» ¼³¸íÇÕ´Ï´Ù.",
-            "»ç°ÇÀÌ Á¾°áµÉ ¹«·Æ,\n°æÂûÀº »õ·Ó°Ô ¹ß°ßµÈ Áõ°Å¸¦ ÅëÇØ Á¦´Ï°¡ Áø¹üÀÓÀ» ¹àÇô³À´Ï´Ù.",
-            "Á¦´Ï°¡ ¾Ù·±¿¡ ´ëÇØ ¿À·§µ¿¾È Ç°¾î¿Ô´ø\nºĞ³ë¿Í º¹¼ö½ÉÀÌ ¹üÇàÀÇ µ¿±â¿´À½À» È®ÀÎÇÏ¿´½À´Ï´Ù.",
-            "ÇÏÁö¸¸ ¾Ù·±ÀÌ È¸»çÀÇ ÀÚ±İÀ» ÀÌ¿ëÇÏ¿©\nÅõ±â¼º ÅõÀÚ¸¦ ÇÑ »ç½Ç ¶ÇÇÑ ¹àÇôÁ³°í",
-            "ÀÌ¿¡ ³×ÀÌ½¼ÀÌ °¡´ãÇÑ »ç½Çµµ ¹àÇôÁ³½À´Ï´Ù.",
-            "³×ÀÌ½¼Àº ¹ıÀû Ã¥ÀÓÀ» ÇÇÇÒ ¼ö ¾ø°Ô µÇ¸ç",
-            "»ìÀÎ ÇøÀÇ¿¡¼­´Â ¹ş¾î³µÁö¸¸ È¸°è ºÎÁ¤°ú\nÀÚ±İ À¯¿ë¿¡ ´ëÇÑ Ã¥ÀÓÀ» Áö°í ¹ıÁ¤¿¡ ¼­°Ô µË´Ï´Ù.",
-            "³×ÀÌ½¼Àº Ä£±¸¸¦ À§ÇØ ³»¸°\nÀß¸øµÈ ¼±ÅÃÀ» Æò»ı µ¿¾È Áû¾îÁö°Ô µÉ °ÍÀÔ´Ï´Ù."
+        if (locale.Identifier.Code == "en")
+        {
+            nasonEnd = new string[] {
+            "When Nason is identified as the culprit,\nhe lowers his head and lets out a sigh.",
+            "After a long silence,\r\nhe speaks in a calm voice.",
+            "\"Do you truly believe Iâ€™m the culprit?\"",
+            "\"As a longtime friend of Alan,\nwe had our conflicts,\nand I was often angry about his illness.\"",
+            "\"But I had no reason to kill him!\"",
+            "\"I only wanted to help him.\"",
+            "Nasonâ€™s eyes are filled with sorrow,",
+            "deeply wounded by being misunderstood\nas his friendâ€™s killer.",
+            "During the investigation, he explains\nthat he was devoted to helping Alan but often clashed with him\nover business issues and Alanâ€™s depression.",
+            "As the case nears its conclusion,\r\nthe police discover new evidence\nthat reveals Jenny as the true culprit.",
+            "It is confirmed that Jenny's long-held anger\r\nand desire for revenge against Alan\nwere the motives behind the crime.",
+            "However, it is also revealed\nthat Alan used company funds\nfor speculative investments,",
+            "and that Nason was complicit in this.",
+            "Nason is unable to escape legal responsibility.",
+            "Though cleared of the murder charge,\r\nhe stands trial for accounting fraud and embezzlement.",
+            "Nason will carry the burden\r\nof his wrong choice made for a friend\nfor the rest of his life."
+            };
+
+            jennyEnd = new string[] {
+            "When Jenny is identified as the culprit,\r\nshe lifts her head slowly with a bitter smile on her face.",
+            "\"Yes, I did it.\"",
+            "\"The wound Alan left in me was too deep...\r\nI couldnâ€™t just let it go.\"",
+            "Her voice carries the weight\nof long-suppressed anger and pain,",
+            "trembling on the verge of emotional outburst.",
+            "Jenny confesses the inferiority complex\r\nand the feeling of being ignored\nby Alan since their university days.",
+            "She says she was always tormented\nby the thought that she was falling behind Alan.",
+            "And when Alan sabotaged her new drug research project,\r\ncrushing her last hope,\r\nher patience reached its limit.",
+            "She thought this reunion\nwas the perfect opportunity\nto take revenge on Alan.",
+            "She confesses that she planned to poison him.",
+            "Recalling the cold satisfaction\nshe felt when she decided to carry out her revenge,",
+            "she says she wanted Alan to feel pain\r\njust as deeply as the pain he left in her.",
+            "Jenny admits to all her crimes and is arrested.",
+            "She is overwhelmed by an even greater emptiness and loss,\r\nrealizing she still canâ€™t escape Alanâ€™s shadow.",
+            "At the end of her rage and vengeance,\r\nJenny meets a lonely fate.",
         };
 
-        jennyEnd = new string[] {
-            "Á¦´Ï¸¦ ¹üÀÎÀ¸·Î Áö¸ñÇÏÀÚ ¾ó±¼¿¡\n¾¹¾µÇÑ ¹Ì¼Ò¸¦ ¶ì¸ç ÃµÃµÈ÷ °í°³¸¦ µì´Ï´Ù.",
-            "\"±×·¡¿ä, Á¦°¡ Çß½À´Ï´Ù.\"",
-            "\"¾Ù·±ÀÌ ³»°Ô ³²±ä »óÃ³´Â ³Ê¹«³ª ±í¾ú°í\n±×¸¦ ±×³É µÎ°í º¼ ¼ö´Â ¾ø¾ú½À´Ï´Ù.\"",
-            "Á¦´ÏÀÇ ¸ñ¼Ò¸®¿¡´Â ±ä ¼¼¿ù µ¿¾È\n¾ï´­·Á ¿Â ºĞ³ë¿Í »óÃ³°¡ ¹è¾î ÀÖÀ¸¸ç",
-            "°¨Á¤ÀÌ ÅÍÁ® ³ª¿Ã µíÀÌ Èçµé¸®°í ÀÖ½À´Ï´Ù.",
-            "Á¦´Ï´Â ´ëÇĞ ½ÃÀıºÎÅÍ ¾Ù·±¿¡°Ô ´À²¼´ø\n¿­µî°¨°ú ¹«½Ã´çÇÑ °æÇèÀ» °í¹éÇÕ´Ï´Ù.",
-            "±×³à´Â Ç×»ó ¾Ù·±º¸´Ù µÚÃ³Áø´Ù´Â »ı°¢¿¡ ±«·Î¿öÇß°í",
-            "¾Ù·±ÀÌ ÀÚ½ÅÀÇ ½Å¾à ¿¬±¸ ÇÁ·ÎÁ§Æ®¸¦ ¹«»ê½ÃÅ°¸ç\n¸¶Áö¸· Èñ¸Á¸¶Àú Áş¹â¾ÒÀ» ¶§ ¸ğµç ÀÎ³»½ÉÀÌ ÇÑ°è¿¡ ´Ù´Ù¶ú´Ù°í ¸»ÇÕ´Ï´Ù.",
-            "±×³à´Â ÀÌ¹ø ¸ğÀÓÀÌ ¾Ù·±¿¡°Ô\nº¹¼öÇÒ ¼ö ÀÖ´Â ÀıÈ£ÀÇ ±âÈ¸¶ó°í »ı°¢Çß°í",
-            "±×¸¦ µ¶»ìÇÒ °èÈ¹À» ¼¼¿ü´Ù°í °í¹éÇÕ´Ï´Ù.",
-            "±×³à´Â ¾Ù·±¿¡°Ô ¸¶Áö¸· º¹¼ö¸¦ °á½ÉÇßÀ» ¶§\n´À²¼´ø Â÷°¡¿î ¸¸Á·°¨À» ¶°¿Ã¸®¸ç",
-            "¾Ù·±ÀÌ ÀÚ½Å¿¡°Ô ³²±ä »óÃ³¸¸Å­\n±×¿¡°Ôµµ °íÅëÀ» ¾È±â°í ½Í¾ú´Ù°í ¸»ÇÕ´Ï´Ù.",
-            "Á¦´Ï´Â ¸ğµç ÁË¸¦ ÀÎÁ¤ÇÏ°í Ã¼Æ÷µË´Ï´Ù.",
-            "±×³à´Â ´õ Å« °øÇãÇÔ°ú »ó½Ç°¨À» ´À³¢¸ç\n¾Ù·±ÀÇ ±×¸²ÀÚ¿¡¼­ ¹ş¾î³ªÁö ¸øÇÏ´Â ÀÚ½ÅÀ» ¹ß°ßÇÕ´Ï´Ù",
-            "ºĞ³ë¿Í º¹¼öÀÇ ³¡¿¡¼­\nÁ¦´Ï´Â °íµ¶ÇÑ °á¸»À» ¸ÂÀÌÇß½À´Ï´Ù.",            
+            minaEnd = new string[] {
+            "When Mina is identified as the culprit,\r\nshe closes her eyes in shock\nand takes a deep breath in silence.",
+            "Slowly lifting her head,\r\nshe begins to speak with a sorrowful expression.",
+            "\"I loved Alan...\"",
+            "\"But I never wished for his death.\"",
+            "\"What remained in my heart\nfor him was only love... and longing.\"",
+            "\"Now that he's gone, I've lost even that.\"",
+            "She confesses that she and Alan were lovers in college,",
+            "And though they grew apart\nwhen he started his business,\r\nshe still loved him.",
+            "She reveals that when Alan invited her,\r\nshe believed it was a chance to repair their relationship\nand accepted willingly.",
+            "The police reinvestigate the case,\r\nand new evidence reveals that Jenny is the true culprit.",
+            "Jennyâ€™s long-held anger and desire\nfor revenge toward Alan are confirmed\nas the motives for the crime.",
+            "Mina not only lost the man she loved,\r\nbut was also deeply wounded\nby the suspicion of having killed him.",
+            "Her final choice leaves behind a bitter aftertaste,\r\nconcluding in a tragedy born from love and lingering affection."
         };
 
-        minaEnd = new string[] {
-            "¹Ì³ª¸¦ ¹üÀÎÀ¸·Î Áö¸ñÇÏÀÚ, Ãæ°İ¿¡ »ç·ÎÀâÇô\n¾Æ¹« ¸» ¾øÀÌ Àá½Ã ´«À» °¨°í ±íÀº ¼ûÀ» ³»½±´Ï´Ù.",
-            "±×³à´Â ÃµÃµÈ÷ °í°³¸¦ µé¾î\nÄ§¿ïÇÑ Ç¥Á¤À¸·Î Á¶¿ëÈ÷ ÀÔÀ» ¿±´Ï´Ù.",
-            "\"¾Ù·±À» »ç¶ûÇß½À´Ï´Ù...\"",
-            "\"ÇÏÁö¸¸ ±×ÀÇ Á×À½À» ¹Ù¶õ ÀûÀº ¾ø½À´Ï´Ù.\"",
-            "\"±×¿¡°Ô ³²¾Æ ÀÖ´ø Á¦ ¸¶À½Àº ¿À·ÎÁö »ç¶û°ú ¹Ì·ÃÀÌ¾ú¾î¿ä.\"",
-            "\"±×°¡ ¶°³­ Áö±İ, ±×¸¶Àúµµ ÀÒ¾î¹ö¸° ¼ÀÀÌÁÒ.\"",
-            "¾Ù·±°ú ´ëÇĞ ½ÃÀı ¿¬ÀÎÀÌ¾ú´Ù´Â °Í,",
-            "±×°¡ »ç¾÷À» ½ÃÀÛÇÏ¸é¼­ ¸Ö¾îÁ³Áö¸¸\n¿©ÀüÈ÷ ±×¸¦ »ç¶ûÇßÀ½À» °í¹éÇÕ´Ï´Ù.",
-            "±×³à´Â ¾Ù·±ÀÌ ÀÚ½ÅÀ» ÃÊ´ëÇßÀ» ¶§\n¼­·ÎÀÇ °ü°è¸¦ È¸º¹ÇÏ·Á ÇÑ´Ù°í ¹Ï°í ÈçÄèÈ÷ ¼ö¶ôÇß´Ù´Â »ç½ÇÀ» ÅĞ¾î³õ½À´Ï´Ù.",
-            "°æÂûÀº »ç°ÇÀ» ÀçÁ¶»çÇÏ¿© »õ·Î¿î Áõ°Å¸¦ ÅëÇØ\nÁø¹üÀÌ Á¦´ÏÀÓÀ» ¹àÇô³À´Ï´Ù.",
-            "Á¦´Ï°¡ ¾Ù·±¿¡ ´ëÇØ ¿À·§µ¿¾È Ç°¾î¿Ô´ø\nºĞ³ë¿Í º¹¼ö½ÉÀÌ ¹üÇàÀÇ µ¿±â¿´À½À» È®ÀÎÇÏ¿´½À´Ï´Ù.",
-            "¹Ì³ª´Â »ç¶ûÇß´ø »ç¶÷À» ÀÒ°í\n±×¸¦ Á×¿´´Ù´Â ÀÇ½É±îÁö ¹ŞÀ¸¸ç ±íÀº »óÃ³¸¦ ÀÔ¾ú½À´Ï´Ù.",
-            "±×³àÀÇ ¸¶Áö¸· ¼±ÅÃÀº ¾¹¾µÇÑ ¿©¿îÀ» ³²±â¸ç\n»ç¶û°ú ¹Ì·ÃÀÌ ¸¸µé¾î³½ ºñ±ØÀ¸·Î ¸¶¹«¸®µÇ¾ú½À´Ï´Ù."
+        }
+        else if (locale.Identifier.Code == "ja")
+        {
+            nasonEnd = new string[] {
+            "ãƒã‚¤ã‚½ãƒ³ãŒçŠ¯äººã¨ã—ã¦æŒ‡æ‘˜ã•ã‚Œã‚‹ã¨ã€\r\nå½¼ã¯ã†ã¤ã‚€ã„ã¦ãŸã‚æ¯ã‚’ã¤ãã¾ã™ã€‚",
+            "é•·ã„æ²ˆé»™ã®å¾Œã€\r\nè½ã¡ç€ã„ãŸå£°ã§è©±ã—å§‹ã‚ã¾ã™ã€‚",
+            "ã€Œæœ¬å½“ã«ç§ãŒçŠ¯äººã ã¨æ€ã„ã¾ã™ã‹ï¼Ÿã€",
+            "ã€Œã‚¢ãƒ©ãƒ³ã¨ã¯é•·å¹´ã®å‹äººã§ã€è¡çªã‚‚ã‚ã‚Šã¾ã—ãŸã—ã€\r\nå½¼ã®æŒç—…ã«è‹›ç«‹ã£ãŸã“ã¨ã‚‚ã‚ã‚Šã¾ã™ã€‚ã€",
+            "ã€Œã§ã‚‚ã€ã‚¢ãƒ©ãƒ³ã‚’æ®ºã™ç†ç”±ãªã‚“ã¦ã‚ã‚Šã¾ã›ã‚“ï¼ã€",
+            "ã€Œç§ã¯å½¼ã‚’åŠ©ã‘ãŸã‹ã£ãŸã ã‘ã§ã™ã€‚ã€",
+            "ãƒã‚¤ã‚½ãƒ³ã®ç›®ã¯æ‚²ã—ã¿ã«æº€ã¡ã¦ãŠã‚Šã€",
+            "å‹äººã‚’æ®ºã—ãŸã¨èª¤è§£ã•ã‚ŒãŸã“ã¨ã«æ·±ãå‚·ã¤ã„ã¦ã„ã¾ã™ã€‚",
+            "å½¼ã¯æœæŸ»ã®éç¨‹ã§ã€\r\nã‚¢ãƒ©ãƒ³ã‚’æ”¯ãˆã‚‹ãŸã‚ã«å°½åŠ›ã—ã¦ã„ãŸãŒã€\r\nãƒ“ã‚¸ãƒã‚¹ã®å•é¡Œã‚„ã‚¢ãƒ©ãƒ³ã®ã†ã¤ç—…ã§è¡çªãŒå¤šã‹ã£ãŸã¨èª¬æ˜ã—ã¾ã™ã€‚",
+            "äº‹ä»¶ã®çµ‚ç›¤ã€\r\næ–°ãŸã«ç™ºè¦‹ã•ã‚ŒãŸè¨¼æ‹ ã«ã‚ˆã‚Šã€\r\nçœŸçŠ¯äººãŒã‚¸ã‚§ãƒ‹ãƒ¼ã§ã‚ã‚‹ã“ã¨ãŒè­¦å¯Ÿã«ã‚ˆã£ã¦æ˜ã‚‰ã‹ã«ãªã‚Šã¾ã™ã€‚",
+            "ã‚¸ã‚§ãƒ‹ãƒ¼ãŒã‚¢ãƒ©ãƒ³ã«å¯¾ã—ã¦é•·å¹´æŠ±ã„ã¦ã„ãŸ\r\næ€’ã‚Šã¨å¾©è®å¿ƒãŒçŠ¯è¡Œã®å‹•æ©Ÿã§ã‚ã£ãŸã“ã¨ãŒç¢ºèªã•ã‚Œã¾ã—ãŸã€‚",
+            "ã—ã‹ã—ã€ã‚¢ãƒ©ãƒ³ãŒä¼šç¤¾ã®è³‡é‡‘ã‚’ä½¿ã£ã¦\r\næŠ•æ©Ÿçš„ãªæŠ•è³‡ã‚’ã—ã¦ã„ãŸäº‹å®Ÿã‚‚æ˜ã‚‰ã‹ã«ãªã‚Šã€",
+            "ãã‚Œã«ãƒã‚¤ã‚½ãƒ³ãŒé–¢ä¸ã—ã¦ã„ãŸã“ã¨ã‚‚åˆ¤æ˜ã—ã¾ã™ã€‚",
+            "ãƒã‚¤ã‚½ãƒ³ã¯æ³•çš„è²¬ä»»ã‚’å…ã‚Œã‚‹ã“ã¨ã¯ã§ããšã€",
+            "æ®ºäººã®å®¹ç–‘ã¯æ™´ã‚ŒãŸã‚‚ã®ã®ã€\r\nä¼šè¨ˆä¸æ­£ã¨è³‡é‡‘æµç”¨ã®è²¬ä»»ã‚’å•ã‚ã‚Œã¦æ³•å»·ã«ç«‹ã¤ã“ã¨ã«ãªã‚Šã¾ã™ã€‚",
+            "ãƒã‚¤ã‚½ãƒ³ã¯å‹äººã®ãŸã‚ã«ä¸‹ã—ãŸé–“é•ã£ãŸé¸æŠã‚’ã€\r\nä¸€ç”ŸèƒŒè² ã£ã¦ç”Ÿãã¦ã„ãã“ã¨ã«ãªã‚‹ã§ã—ã‚‡ã†ã€‚"
         };
+
+            jennyEnd = new string[] {
+            "ã‚¸ã‚§ãƒ‹ãƒ¼ãŒçŠ¯äººã¨ã—ã¦æŒ‡æ‘˜ã•ã‚Œã‚‹ã¨ã€\r\nå½¼å¥³ã¯è‹¦ã„ç¬‘ã¿ã‚’æµ®ã‹ã¹ãªãŒã‚‰ã€ã‚†ã£ãã‚Šã¨é¡”ã‚’ä¸Šã’ã¾ã™ã€‚",
+            "ã€Œãã†ã§ã™ã€ç§ãŒã‚„ã‚Šã¾ã—ãŸã€‚ã€",
+            "ã€Œã‚¢ãƒ©ãƒ³ãŒç§ã«æ®‹ã—ãŸå‚·ã¯ã‚ã¾ã‚Šã«ã‚‚æ·±ãã€\r\nè¦‹éã”ã™ã“ã¨ãªã‚“ã¦ã§ããªã‹ã£ãŸã‚“ã§ã™ã€‚ã€",
+            "å½¼å¥³ã®å£°ã«ã¯ã€é•·å¹´æŠ¼ã—æ®ºã—ã¦ããŸ\r\næ€’ã‚Šã¨å‚·ãŒã«ã˜ã‚“ã§ãŠã‚Šã€",
+            "æ„Ÿæƒ…ãŒä»Šã«ã‚‚æº¢ã‚Œå‡ºã—ãã†ã«æºã‚Œã¦ã„ã¾ã™ã€‚",
+            "ã‚¸ã‚§ãƒ‹ãƒ¼ã¯å¤§å­¦æ™‚ä»£ã‹ã‚‰ã‚¢ãƒ©ãƒ³ã«æ„Ÿã˜ã¦ã„ãŸåŠ£ç­‰æ„Ÿã¨ã€\r\nç„¡è¦–ã•ã‚Œã¦ããŸçµŒé¨“ã‚’å‘Šç™½ã—ã¾ã™ã€‚",
+            "å½¼å¥³ã¯å¸¸ã«ã‚¢ãƒ©ãƒ³ã«é…ã‚Œã‚’å–ã£ã¦ã„ã‚‹ã¨ã„ã†æ€ã„ã«è‹¦ã—ã¿ã€",
+            "ã‚¢ãƒ©ãƒ³ãŒå½¼å¥³ã®æ–°è–¬ç ”ç©¶ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆã‚’æ½°ã—ãŸã¨ãã€\r\næœ€å¾Œã®å¸Œæœ›ã•ãˆã‚‚è¸ã¿ã«ã˜ã‚‰ã‚ŒãŸã¨èªã‚Šã¾ã™ã€‚",
+            "å½¼å¥³ã¯ä»Šå›ã®å†ä¼šãŒã€\r\nã‚¢ãƒ©ãƒ³ã«å¾©è®ã§ãã‚‹çµ¶å¥½ã®æ©Ÿä¼šã ã¨è€ƒãˆã¾ã—ãŸã€‚",
+            "ãã—ã¦ã€å½¼ã‚’æ¯’æ®ºã™ã‚‹è¨ˆç”»ã‚’ç«‹ã¦ãŸã¨å‘Šç™½ã—ã¾ã™ã€‚",
+            "å¾©è®ã‚’æ±ºæ„ã—ãŸæ™‚ã«æ„Ÿã˜ãŸ\r\nå†·ãŸã„æº€è¶³æ„Ÿã‚’æ€ã„å‡ºã—ãªãŒã‚‰ã€",
+            "å½¼å¥³ã¯ã€ã‚¢ãƒ©ãƒ³ãŒè‡ªåˆ†ã«æ®‹ã—ãŸå‚·ã¨åŒã˜ãã‚‰ã„\r\nå½¼ã«ã‚‚è‹¦ã—ã¿ã‚’ä¸ãˆãŸã‹ã£ãŸã¨èªã‚Šã¾ã™ã€‚",
+            "ã‚¸ã‚§ãƒ‹ãƒ¼ã¯ã™ã¹ã¦ã®ç½ªã‚’èªã‚ã€é€®æ•ã•ã‚Œã¾ã™ã€‚",
+            "å½¼å¥³ã¯ã•ã‚‰ã«å¤§ããªè™šç„¡ã¨å–ªå¤±æ„Ÿã«è¥²ã‚ã‚Œã€\r\nã„ã¾ã ã«ã‚¢ãƒ©ãƒ³ã®å½±ã‹ã‚‰æŠœã‘å‡ºã›ãªã„è‡ªåˆ†ã«æ°—ã¥ãã¾ã™ã€‚",
+            "æ€’ã‚Šã¨å¾©è®ã®æœã¦ã«ã€\r\nã‚¸ã‚§ãƒ‹ãƒ¼ã¯å­¤ç‹¬ãªçµæœ«ã‚’è¿ãˆã¾ã—ãŸã€‚",
+        };
+
+            minaEnd = new string[] {
+            "ãƒŸãƒŠãŒçŠ¯äººã¨ã—ã¦æŒ‡æ‘˜ã•ã‚Œã‚‹ã¨ã€\r\nå½¼å¥³ã¯ã‚·ãƒ§ãƒƒã‚¯ã§é»™ã£ãŸã¾ã¾ç›®ã‚’é–‰ã˜ã€æ·±ãæ¯ã‚’åãã¾ã™ã€‚",
+            "ã‚†ã£ãã‚Šã¨é¡”ã‚’ä¸Šã’ã€\r\næ²ˆã‚“ã è¡¨æƒ…ã§é™ã‹ã«å£ã‚’é–‹ãã¾ã™ã€‚",
+            "ã€Œã‚¢ãƒ©ãƒ³ã‚’æ„›ã—ã¦ã„ã¾ã—ãŸ...ã€",
+            "ã€Œã§ã‚‚ã€å½¼ã®æ­»ã‚’æœ›ã‚“ã ã“ã¨ã¯ä¸€åº¦ã‚‚ã‚ã‚Šã¾ã›ã‚“ã€‚ã€",
+            "ã€Œå½¼ã«å¯¾ã™ã‚‹ç§ã®æ°—æŒã¡ã¯ã€æ„›ã¨æœªç·´ã ã‘ã§ã—ãŸã€‚ã€",
+            "ã€Œå½¼ãŒã„ãªããªã£ãŸä»Šã€ãã®æ°—æŒã¡ã•ãˆã‚‚å¤±ã£ã¦ã—ã¾ã„ã¾ã—ãŸã€‚ã€",
+            "å½¼å¥³ã¯ã‚¢ãƒ©ãƒ³ã¨å¤§å­¦æ™‚ä»£ã«æ‹äººã ã£ãŸã“ã¨ã€",
+            "å½¼ãŒäº‹æ¥­ã‚’å§‹ã‚ã¦ã‹ã‚‰è·é›¢ãŒã§ããŸãŒã€\r\nãã‚Œã§ã‚‚ãšã£ã¨å½¼ã‚’æ„›ã—ã¦ã„ãŸã¨å‘Šç™½ã—ã¾ã™ã€‚",
+            "ã‚¢ãƒ©ãƒ³ã‹ã‚‰æ‹›å¾…ã‚’å—ã‘ãŸã¨ãã€\r\né–¢ä¿‚ã‚’ä¿®å¾©ã§ãã‚‹æ©Ÿä¼šã ã¨ä¿¡ã˜ã¦ã€å–œã‚“ã§å¿œã˜ãŸã“ã¨ã‚‚æ˜ã‹ã—ã¾ã™ã€‚",
+            "è­¦å¯Ÿã¯äº‹ä»¶ã‚’å†èª¿æŸ»ã—ã€\r\næ–°ãŸãªè¨¼æ‹ ã«ã‚ˆã‚Šã€çœŸçŠ¯äººãŒã‚¸ã‚§ãƒ‹ãƒ¼ã§ã‚ã‚‹ã“ã¨ãŒæ˜ã‚‰ã‹ã«ãªã‚Šã¾ã™ã€‚",
+            "ã‚¸ã‚§ãƒ‹ãƒ¼ãŒé•·å¹´ã‚¢ãƒ©ãƒ³ã«æŠ±ã„ã¦ã„ãŸ\r\næ€’ã‚Šã¨å¾©è®å¿ƒãŒçŠ¯è¡Œã®å‹•æ©Ÿã ã£ãŸã“ã¨ãŒç¢ºèªã•ã‚Œã¾ã—ãŸã€‚",
+            "ãƒŸãƒŠã¯æ„›ã™ã‚‹äººã‚’å¤±ã£ãŸã ã‘ã§ãªãã€\r\nå½¼ã‚’æ®ºã—ãŸã¨ç–‘ã‚ã‚ŒãŸã“ã¨ã§æ·±ã„å‚·ã‚’è² ã„ã¾ã—ãŸã€‚",
+            "å½¼å¥³ã®æœ€å¾Œã®é¸æŠã¯ã»ã‚è‹¦ã„ä½™éŸ»ã‚’æ®‹ã—ã€\r\næ„›ã¨æœªç·´ãŒç”Ÿã‚“ã æ‚²åŠ‡ã§å¹•ã‚’é–‰ã˜ã¾ã—ãŸã€‚"
+        };
+
+        }
+        else if (locale.Identifier.Code == "ko")
+        {
+            nasonEnd = new string[] {
+            "ë„¤ì´ìŠ¨ì„ ë²”ì¸ìœ¼ë¡œ ì§€ëª©í•˜ì,\në„¤ì´ìŠ¨ì€ ê³ ê°œë¥¼ ìˆ™ì¸ ì±„ í•œìˆ¨ì„ ë‚´ì‰½ë‹ˆë‹¤.",     // 1
+            "ê·¸ëŠ” í•œì°¸ ë™ì•ˆ ì¹¨ë¬µí•˜ë‹¤ê°€\nì°¨ë¶„í•œ ëª©ì†Œë¦¬ë¡œ ë§í•©ë‹ˆë‹¤.",
+            "\"ì •ë§ë¡œ ì œê°€ ë²”ì¸ì´ë¼ê³  ìƒê°í•˜ì‹­ë‹ˆê¹Œ?\"",
+            "\"ì•¨ëŸ°ê³¼ ì˜¤ëœ ì¹œêµ¬ë¡œì„œ ê°ˆë“±ë„ ìˆì—ˆê³ \nê·¸ì˜ ì§€ë³‘ìœ¼ë¡œ ì¸í•´ í™”ê°€ ë‚œ ì ë„ ë§ì•˜ìŠµë‹ˆë‹¤.\"",
+            "\"í•˜ì§€ë§Œ, ì•¨ëŸ°ì„ ì£½ì¼ ì´ìœ ëŠ” ì—†ìŠµë‹ˆë‹¤!\"",        // 2
+            "\"ì €ëŠ” ê·¸ë¥¼ ë„ìš°ë ¤ í–ˆì„ ë¿ì…ë‹ˆë‹¤.\"",
+            "ë„¤ì´ìŠ¨ì˜ ëˆˆì€ ìŠ¬í””ìœ¼ë¡œ ê°€ë“ ì°¨ ìˆìœ¼ë©°",
+            "ìì‹ ì´ ì¹œêµ¬ë¥¼ ì£½ì˜€ë‹¤ê³ \nì˜¤í•´ë°›ì€ ê²ƒì— ëŒ€í•œ ìƒì²˜ê°€ ê¹Šì´ ë°°ì–´ ìˆìŠµë‹ˆë‹¤.",
+            "ì¡°ì‚¬ ê³¼ì •ì—ì„œ ê·¸ëŠ” ì•¨ëŸ°ì„ ìœ„í•´ í—Œì‹ í–ˆì§€ë§Œ\nì‚¬ì—… ë¬¸ì œì™€ ì•¨ëŸ°ì˜ ìš°ìš¸ì¦ ë•Œë¬¸ì— ìì£¼ ì¶©ëŒí•˜ê²Œ ë˜ì—ˆìŒì„ ì„¤ëª…í•©ë‹ˆë‹¤.",
+            "ì‚¬ê±´ì´ ì¢…ê²°ë  ë¬´ë µ,\nê²½ì°°ì€ ìƒˆë¡­ê²Œ ë°œê²¬ëœ ì¦ê±°ë¥¼ í†µí•´ ì œë‹ˆê°€ ì§„ë²”ì„ì„ ë°í˜€ëƒ…ë‹ˆë‹¤.",      // 3
+            "ì œë‹ˆê°€ ì•¨ëŸ°ì— ëŒ€í•´ ì˜¤ë«ë™ì•ˆ í’ˆì–´ì™”ë˜\në¶„ë…¸ì™€ ë³µìˆ˜ì‹¬ì´ ë²”í–‰ì˜ ë™ê¸°ì˜€ìŒì„ í™•ì¸í•˜ì˜€ìŠµë‹ˆë‹¤.",
+            "í•˜ì§€ë§Œ ì•¨ëŸ°ì´ íšŒì‚¬ì˜ ìê¸ˆì„ ì´ìš©í•˜ì—¬\níˆ¬ê¸°ì„± íˆ¬ìë¥¼ í•œ ì‚¬ì‹¤ ë˜í•œ ë°í˜€ì¡Œê³ ",   // 4
+            "ì´ì— ë„¤ì´ìŠ¨ì´ ê°€ë‹´í•œ ì‚¬ì‹¤ë„ ë°í˜€ì¡ŒìŠµë‹ˆë‹¤.",
+            "ë„¤ì´ìŠ¨ì€ ë²•ì  ì±…ì„ì„ í”¼í•  ìˆ˜ ì—†ê²Œ ë˜ë©°",       // 5
+            "ì‚´ì¸ í˜ì˜ì—ì„œëŠ” ë²—ì–´ë‚¬ì§€ë§Œ íšŒê³„ ë¶€ì •ê³¼\nìê¸ˆ ìœ ìš©ì— ëŒ€í•œ ì±…ì„ì„ ì§€ê³  ë²•ì •ì— ì„œê²Œ ë©ë‹ˆë‹¤.",
+            "ë„¤ì´ìŠ¨ì€ ì¹œêµ¬ë¥¼ ìœ„í•´ ë‚´ë¦°\nì˜ëª»ëœ ì„ íƒì„ í‰ìƒ ë™ì•ˆ ì§Šì–´ì§€ê²Œ ë  ê²ƒì…ë‹ˆë‹¤."
+            };
+
+            jennyEnd = new string[] {
+            "ì œë‹ˆë¥¼ ë²”ì¸ìœ¼ë¡œ ì§€ëª©í•˜ì ì–¼êµ´ì—\nì”ì“¸í•œ ë¯¸ì†Œë¥¼ ë ë©° ì²œì²œíˆ ê³ ê°œë¥¼ ë“­ë‹ˆë‹¤.",       // 1
+            "\"ê·¸ë˜ìš”, ì œê°€ í–ˆìŠµë‹ˆë‹¤.\"",
+            "\"ì•¨ëŸ°ì´ ë‚´ê²Œ ë‚¨ê¸´ ìƒì²˜ëŠ” ë„ˆë¬´ë‚˜ ê¹Šì—ˆê³ \nê·¸ë¥¼ ê·¸ëƒ¥ ë‘ê³  ë³¼ ìˆ˜ëŠ” ì—†ì—ˆìŠµë‹ˆë‹¤.\"",
+            "ì œë‹ˆì˜ ëª©ì†Œë¦¬ì—ëŠ” ê¸´ ì„¸ì›” ë™ì•ˆ\nì–µëˆŒë ¤ ì˜¨ ë¶„ë…¸ì™€ ìƒì²˜ê°€ ë°°ì–´ ìˆìœ¼ë©°",      // 2
+            "ê°ì •ì´ í„°ì ¸ ë‚˜ì˜¬ ë“¯ì´ í”ë“¤ë¦¬ê³  ìˆìŠµë‹ˆë‹¤.",
+            "ì œë‹ˆëŠ” ëŒ€í•™ ì‹œì ˆë¶€í„° ì•¨ëŸ°ì—ê²Œ ëŠê¼ˆë˜\nì—´ë“±ê°ê³¼ ë¬´ì‹œë‹¹í•œ ê²½í—˜ì„ ê³ ë°±í•©ë‹ˆë‹¤.",       
+            "ê·¸ë…€ëŠ” í•­ìƒ ì•¨ëŸ°ë³´ë‹¤ ë’¤ì²˜ì§„ë‹¤ëŠ” ìƒê°ì— ê´´ë¡œì›Œí–ˆê³ ",
+            "ì•¨ëŸ°ì´ ìì‹ ì˜ ì‹ ì•½ ì—°êµ¬ í”„ë¡œì íŠ¸ë¥¼ ë¬´ì‚°ì‹œí‚¤ë©°\në§ˆì§€ë§‰ í¬ë§ë§ˆì € ì§“ë°Ÿì•˜ì„ ë•Œ ëª¨ë“  ì¸ë‚´ì‹¬ì´ í•œê³„ì— ë‹¤ë‹¤ëë‹¤ê³  ë§í•©ë‹ˆë‹¤.",
+            "ê·¸ë…€ëŠ” ì´ë²ˆ ëª¨ì„ì´ ì•¨ëŸ°ì—ê²Œ\në³µìˆ˜í•  ìˆ˜ ìˆëŠ” ì ˆí˜¸ì˜ ê¸°íšŒë¼ê³  ìƒê°í–ˆê³ ",      // 3
+            "ê·¸ë¥¼ ë…ì‚´í•  ê³„íšì„ ì„¸ì› ë‹¤ê³  ê³ ë°±í•©ë‹ˆë‹¤.",
+            "ê·¸ë…€ëŠ” ì•¨ëŸ°ì—ê²Œ ë§ˆì§€ë§‰ ë³µìˆ˜ë¥¼ ê²°ì‹¬í–ˆì„ ë•Œ\nëŠê¼ˆë˜ ì°¨ê°€ìš´ ë§Œì¡±ê°ì„ ë– ì˜¬ë¦¬ë©°",       // 4
+            "ì•¨ëŸ°ì´ ìì‹ ì—ê²Œ ë‚¨ê¸´ ìƒì²˜ë§Œí¼\nê·¸ì—ê²Œë„ ê³ í†µì„ ì•ˆê¸°ê³  ì‹¶ì—ˆë‹¤ê³  ë§í•©ë‹ˆë‹¤.",
+            "ì œë‹ˆëŠ” ëª¨ë“  ì£„ë¥¼ ì¸ì •í•˜ê³  ì²´í¬ë©ë‹ˆë‹¤.",
+            "ê·¸ë…€ëŠ” ë” í° ê³µí—ˆí•¨ê³¼ ìƒì‹¤ê°ì„ ëŠë¼ë©°\nì•¨ëŸ°ì˜ ê·¸ë¦¼ìì—ì„œ ë²—ì–´ë‚˜ì§€ ëª»í•˜ëŠ” ìì‹ ì„ ë°œê²¬í•©ë‹ˆë‹¤",      // 5
+            "ë¶„ë…¸ì™€ ë³µìˆ˜ì˜ ëì—ì„œ\nì œë‹ˆëŠ” ê³ ë…í•œ ê²°ë§ì„ ë§ì´í–ˆìŠµë‹ˆë‹¤.",
+            };
+
+            minaEnd = new string[] {
+            "ë¯¸ë‚˜ë¥¼ ë²”ì¸ìœ¼ë¡œ ì§€ëª©í•˜ì, ì¶©ê²©ì— ì‚¬ë¡œì¡í˜€\nì•„ë¬´ ë§ ì—†ì´ ì ì‹œ ëˆˆì„ ê°ê³  ê¹Šì€ ìˆ¨ì„ ë‚´ì‰½ë‹ˆë‹¤.",    // 1
+            "ê·¸ë…€ëŠ” ì²œì²œíˆ ê³ ê°œë¥¼ ë“¤ì–´\nì¹¨ìš¸í•œ í‘œì •ìœ¼ë¡œ ì¡°ìš©íˆ ì…ì„ ì—½ë‹ˆë‹¤.",
+            "\"ì•¨ëŸ°ì„ ì‚¬ë‘í–ˆìŠµë‹ˆë‹¤...\"",        // 2
+            "\"í•˜ì§€ë§Œ ê·¸ì˜ ì£½ìŒì„ ë°”ë€ ì ì€ ì—†ìŠµë‹ˆë‹¤.\"",
+            "\"ê·¸ì—ê²Œ ë‚¨ì•„ ìˆë˜ ì œ ë§ˆìŒì€ ì˜¤ë¡œì§€ ì‚¬ë‘ê³¼ ë¯¸ë ¨ì´ì—ˆì–´ìš”.\"",
+            "\"ê·¸ê°€ ë– ë‚œ ì§€ê¸ˆ, ê·¸ë§ˆì €ë„ ìƒì–´ë²„ë¦° ì…ˆì´ì£ .\"",
+            "ì•¨ëŸ°ê³¼ ëŒ€í•™ ì‹œì ˆ ì—°ì¸ì´ì—ˆë‹¤ëŠ” ê²ƒ,",      // 3
+            "ê·¸ê°€ ì‚¬ì—…ì„ ì‹œì‘í•˜ë©´ì„œ ë©€ì–´ì¡Œì§€ë§Œ\nì—¬ì „íˆ ê·¸ë¥¼ ì‚¬ë‘í–ˆìŒì„ ê³ ë°±í•©ë‹ˆë‹¤.",
+            "ê·¸ë…€ëŠ” ì•¨ëŸ°ì´ ìì‹ ì„ ì´ˆëŒ€í–ˆì„ ë•Œ\nì„œë¡œì˜ ê´€ê³„ë¥¼ íšŒë³µí•˜ë ¤ í•œë‹¤ê³  ë¯¿ê³  í”ì¾Œíˆ ìˆ˜ë½í–ˆë‹¤ëŠ” ì‚¬ì‹¤ì„ í„¸ì–´ë†“ìŠµë‹ˆë‹¤.",
+            "ê²½ì°°ì€ ì‚¬ê±´ì„ ì¬ì¡°ì‚¬í•˜ì—¬ ìƒˆë¡œìš´ ì¦ê±°ë¥¼ í†µí•´\nì§„ë²”ì´ ì œë‹ˆì„ì„ ë°í˜€ëƒ…ë‹ˆë‹¤.",        // 4
+            "ì œë‹ˆê°€ ì•¨ëŸ°ì— ëŒ€í•´ ì˜¤ë«ë™ì•ˆ í’ˆì–´ì™”ë˜\në¶„ë…¸ì™€ ë³µìˆ˜ì‹¬ì´ ë²”í–‰ì˜ ë™ê¸°ì˜€ìŒì„ í™•ì¸í•˜ì˜€ìŠµë‹ˆë‹¤.",
+            "ë¯¸ë‚˜ëŠ” ì‚¬ë‘í–ˆë˜ ì‚¬ëŒì„ ìƒê³ \nê·¸ë¥¼ ì£½ì˜€ë‹¤ëŠ” ì˜ì‹¬ê¹Œì§€ ë°›ìœ¼ë©° ê¹Šì€ ìƒì²˜ë¥¼ ì…ì—ˆìŠµë‹ˆë‹¤.",      // 5
+            "ê·¸ë…€ì˜ ë§ˆì§€ë§‰ ì„ íƒì€ ì”ì“¸í•œ ì—¬ìš´ì„ ë‚¨ê¸°ë©°\nì‚¬ë‘ê³¼ ë¯¸ë ¨ì´ ë§Œë“¤ì–´ë‚¸ ë¹„ê·¹ìœ¼ë¡œ ë§ˆë¬´ë¦¬ë˜ì—ˆìŠµë‹ˆë‹¤."
+            };
+        }
     }
 
     void SetClips()
@@ -230,7 +479,7 @@ public class EndSceneManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ¼±ÅÃµÈ NPCÀÇ ¿£µù ÁøÇà
+    /// ì„ íƒëœ NPCì˜ ì—”ë”© ì§„í–‰
     /// </summary>
     public void SelectCriminal(int npcIndex)
     {
@@ -249,16 +498,19 @@ public class EndSceneManager : MonoBehaviour
         cam.FocusNPC(NPCTransform[npcIndex]);
         NPCTransform[npcIndex].parent.GetComponent<EndNPC>().TurnTowardPlayer(cam.transform);
 
-        StartCoroutine(ShowLine(finalStatement, allFinalStatements[npcIndex][index++ % 3], NPCTransform[npcIndex].parent.GetComponent<EndNPC>()));
+        if (locale.Identifier.Code == "en")
+            StartCoroutine(ShowLine(finalStatement, allFinalStatements[npcIndex][index++ % 3], NPCTransform[npcIndex].parent.GetComponent<EndNPC>(), 0.05f));
+        else
+            StartCoroutine(ShowLine(finalStatement, allFinalStatements[npcIndex][index++ % 3], NPCTransform[npcIndex].parent.GetComponent<EndNPC>()));
     }
 
     /// <summary>
-    /// O ¹öÆ° Å¬¸¯ ½Ã ¿£µù ÁøÇà
+    /// O ë²„íŠ¼ í´ë¦­ ì‹œ ì—”ë”© ì§„í–‰
     /// </summary>
     public void OButtton()
     {
-        if (isEndingStarted) return; // ÀÌ¹Ì ½ÇÇà ÁßÀÌ¶ó¸é return
-        isEndingStarted = true; // ½ÇÇà ½ÃÀÛ ÇÃ·¡±× ¼³Á¤
+        if (isEndingStarted) return; // ì´ë¯¸ ì‹¤í–‰ ì¤‘ì´ë¼ë©´ return
+        isEndingStarted = true; // ì‹¤í–‰ ì‹œì‘ í”Œë˜ê·¸ ì„¤ì •
 
         StartCoroutine(SoundManager.Instance.FadeOutAndChangeClip(SoundManager.Instance.GetEndingBGM()));
         StartCoroutine(OButtonCourutine(GetEnd()));        
@@ -266,36 +518,105 @@ public class EndSceneManager : MonoBehaviour
 
     public IEnumerator OButtonCourutine(string[] endStrings)
     {
-        int tmpIndex = 0; // ¿Àµğ¿À Å¬¸³ÀÇ ÀÎµ¦½º¸¦ ÃßÀûÇÏ´Â º¯¼ö
+        int tmpIndex = 0; // ì˜¤ë””ì˜¤ í´ë¦½ì˜ ì¸ë±ìŠ¤ë¥¼ ì¶”ì í•˜ëŠ” ë³€ìˆ˜
+        int dialogueIndex = 0; // í˜„ì¬ ëª‡ ë²ˆì§¸ ëŒ€ì‚¬ì¸ì§€ ì¶”ì 
 
-        // È­¸éÀ» ÆäÀÌµå ÀÎÇÏ¿© ¿£µù È­¸éÀ¸·Î ÀüÈ¯ (2ÃÊ µ¿¾È)
+        // í™”ë©´ì„ í˜ì´ë“œ ì¸í•˜ì—¬ ì—”ë”© í™”ë©´ìœ¼ë¡œ ì „í™˜ (2ì´ˆ ë™ì•ˆ)
         yield return StartCoroutine(FadeUtility.Instance.FadeIn(screen, 2f));
 
         _2xClass.FadeIn2xButton();
 
-        // ¿£µù ÅØ½ºÆ® ¹è¿­À» ÇÏ³ª¾¿ Ãâ·Â
+        // ì—”ë”© í…ìŠ¤íŠ¸ ë°°ì—´ì„ í•˜ë‚˜ì”© ì¶œë ¥
         foreach (string str in endStrings)
         {
-            finalDialogueText.text = ""; // ±âÁ¸ ÅØ½ºÆ® ÃÊ±âÈ­
+            finalDialogueText.text = ""; // ê¸°ì¡´ í…ìŠ¤íŠ¸ ì´ˆê¸°í™”            
 
-            // ´ë»ç°¡ "·Î ½ÃÀÛÇÏ´Â °æ¿ì (NPC°¡ ¸»ÇÏ´Â ºÎºĞ)
-            if (str.StartsWith("\""))
+            switch (npcNum)
             {
-                // ÇØ´ç NPCÀÇ À½¼ºÀ» Àç»ıÇÏ¸é¼­ ´ë»ç Ãâ·Â (±ÛÀÚ ÇÏ³ª¾¿ Ç¥½Ã)
-                yield return StartCoroutine(PlayNPCSound(finalDialogueText, str, allClips[npcNum][tmpIndex++], 0.1f));
+                case 0: // Mina
+                    for (int i = 0; i < minaEndingIndex.Length; i++)
+                    {
+                        if (minaEndingIndex[i] == dialogueIndex)
+                        {
+                            if(i != 0)
+                            {
+                                yield return StartCoroutine(FadeUtility.Instance.FadeOut(NPCEndingImage, 1f));
+                                NPCEndingImage.sprite = GetEndingImageSprite(dialogueIndex);
+                                yield return StartCoroutine(FadeUtility.Instance.FadeIn(NPCEndingImage, 1f));
+                            }
+                            else
+                            {
+                                NPCEndingImage.sprite = GetEndingImageSprite(dialogueIndex);
+                                yield return StartCoroutine(FadeUtility.Instance.FadeIn(NPCEndingImage, 1f));
+                            }
+                        }                            
+                    }
+                    break;
+
+                case 1: // Jenny
+                    for (int i = 0; i < jennyEndingIndex.Length; i++)
+                    {
+                        if (jennyEndingIndex[i] == dialogueIndex)
+                            if (i != 0)
+                            {
+                                yield return StartCoroutine(FadeUtility.Instance.FadeOut(NPCEndingImage, 1f));
+                                NPCEndingImage.sprite = GetEndingImageSprite(dialogueIndex);
+                                yield return StartCoroutine(FadeUtility.Instance.FadeIn(NPCEndingImage, 1f));
+                            }
+                            else
+                            {
+                                NPCEndingImage.sprite = GetEndingImageSprite(dialogueIndex);
+                                yield return StartCoroutine(FadeUtility.Instance.FadeIn(NPCEndingImage, 1f));
+                            }
+
+                    }
+                    break;
+
+                case 2: // Nason
+                    for (int i = 0; i < nasonEndingIndex.Length; i++)
+                    {
+                        if (nasonEndingIndex[i] == dialogueIndex)
+                            if (i != 0)
+                            {
+                                yield return StartCoroutine(FadeUtility.Instance.FadeOut(NPCEndingImage, 1f));
+                                NPCEndingImage.sprite = GetEndingImageSprite(dialogueIndex);
+                                yield return StartCoroutine(FadeUtility.Instance.FadeIn(NPCEndingImage, 1f));
+                            }
+                            else
+                            {
+                                NPCEndingImage.sprite = GetEndingImageSprite(dialogueIndex);
+                                yield return StartCoroutine(FadeUtility.Instance.FadeIn(NPCEndingImage, 1f));
+                            }
+                    }
+                    break;
+            }
+
+            // ëŒ€ì‚¬ê°€ "ë¡œ ì‹œì‘í•˜ëŠ” ê²½ìš° (NPCê°€ ë§í•˜ëŠ” ë¶€ë¶„)
+            if (str.StartsWith("\"") || str.StartsWith("ã€Œ"))
+            {
+                // í•´ë‹¹ NPCì˜ ìŒì„±ì„ ì¬ìƒí•˜ë©´ì„œ ëŒ€ì‚¬ ì¶œë ¥ (ê¸€ì í•˜ë‚˜ì”© í‘œì‹œ)
+                if(locale.Identifier.Code == "en")
+                    yield return StartCoroutine(PlayNPCSound(finalDialogueText, str, allClips[npcNum][tmpIndex++], 0.05f));
+                else
+                    yield return StartCoroutine(PlayNPCSound(finalDialogueText, str, allClips[npcNum][tmpIndex++], 0.1f));
             }
             else
             {
-                // ÀÏ¹İÀûÀÎ ³»·¹ÀÌ¼Ç ÅØ½ºÆ® Ãâ·Â (±ÛÀÚ ÇÏ³ª¾¿ Ç¥½Ã)
-                yield return StartCoroutine(ShowEnding(finalDialogueText, str, 0.05f));
+                // ì¼ë°˜ì ì¸ ë‚´ë ˆì´ì…˜ í…ìŠ¤íŠ¸ ì¶œë ¥ (ê¸€ì í•˜ë‚˜ì”© í‘œì‹œ)
+                if (locale.Identifier.Code == "en")
+                    yield return StartCoroutine(ShowEnding(finalDialogueText, str, 0.025f));
+                else
+                    yield return StartCoroutine(ShowEnding(finalDialogueText, str, 0.05f));
             }
 
-            yield return new WaitForSeconds(2.5f); // °¢ ´ë»ç Ãâ·Â ÈÄ 2.5ÃÊ ´ë±â
+            dialogueIndex++;
+            yield return new WaitForSeconds(2.5f); // ê° ëŒ€ì‚¬ ì¶œë ¥ í›„ 2.5ì´ˆ ëŒ€ê¸°
         }
 
-        finalDialogueText.text = ""; // ¸¶Áö¸· ÅØ½ºÆ® ÃÊ±âÈ­
+        finalDialogueText.text = ""; // ë§ˆì§€ë§‰ í…ìŠ¤íŠ¸ ì´ˆê¸°í™”
+        StartCoroutine(FadeUtility.Instance.FadeOut(NPCEndingImage, 1f));
 
-        // ¿£µù Å©·¹µ÷ Ãâ·Â ÄÚ·çÆ¾ ½ÇÇà
+        // ì—”ë”© í¬ë ˆë”§ ì¶œë ¥ ì½”ë£¨í‹´ ì‹¤í–‰
         StartCoroutine(ShowEndingCredit());
     }
 
@@ -303,18 +624,54 @@ public class EndSceneManager : MonoBehaviour
     {
         switch (npcNum)
         {
-            case 0: // mina
+            case 0: // Mina
+                UnlockAchievement("ACH_MINA_END");
                 return minaEnd;
-            case 1:
+            case 1: // Jenny
+                UnlockAchievement("ACH_JENNY_END");
                 return jennyEnd;
-            case 2:
+            case 2: // Nason
+                UnlockAchievement("ACH_NASON_END");
                 return nasonEnd;
 
             default:
-                Debug.LogError("npcIndex ¿À·ù!");
+                Debug.LogError("npcIndex ì˜¤ë¥˜!");
                 return null;
         }
+    }    
+
+    // indexì— í•´ë‹¹í•˜ëŠ” ì—”ë”© Sprite ë°˜í™˜
+    private Sprite GetEndingImageSprite(int dialogueIndex)
+    {
+        switch (npcNum)
+        {
+            case 0: // Mina
+                for (int i = 0; i < minaEndingIndex.Length; i++)
+                {
+                    if (minaEndingIndex[i] == dialogueIndex)
+                        return minaEndingImages[i];
+                }
+                break;
+
+            case 1: // Jenny
+                for (int i = 0; i < jennyEndingIndex.Length; i++)
+                {
+                    if (jennyEndingIndex[i] == dialogueIndex)
+                        return jennyEndingImages[i];
+                }
+                break;
+
+            case 2: // Nason
+                for (int i = 0; i < nasonEndingIndex.Length; i++)
+                {
+                    if (nasonEndingIndex[i] == dialogueIndex)
+                        return nasonEndingImages[i];
+                }
+                break;
+        }
+        return null;
     }
+
 
     public void XButton()
     {
@@ -342,11 +699,11 @@ public class EndSceneManager : MonoBehaviour
         if (fadeIn)
         {
             cam.FocusAndReturnToOriginal();
-            yield return StartCoroutine(FadeUtility.Instance.FadeIn(target, duration)); // FadeIn ½ÇÇà
+            yield return StartCoroutine(FadeUtility.Instance.FadeIn(target, duration)); // FadeIn ì‹¤í–‰
         }
         else
         {            
-            yield return StartCoroutine(FadeUtility.Instance.FadeOut(target, duration)); // FadeOut ½ÇÇà
+            yield return StartCoroutine(FadeUtility.Instance.FadeOut(target, duration)); // FadeOut ì‹¤í–‰
         }
 
         isReadyToClick = true;
@@ -356,8 +713,8 @@ public class EndSceneManager : MonoBehaviour
 
     public IEnumerator ShowLine(Text t, string answer, EndNPC npc, float second = 0.1f)
     {
-        t.text = ""; // ÅØ½ºÆ® ÃÊ±âÈ­
-        yield return new WaitForSeconds(1f); // 1ÃÊ ´ë±â
+        t.text = ""; // í…ìŠ¤íŠ¸ ì´ˆê¸°í™”
+        yield return new WaitForSeconds(1f); // 1ì´ˆ ëŒ€ê¸°
 
         npc.PlayEmotion(answer);        
 
@@ -367,14 +724,14 @@ public class EndSceneManager : MonoBehaviour
 
         for (int i = 0; i < answer.Length; i++)
         {
-            t.text += answer[i]; // ÇÑ ±ÛÀÚ¾¿ Ãß°¡
+            t.text += answer[i]; // í•œ ê¸€ìì”© ì¶”ê°€
             yield return new WaitForSeconds(second); 
         }
 
-        // ÄÚ·çÆ¾ÀÌ ½ÇÇàµÇ¾úÀ» °æ¿ì¿¡¸¸ Á¾·á Ã³¸®
+        // ì½”ë£¨í‹´ì´ ì‹¤í–‰ë˜ì—ˆì„ ê²½ìš°ì—ë§Œ ì¢…ë£Œ ì²˜ë¦¬
         if (dialogSoundCoroutine != null)
         {
-            StopCoroutine(dialogSoundCoroutine); // PlayDialogSound ÄÚ·çÆ¾ ÁßÁö
+            StopCoroutine(dialogSoundCoroutine); // PlayDialogSound ì½”ë£¨í‹´ ì¤‘ì§€
 
             ox.gameObject.SetActive(true);
             StartCoroutine(FadeUtility.Instance.FadeIn(ox.transform.GetChild(0).GetComponent<Graphic>(), 1f));
@@ -386,15 +743,15 @@ public class EndSceneManager : MonoBehaviour
 
     public IEnumerator PlayNPCSound(Text t, string answer, AudioClip npcSound, float second = 0.1f)
     {
-        t.text = ""; // ÅØ½ºÆ® ÃÊ±âÈ­
-        yield return new WaitForSeconds(1f); // 1ÃÊ ´ë±â
+        t.text = ""; // í…ìŠ¤íŠ¸ ì´ˆê¸°í™”
+        yield return new WaitForSeconds(1f); // 1ì´ˆ ëŒ€ê¸°
 
         SoundManager.Instance.ChangeTextAudioClip(npcSound);
         SoundManager.Instance.PlayTextSound();
 
         for (int i = 0; i < answer.Length; i++)
         {
-            t.text += answer[i]; // ÇÑ ±ÛÀÚ¾¿ Ãß°¡
+            t.text += answer[i]; // í•œ ê¸€ìì”© ì¶”ê°€
             yield return new WaitForSeconds(second);
         }
 
@@ -403,8 +760,8 @@ public class EndSceneManager : MonoBehaviour
 
     public IEnumerator ShowEnding(Text t, string answer, float second = 0.1f)
     {
-        t.text = ""; // ÅØ½ºÆ® ÃÊ±âÈ­
-        yield return new WaitForSeconds(1f); // 1ÃÊ ´ë±â
+        t.text = ""; // í…ìŠ¤íŠ¸ ì´ˆê¸°í™”
+        yield return new WaitForSeconds(1f); // 1ì´ˆ ëŒ€ê¸°
 
         Coroutine dialogSoundCoroutine = null;
 
@@ -413,14 +770,14 @@ public class EndSceneManager : MonoBehaviour
 
         for (int i = 0; i < answer.Length; i++)
         {
-            t.text += answer[i]; // ÇÑ ±ÛÀÚ¾¿ Ãß°¡
+            t.text += answer[i]; // í•œ ê¸€ìì”© ì¶”ê°€
             yield return new WaitForSeconds(second);
         }
 
-        // ÄÚ·çÆ¾ÀÌ ½ÇÇàµÇ¾úÀ» °æ¿ì¿¡¸¸ Á¾·á Ã³¸®
+        // ì½”ë£¨í‹´ì´ ì‹¤í–‰ë˜ì—ˆì„ ê²½ìš°ì—ë§Œ ì¢…ë£Œ ì²˜ë¦¬
         if (dialogSoundCoroutine != null)
         {
-            StopCoroutine(dialogSoundCoroutine); // PlayDialogSound ÄÚ·çÆ¾ ÁßÁö
+            StopCoroutine(dialogSoundCoroutine); // PlayDialogSound ì½”ë£¨í‹´ ì¤‘ì§€
 
             ox.gameObject.SetActive(true);
             StartCoroutine(FadeUtility.Instance.FadeIn(ox.transform.GetChild(0).GetComponent<Graphic>(), 1f));
@@ -432,7 +789,7 @@ public class EndSceneManager : MonoBehaviour
 
     IEnumerator PlayDialogSound()
     {
-        while (true) // ¹«ÇÑ ·çÇÁ¸¦ »ç¿ëÇÏ¿© ¹İº¹ ½ÇÇà
+        while (true) // ë¬´í•œ ë£¨í”„ë¥¼ ì‚¬ìš©í•˜ì—¬ ë°˜ë³µ ì‹¤í–‰
         {
             SoundManager.Instance.PlayTextSound();
             yield return new WaitForSeconds(0.1f);
@@ -440,107 +797,122 @@ public class EndSceneManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ¿£µù Å©·¹µ÷ Ãâ·Â
+    /// ì—”ë”© í¬ë ˆë”§ ì¶œë ¥
     /// </summary>
     private IEnumerator ShowEndingCredit()
     {
         _2xClass.Disable2xClass();
-        yield return new WaitForSeconds(2f); // 2ÃÊ ´ë±â
+        yield return new WaitForSeconds(2f); // 2ì´ˆ ëŒ€ê¸°
         StartCoroutine(FadeUtility.Instance.FadeIn(endingCredit.GetComponent<Graphic>(), 3f));
-        yield return new WaitForSeconds(10f); // 10ÃÊ ´ë±â                
+        yield return new WaitForSeconds(10f); // 10ì´ˆ ëŒ€ê¸°                
         StartCoroutine(EndGameAfterDelay());
     }
 
     private IEnumerator EndGameAfterDelay()
     {
         yield return FadeUtility.Instance.FadeOut(endingCredit, 3f);        
-        Application.Quit(); // ºôµåµÈ °ÔÀÓ Á¾·á
+        Application.Quit(); // ë¹Œë“œëœ ê²Œì„ ì¢…ë£Œ
     }
 
     /// <summary>
-    /// 2¹è¼Ó ¹öÆ° OnClick µî·Ï ÀÌº¥Æ®
+    /// 2ë°°ì† ë²„íŠ¼ OnClick ë“±ë¡ ì´ë²¤íŠ¸
     /// </summary>
     public void OnClick2x()
     {
         _2xClass.OnClick2xButton();
     }
+
+    private void UnlockAchievement(string achievementId)
+    {
+        if (!SteamManager.Initialized) return;
+
+        bool alreadyAchieved;
+        SteamUserStats.GetAchievement(achievementId, out alreadyAchieved);
+
+        if (!alreadyAchieved)
+        {
+            SteamUserStats.SetAchievement(achievementId);
+            SteamUserStats.StoreStats(); // ì €ì¥ê¹Œì§€ í•´ì•¼ ë„ì „ê³¼ì œ UI íŒì—…ì´ ëœ¸
+            Debug.Log($"Steam ì—…ì  ë‹¬ì„±: {achievementId}");
+        }
+    }
 }
 
 /// <summary>
-/// 2x ¼Óµµ¸¦ Á¶ÀıÇÏ´Â Å¬·¡½º
+/// 2x ì†ë„ë¥¼ ì¡°ì ˆí•˜ëŠ” í´ë˜ìŠ¤
 /// </summary>
 class _2x : MonoBehaviour
 {
-    private bool is2x; // ÇöÀç 2x ¼Óµµ°¡ È°¼ºÈ­µÇ¾î ÀÖ´ÂÁö ¿©ºÎ
-    private float originTimeScale = 1f; // ±âº» ½Ã°£ ¼Óµµ
-    private float _2xTimeScale = 1.75f; // 2¹è¼Ó ½Ã Àû¿ëÇÒ ½Ã°£ ¼Óµµ
+    private bool is2x; // í˜„ì¬ 2x ì†ë„ê°€ í™œì„±í™”ë˜ì–´ ìˆëŠ”ì§€ ì—¬ë¶€
+    private float originTimeScale = 1f; // ê¸°ë³¸ ì‹œê°„ ì†ë„
+    private float _2xTimeScale = 1.5f; // 2ë°°ì† ì‹œ ì ìš©í•  ì‹œê°„ ì†ë„
     private float originAlpha = 0.3f;
     private float maxAlpha = 1f;
 
 
-    private GameObject _2x_Parent; // 2x ºÎ¸ğ ¿ÀºêÁ§Æ®
-    private GameObject circle; // 2x ¸ğµå È°¼ºÈ­ ½Ã ¾Ö´Ï¸ŞÀÌ¼Ç ¿ÀºêÁ§Æ®
-    private Button _2x_Button; // 2x ¸ğµå¸¦ Åä±ÛÇÏ´Â ¹öÆ°
+    private GameObject _2x_Parent; // 2x ë¶€ëª¨ ì˜¤ë¸Œì íŠ¸
+    private GameObject circle; // 2x ëª¨ë“œ í™œì„±í™” ì‹œ ì• ë‹ˆë©”ì´ì…˜ ì˜¤ë¸Œì íŠ¸
+    private Button _2x_Button; // 2x ëª¨ë“œë¥¼ í† ê¸€í•˜ëŠ” ë²„íŠ¼
 
     /// <summary>
-    /// »ı¼ºÀÚ: 2x ¸ğµåÀÇ UI ¿ä¼Ò¸¦ ÃÊ±âÈ­
+    /// ìƒì„±ì: 2x ëª¨ë“œì˜ UI ìš”ì†Œë¥¼ ì´ˆê¸°í™”
     /// </summary>
-    /// <param name="parent">2x ¸ğµå UIÀÇ ºÎ¸ğ ¿ÀºêÁ§Æ®</param>
+    /// <param name="parent">2x ëª¨ë“œ UIì˜ ë¶€ëª¨ ì˜¤ë¸Œì íŠ¸</param>
     public _2x(GameObject parent)
     {
         _2x_Parent = parent;
-        circle = parent.transform.GetChild(0).gameObject; // Ã¹ ¹øÂ° ÀÚ½Ä ¿ÀºêÁ§Æ® (¿øÇü UI)
-        _2x_Button = parent.transform.GetChild(1).GetComponent<Button>(); // µÎ ¹øÂ° ÀÚ½Ä ¿ÀºêÁ§Æ® (¹öÆ°)
+        circle = parent.transform.GetChild(0).gameObject; // ì²« ë²ˆì§¸ ìì‹ ì˜¤ë¸Œì íŠ¸ (ì›í˜• UI)
+        _2x_Button = parent.transform.GetChild(1).GetComponent<Button>(); // ë‘ ë²ˆì§¸ ìì‹ ì˜¤ë¸Œì íŠ¸ (ë²„íŠ¼)
 
-        is2x = false; // ±âº»ÀûÀ¸·Î 2x ¸ğµå´Â ºñÈ°¼ºÈ­ »óÅÂ
+        is2x = false; // ê¸°ë³¸ì ìœ¼ë¡œ 2x ëª¨ë“œëŠ” ë¹„í™œì„±í™” ìƒíƒœ
     }
 
     /// <summary>
-    /// 2x ¹öÆ°À» ÆäÀÌµå ÀÎÇÏ¿© È°¼ºÈ­
+    /// 2x ë²„íŠ¼ì„ í˜ì´ë“œ ì¸í•˜ì—¬ í™œì„±í™”
     /// </summary>
     public void FadeIn2xButton()
     {
-        _2x_Parent.gameObject.SetActive(true);  // 2x UI ºÎ¸ğ ¿ÀºêÁ§Æ® È°¼ºÈ­
-        circle.SetActive(false);                // ¿øÇü UI ºñÈ°¼ºÈ­
-        _2x_Button.gameObject.SetActive(true);  // 2x ¹öÆ° È°¼ºÈ­
+        _2x_Parent.gameObject.SetActive(true);  // 2x UI ë¶€ëª¨ ì˜¤ë¸Œì íŠ¸ í™œì„±í™”
+        circle.SetActive(false);                // ì›í˜• UI ë¹„í™œì„±í™”
+        _2x_Button.gameObject.SetActive(true);  // 2x ë²„íŠ¼ í™œì„±í™”
     }
 
     /// <summary>
-    /// 2x ¹öÆ° Å¬¸¯ ½Ã ½ÇÇà (2x ¸ğµå On/Off)
+    /// 2x ë²„íŠ¼ í´ë¦­ ì‹œ ì‹¤í–‰ (2x ëª¨ë“œ On/Off)
     /// </summary>
     public void OnClick2xButton()
     {
-        is2x = !is2x; // ÇöÀç »óÅÂ¸¦ ¹İÀü (true ¡ê false)
+        is2x = !is2x; // í˜„ì¬ ìƒíƒœë¥¼ ë°˜ì „ (true â†” false)
 
-        // ½Ã°£ ¼Óµµ º¯°æ: 2x ¸ğµå È°¼ºÈ­ ½Ã 1.75¹è, ºñÈ°¼ºÈ­ ½Ã ±âº» ¼Óµµ
+        // ì‹œê°„ ì†ë„ ë³€ê²½: 2x ëª¨ë“œ í™œì„±í™” ì‹œ 1.75ë°°, ë¹„í™œì„±í™” ì‹œ ê¸°ë³¸ ì†ë„
         Time.timeScale = is2x ? _2xTimeScale : originTimeScale;
 
-        // ¿øÇü UI¸¦ 2x È°¼º »óÅÂ¿¡ µû¶ó Ç¥½Ã ¶Ç´Â ¼û±è
+        // ì›í˜• UIë¥¼ 2x í™œì„± ìƒíƒœì— ë”°ë¼ í‘œì‹œ ë˜ëŠ” ìˆ¨ê¹€
         circle.gameObject.SetActive(is2x);
 
-        // ¹öÆ°ÀÇ ¾ËÆÄ°ªÀ» Á¶ÀıÇÏ¿© È°¼ºÈ­ »óÅÂ¸¦ ¹İ¿µ
+        // ë²„íŠ¼ì˜ ì•ŒíŒŒê°’ì„ ì¡°ì ˆí•˜ì—¬ í™œì„±í™” ìƒíƒœë¥¼ ë°˜ì˜
         SetButtonAlpha(_2x_Button.GetComponent<Image>(), is2x ? maxAlpha : originAlpha);
     }
 
     /// <summary>
-    /// ¹öÆ°ÀÇ ¾ËÆÄ °ªÀ» º¯°æÇÏ¿© Åõ¸íµµ Á¶Àı
+    /// ë²„íŠ¼ì˜ ì•ŒíŒŒ ê°’ì„ ë³€ê²½í•˜ì—¬ íˆ¬ëª…ë„ ì¡°ì ˆ
     /// </summary>
-    /// <param name="_2x_Button_Image">¾ËÆÄ °ªÀ» º¯°æÇÒ ¹öÆ°ÀÇ ÀÌ¹ÌÁö</param>
-    /// <param name="alpha">¼³Á¤ÇÒ ¾ËÆÄ °ª (0 ~ 1)</param>
+    /// <param name="_2x_Button_Image">ì•ŒíŒŒ ê°’ì„ ë³€ê²½í•  ë²„íŠ¼ì˜ ì´ë¯¸ì§€</param>
+    /// <param name="alpha">ì„¤ì •í•  ì•ŒíŒŒ ê°’ (0 ~ 1)</param>
     private void SetButtonAlpha(Image _2x_Button_Image, float alpha)
     {
         Color newColor = _2x_Button_Image.color;
-        newColor.a = alpha; // ¾ËÆÄ °ª º¯°æ
+        newColor.a = alpha; // ì•ŒíŒŒ ê°’ ë³€ê²½
         _2x_Button_Image.color = newColor;
     }
 
     /// <summary>
-    /// 2x ¸ğµå¸¦ ºñÈ°¼ºÈ­ÇÏ°í ¿ø·¡ ¼Óµµ·Î º¹±¸
+    /// 2x ëª¨ë“œë¥¼ ë¹„í™œì„±í™”í•˜ê³  ì›ë˜ ì†ë„ë¡œ ë³µêµ¬
     /// </summary>
     public void Disable2xClass()
     {
-        Time.timeScale = originTimeScale; // ½Ã°£ ¼Óµµ¸¦ ±âº» °ªÀ¸·Î º¯°æ
-        is2x = false; // 2x ¸ğµå ºñÈ°¼ºÈ­
-        _2x_Parent.gameObject.SetActive(false); // 2x UI ÀüÃ¼ ºñÈ°¼ºÈ­
+        Time.timeScale = originTimeScale; // ì‹œê°„ ì†ë„ë¥¼ ê¸°ë³¸ ê°’ìœ¼ë¡œ ë³€ê²½
+        is2x = false; // 2x ëª¨ë“œ ë¹„í™œì„±í™”
+        _2x_Parent.gameObject.SetActive(false); // 2x UI ì „ì²´ ë¹„í™œì„±í™”
     }
 }

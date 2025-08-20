@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using OpenAI;
-using static Evidence;
+using UnityEngine.Localization.Settings;
 
 
 public class EvidenceManager : MonoBehaviour
@@ -80,6 +80,7 @@ public class EvidenceManager : MonoBehaviour
     /// </summary>
     private void InitializeEvidence(Evidence evidence)
     {
+        Debug.Log(evidence.GetName());
         EvidenceInfo evidenceInfo = GetEvidenceByName(evidence.GetName());
 
         if (evidenceInfo != null)
@@ -126,7 +127,24 @@ public class EvidenceManager : MonoBehaviour
         SetRawImage(evidencePageInstance.transform.GetChild(0), GetEvidenceRenderTexture(evidenceName));
         SetTextInChild(evidencePageInstance.transform.GetChild(1), GetEvidenceName(evidenceName));
         SetTextInChild(evidencePageInstance.transform.GetChild(2), GetEvidenceInformation(evidenceName));
-        SetTextInChild(evidencePageInstance.transform.GetChild(3), "Ãß°¡ ÈùÆ® : " + GetEvidenceNotes(evidenceName));        
+
+
+        var currentLocale = LocalizationSettings.SelectedLocale;
+
+        // ¾ð¾î ÄÚµå·Î È®ÀÎ (±ÇÀå)
+        if (currentLocale.Identifier.Code == "en")
+        {
+            SetTextInChild(evidencePageInstance.transform.GetChild(3), "Additional hint : " + GetEvidenceNotes(evidenceName));
+        }
+        else if (currentLocale.Identifier.Code == "ja")
+        {
+            SetTextInChild(evidencePageInstance.transform.GetChild(3), "õÚÊ¥ªÎ«Ò«ó«È : " + GetEvidenceNotes(evidenceName));
+        }
+        else if (currentLocale.Identifier.Code == "ko")
+        {
+            SetTextInChild(evidencePageInstance.transform.GetChild(3), "Ãß°¡ ÈùÆ® : " + GetEvidenceNotes(evidenceName));
+        }
+            
         evidenceButtonInstance.SetAnchor();
         evidenceButtonInstance.SetText(evidence);
         evidenceButtonInstance.GetComponent<Button>().onClick.AddListener(SetActiveFalseAllIntroductions);
@@ -174,7 +192,7 @@ public class EvidenceManager : MonoBehaviour
     /// </summary>
     void UpdateEvidenceButtonPositions(List<RectTransform> foundEvidenceList, ScrollRect scrollRect)
     {
-        float y = 30f;
+        float y = 50f;
         for (int i = 0; i < foundEvidenceList.Count; i++)
         {
             foundEvidenceList[i].anchoredPosition = new Vector2(0f, -y);

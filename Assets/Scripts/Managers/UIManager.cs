@@ -1,43 +1,44 @@
-using System.Collections;
+ï»¿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
-using System.Collections.Generic;
 // using static UnityEngine.Rendering.DebugUI;
 
 public class UIManager : MonoBehaviour
 {
-    // Àü¿ªÀûÀ¸·Î »ç¿ëµÇ´Â º¯¼öµé
+    // ì „ì—­ì ìœ¼ë¡œ ì‚¬ìš©ë˜ëŠ” ë³€ìˆ˜ë“¤
     public static string tmpAnswer = "";
     public string tmpQuestion = "";
-    public static bool isAttachedToEvidence = false; // Áõ°Å¿ÍÀÇ »óÈ£ÀÛ¿ë ¿©ºÎ
+    public static bool isAttachedToEvidence = false; // ì¦ê±°ì™€ì˜ ìƒí˜¸ì‘ìš© ì—¬ë¶€
 
     [Header("Managers")]
     public ConversationManager conversationManager;
     public EvidenceManager evidenceManager;
 
     [Header("UI")]
-    public Button endConversationBtn;  // ´ëÈ­ Á¾·á ¹öÆ°
-    public GameObject pulsing;  // Æ¯Á¤ ÀÌº¥Æ® ½Ã ±ôºıÀÌ´Â UI
-    public InputField askField;  // ÇÃ·¹ÀÌ¾î Áú¹® ÀÔ·Â ÇÊµå
+    public Button endConversationBtn;  // ëŒ€í™” ì¢…ë£Œ ë²„íŠ¼
+    public GameObject pulsing;  // íŠ¹ì • ì´ë²¤íŠ¸ ì‹œ ê¹œë¹¡ì´ëŠ” UI
+    public InputField askField;  // í”Œë ˆì´ì–´ ì§ˆë¬¸ ì…ë ¥ í•„ë“œ
     public Image boundaryUI;
     public Image chatBox;
     public Image screen;
-    public Image[] keys;  // °ÔÀÓ ³» »óÈ£ÀÛ¿ë Å°
+    public Image[] keys;  // ê²Œì„ ë‚´ ìƒí˜¸ì‘ìš© í‚¤
     public Text keyDescriptionText;
     public Text thingDescriptionText;
     public Text thingNameText;
-    public Timer timer;  // °ÔÀÓ Å¸ÀÌ¸Ó
+    public Timer timer;  // ê²Œì„ íƒ€ì´ë¨¸
 
     [SerializeField] Text NPCName;
     [SerializeField] Text NPCAnswer;
-    [SerializeField] GameObject waitingMark;  // NPC°¡ ¹ß¾ğ ÁØºñ Áß Ç¥½Ã
-    [SerializeField] GameObject clickMark;  // ÇÃ·¹ÀÌ¾î°¡ ÀÔ·Â °¡´ÉÇÒ ¶§ Ç¥½Ã
+    [SerializeField] GameObject waitingMark;  // NPCê°€ ë°œì–¸ ì¤€ë¹„ ì¤‘ í‘œì‹œ
+    [SerializeField] GameObject clickMark;  // í”Œë ˆì´ì–´ê°€ ì…ë ¥ ê°€ëŠ¥í•  ë•Œ í‘œì‹œ
 
-    UIManagerSup sup; // ¼­ºê UI °ü¸® Å¬·¡½º
+    UIManagerSup sup; // ì„œë¸Œ UI ê´€ë¦¬ í´ë˜ìŠ¤
 
     [SerializeField] private bool waitToSkip = true;
-    public bool isReadyToSkip = false;  // NPC°¡ ¹®Àå Ãâ·Â ½ÃÀÛ ½Ã true·Î º¯°æµÊ
+    public bool isReadyToSkip = false;  // NPCê°€ ë¬¸ì¥ ì¶œë ¥ ì‹œì‘ ì‹œ trueë¡œ ë³€ê²½ë¨
     public bool IsReadyToSkip
     {
         get { return isReadyToSkip; }
@@ -45,7 +46,7 @@ public class UIManager : MonoBehaviour
     }
 
     [SerializeField] private bool isSkipping = false;
-    [SerializeField] private bool isShowingDescription = false; // ÄÚ·çÆ¾ ½ÇÇà ¿©ºÎ È®ÀÎ
+    [SerializeField] private bool isShowingDescription = false; // ì½”ë£¨í‹´ ì‹¤í–‰ ì—¬ë¶€ í™•ì¸
     public bool IsShowingDescription
     {
         get { return isShowingDescription; }
@@ -54,12 +55,12 @@ public class UIManager : MonoBehaviour
 
     void Start()
     {
-        SetUI();    // UI ¿ä¼Ò ºñÈ°¼ºÈ­ ¹× ÃÊ±â ¼³Á¤
+        SetUI();    // UI ìš”ì†Œ ë¹„í™œì„±í™” ë° ì´ˆê¸° ì„¤ì •
         sup = new UIManagerSup(keys, keyDescriptionText, evidenceManager);
     }
 
     /// <summary>
-    /// Å° ÀÔ·Â °¨Áö ÈÄ ´ëÈ­ ½ºÅµ ±â´É È°¼ºÈ­
+    /// í‚¤ ì…ë ¥ ê°ì§€ í›„ ëŒ€í™” ìŠ¤í‚µ ê¸°ëŠ¥ í™œì„±í™”
     /// </summary>
     void OnEnable()
     {
@@ -80,7 +81,7 @@ public class UIManager : MonoBehaviour
 
 
     /// <summary>
-    /// ÃÊ±â UI ¼¼ÆÃ
+    /// ì´ˆê¸° UI ì„¸íŒ…
     /// </summary>
     void SetUI()
     {
@@ -98,20 +99,20 @@ public class UIManager : MonoBehaviour
 
         SetActiveTimer(false);
 
-        // °ÔÀÓ ÀÎÆ®·Î ºÎÅÍ ½ÇÇà½ÃÅ³ ¶§´Â true·Î ¼³Á¤ÇÏ±â - UIManagerµµ °°ÀÌ
+        // ê²Œì„ ì¸íŠ¸ë¡œ ë¶€í„° ì‹¤í–‰ì‹œí‚¬ ë•ŒëŠ” trueë¡œ ì„¤ì •í•˜ê¸° - UIManagerë„ ê°™ì´
         screen.gameObject.SetActive(true);
     }
 
     //---------------------------------------------------------------//
-    // ¾Æ·¡ ÇÔ¼öµéÀº NPC ½ºÅ©¸³Æ®¿¡¼­ È£ÃâµÊ
+    // ì•„ë˜ í•¨ìˆ˜ë“¤ì€ NPC ìŠ¤í¬ë¦½íŠ¸ì—ì„œ í˜¸ì¶œë¨
 
-    // InputField ÅØ½ºÆ® ±æÀÌ ¹İÈ¯
+    // InputField í…ìŠ¤íŠ¸ ê¸¸ì´ ë°˜í™˜
     public int GetAskFieldTextLength()
     {
         return askField.text.Length;
     }
 
-    // InputField ÅØ½ºÆ® ¹İÈ¯
+    // InputField í…ìŠ¤íŠ¸ ë°˜í™˜
     public string GetAskFieldText()
     {
         return askField.text;
@@ -128,10 +129,10 @@ public class UIManager : MonoBehaviour
     }
 
     //---------------------------------------------------------------//
-    //ConversationManager¿¡¼­ È£ÃâµÊ
+    //ConversationManagerì—ì„œ í˜¸ì¶œë¨
 
     /// <summary>
-    /// ´ëÈ­ UI¸¦ È°¼ºÈ­/ºñÈ°¼ºÈ­
+    /// ëŒ€í™” UIë¥¼ í™œì„±í™”/ë¹„í™œì„±í™”
     /// </summary>
     public void SetConversationUI(bool b)
     {
@@ -139,7 +140,7 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// UI ¿ä¼ÒµéÀ» È°¼ºÈ­/ºñÈ°¼ºÈ­ÇÏ´Â ÇïÆÛ ¸Ş¼­µå
+    /// UI ìš”ì†Œë“¤ì„ í™œì„±í™”/ë¹„í™œì„±í™”í•˜ëŠ” í—¬í¼ ë©”ì„œë“œ
     /// </summary>
     private void SetActiveUIElements(bool isActive, params GameObject[] elements)
     {
@@ -150,21 +151,21 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// NPC ÀÌ¸§ º¯°æ
+    /// NPC ì´ë¦„ ë³€ê²½
     /// </summary>
     public void ChangeNPCName(string name)
     {
         NPCName.text = name;
     }
 
-    // NPC ´äº¯ ¹İÈ¯
+    // NPC ë‹µë³€ ë°˜í™˜
     public Text GetNPCAnswer()
     {
         return NPCAnswer;
     }
 
     /// <summary>
-    /// NPC°¡ ¸»ÇÒ ¶§ ¸¶Ä¿ UI ¾÷µ¥ÀÌÆ®
+    /// NPCê°€ ë§í•  ë•Œ ë§ˆì»¤ UI ì—…ë°ì´íŠ¸
     /// </summary>
     public void SetSpeakingUI()
     {
@@ -173,9 +174,9 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// NPCÀÇ ¹ß¾ğ »óÅÂ¿¡ µû¶ó UI ¼³Á¤
+    /// NPCì˜ ë°œì–¸ ìƒíƒœì— ë”°ë¼ UI ì„¤ì •
     /// </summary>
-    /// <param name="isSpeaking">NPC°¡ ¹ß¾ğ ÁßÀÎÁö ¿©ºÎ</param>
+    /// <param name="isSpeaking">NPCê°€ ë°œì–¸ ì¤‘ì¸ì§€ ì—¬ë¶€</param>
     public void SetNPCSpeakingUI(bool isSpeaking)
     {
         waitingMark.gameObject.SetActive(isSpeaking);
@@ -183,7 +184,7 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// input fieldÀÇ Áú¹® Ä­À» °ø¹éÀ¸·Î ¼³Á¤
+    /// input fieldì˜ ì§ˆë¬¸ ì¹¸ì„ ê³µë°±ìœ¼ë¡œ ì„¤ì •
     /// </summary>
     public void SetNullInputField()
     {
@@ -201,7 +202,7 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// NPC ´äº¯ ÅØ½ºÆ®¸¦ °ø¹éÀ¸·Î ¼³Á¤
+    /// NPC ë‹µë³€ í…ìŠ¤íŠ¸ë¥¼ ê³µë°±ìœ¼ë¡œ ì„¤ì •
     /// </summary>
     public void SetBlankAnswerText()
     {
@@ -209,7 +210,7 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// NPC ´ëÈ­ Àü ¿£ÅÍ Å° °¡´ÉÇÏ°Ô ¼¼ÆÃ
+    /// NPC ëŒ€í™” ì „ ì—”í„° í‚¤ ê°€ëŠ¥í•˜ê²Œ ì„¸íŒ…
     /// </summary>
     /// <param name="action"></param>
     public void OnEndEditAskField(UnityAction action)
@@ -232,17 +233,17 @@ public class UIManager : MonoBehaviour
     public void FocusOnAskField()
     {
         askField.Select();
-        askField.ActivateInputField(); // InputField È°¼ºÈ­
+        askField.ActivateInputField(); // InputField í™œì„±í™”
     }
 
     //---------------------------------------------------------------//
 
     /// <summary>
-    /// ´ë»ç¸¦ ÇÑ ±ÛÀÚ¾¿ Ãâ·ÂÇÏ´Â ÄÚ·çÆ¾
+    /// ëŒ€ì‚¬ë¥¼ í•œ ê¸€ìì”© ì¶œë ¥í•˜ëŠ” ì½”ë£¨í‹´
     /// </summary>
     public IEnumerator ShowLine(Text t, string answer, int interrogation_pressure, float second = 0.1f, bool isTyping = true)
     {
-        t.text = ""; // ÅØ½ºÆ® ÃÊ±âÈ­
+        t.text = ""; // í…ìŠ¤íŠ¸ ì´ˆê¸°í™”
 
         t.color = interrogation_pressure switch
         {
@@ -260,27 +261,27 @@ public class UIManager : MonoBehaviour
         yield return new WaitUntil(() => waitToSkip);
         for (int i = 0; i < answer.Length; i++)
         {
-            if (isSkipping) // ¸¶¿ì½º ¿ŞÂÊ Å¬¸¯ or ¿£ÅÍÅ° °¨Áö
+            if (isSkipping) // ë§ˆìš°ìŠ¤ ì™¼ìª½ í´ë¦­ or ì—”í„°í‚¤ ê°ì§€
             {
                 isSkipping = false;
                 waitToSkip = false;
-                t.text = answer; // ÀüÃ¼ ÅØ½ºÆ® Áï½Ã Ç¥½Ã
-                break; // ·çÇÁ¸¦ Áß´ÜÇÏ°í ÀüÃ¼ ÅØ½ºÆ®¸¦ Ç¥½ÃÇÏµµ·Ï ÀÌµ¿
+                t.text = answer; // ì „ì²´ í…ìŠ¤íŠ¸ ì¦‰ì‹œ í‘œì‹œ
+                break; // ë£¨í”„ë¥¼ ì¤‘ë‹¨í•˜ê³  ì „ì²´ í…ìŠ¤íŠ¸ë¥¼ í‘œì‹œí•˜ë„ë¡ ì´ë™
             }
 
-            t.text += answer[i]; // ÇÑ ±ÛÀÚ¾¿ Ãß°¡
-            yield return new WaitForSeconds(second); // 0.02ÃÊ ´ë±â
+            t.text += answer[i]; // í•œ ê¸€ìì”© ì¶”ê°€
+            yield return new WaitForSeconds(second); // 0.02ì´ˆ ëŒ€ê¸°
         }
 
         tmpAnswer = t.text;
         isReadyToSkip = false;
         ChangeIsSkipping(false);
 
-        // ÄÚ·çÆ¾ÀÌ ½ÇÇàµÇ¾úÀ» °æ¿ì¿¡¸¸ Á¾·á Ã³¸®
+        // ì½”ë£¨í‹´ì´ ì‹¤í–‰ë˜ì—ˆì„ ê²½ìš°ì—ë§Œ ì¢…ë£Œ ì²˜ë¦¬
         if (dialogSoundCoroutine != null)
         {
             SetNPCSpeakingUI(false);
-            StopCoroutine(dialogSoundCoroutine); // PlayDialogSound ÄÚ·çÆ¾ ÁßÁö
+            StopCoroutine(dialogSoundCoroutine); // PlayDialogSound ì½”ë£¨í‹´ ì¤‘ì§€
             SoundManager.Instance.StopTextSound();
         }
 
@@ -288,39 +289,39 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Funiture, Evidence ¼³¸í ui¿¡ Ç¥½Ã
+    /// Funiture, Evidence ì„¤ëª… uiì— í‘œì‹œ
     /// </summary>
-    /// <param Áõ°Å ¼³¸í="description"></param>
+    /// <param ì¦ê±° ì„¤ëª…="description"></param>
     /// <returns></returns>
     public IEnumerator ShowDescription(string description)
     {
         if (isShowingDescription)
         {
-            yield break; // ÀÌ¹Ì ½ÇÇà ÁßÀÌ¸é ¹«½Ã
+            yield break; // ì´ë¯¸ ì‹¤í–‰ ì¤‘ì´ë©´ ë¬´ì‹œ
         }
         
-        isShowingDescription = true; // ÄÚ·çÆ¾ ½ÇÇà Áß
+        isShowingDescription = true; // ì½”ë£¨í‹´ ì‹¤í–‰ ì¤‘
 
         thingDescriptionText.text = "";
 
         foreach (char letter in description)
         {
-            thingDescriptionText.text += letter; // ÇÑ ±ÛÀÚ¾¿ Ãß°¡
+            thingDescriptionText.text += letter; // í•œ ê¸€ìì”© ì¶”ê°€
             yield return new WaitForSeconds(0.05f);
         }
 
-        // 2ÃÊ ÈÄ¿¡ ÅØ½ºÆ® Áö¿ì±â ½ÃÀÛ
+        // 2ì´ˆ í›„ì— í…ìŠ¤íŠ¸ ì§€ìš°ê¸° ì‹œì‘
         StartCoroutine(ClearDescription(2f));
     }
 
     IEnumerator ClearDescription(float delay)
     {
-        // 2ÃÊ ´ë±â
+        // 2ì´ˆ ëŒ€ê¸°
         yield return new WaitForSeconds(delay);
 
-        isShowingDescription = false; // ÄÚ·çÆ¾ Á¾·á
+        isShowingDescription = false; // ì½”ë£¨í‹´ ì¢…ë£Œ
 
-        // ÅØ½ºÆ® ³»¿ë Áö¿ì±â
+        // í…ìŠ¤íŠ¸ ë‚´ìš© ì§€ìš°ê¸°
         thingNameText.text = "";
         thingDescriptionText.text = "";
     }
@@ -338,7 +339,7 @@ public class UIManager : MonoBehaviour
 
     IEnumerator PlayDialogSound()
     {
-        while (true) // ¹«ÇÑ ·çÇÁ¸¦ »ç¿ëÇÏ¿© ¹İº¹ ½ÇÇà
+        while (true) // ë¬´í•œ ë£¨í”„ë¥¼ ì‚¬ìš©í•˜ì—¬ ë°˜ë³µ ì‹¤í–‰
         {
             SoundManager.Instance.PlayTextSound();
             yield return new WaitForSeconds(0.1f);
@@ -346,7 +347,7 @@ public class UIManager : MonoBehaviour
     }
 
     //---------------------------------------------//
-    //¾Æ·¡ ÇÔ¼öµéÀº TutorialManager¿¡¼­ È£Ãâ
+    //ì•„ë˜ í•¨ìˆ˜ë“¤ì€ TutorialManagerì—ì„œ í˜¸ì¶œ
 
     public void SetActiveCursor(bool isOn)
     {
@@ -369,7 +370,7 @@ public class UIManager : MonoBehaviour
     }
 
     //---------------------------------------------//
-    // °ÔÀÓ Áß »ç¿ëÇÒ Å° °ü·Ã ÇÔ¼ö
+    // ê²Œì„ ì¤‘ ì‚¬ìš©í•  í‚¤ ê´€ë ¨ í•¨ìˆ˜
 
     public void ShowKeyAndDescriontion(GameObject other)
     {
@@ -411,16 +412,16 @@ public class UIManager : MonoBehaviour
         pulsing.gameObject.SetActive(isOn);
     }
 
-    // ÇÁ·ÎÆÛÆ¼ Á¤ÀÇ
+    // í”„ë¡œí¼í‹° ì •ì˜
     public bool IsAttachedToEvidenceProperty
     {
         get => isAttachedToEvidence;
         set
         {
-            if (isAttachedToEvidence != value) // °ªÀÌ º¯°æµÉ ¶§¸¸ ½ÇÇà
+            if (isAttachedToEvidence != value) // ê°’ì´ ë³€ê²½ë  ë•Œë§Œ ì‹¤í–‰
             {
                 isAttachedToEvidence = value;
-                IsAttachedToEvidenceChanged(); // Æ¯Á¤ ÇÔ¼ö È£Ãâ
+                IsAttachedToEvidenceChanged(); // íŠ¹ì • í•¨ìˆ˜ í˜¸ì¶œ
             }
         }
     }
@@ -434,7 +435,7 @@ public class UIManager : MonoBehaviour
 
 public class UIManagerSup
 {
-    // 0 - Áõ°Å ¼öÁı, 1 - npc ´ëÈ­, 2 - ¹® ¿­±â
+    // 0 - ì¦ê±° ìˆ˜ì§‘, 1 - npc ëŒ€í™”, 2 - ë¬¸ ì—´ê¸°
     List<Image> keys = new List<Image>();
     Text description;
 
@@ -442,6 +443,7 @@ public class UIManagerSup
 
     string[] actionDescriptions = new string[5];
     string evidenceDescription;
+
     public UIManagerSup(Image[] keys, Text t, EvidenceManager evidenceManager)
     {
         foreach (Image key in keys)
@@ -456,11 +458,32 @@ public class UIManagerSup
 
     public void SetKeyDescriptions()
     {
-        actionDescriptions[0] = "³×ÀÌ½¼°ú ´ëÈ­ÇÏ´Ù";
-        actionDescriptions[1] = "Á¦´Ï¿Í ´ëÈ­ÇÏ´Ù";
-        actionDescriptions[2] = "¹Ì³ª¿Í ´ëÈ­ÇÏ´Ù";
-        actionDescriptions[3] = "¹®À» ¿¬´Ù";
-        actionDescriptions[4] = "Áõ°Å¸¦ ¼öÁıÇÏ´Ù";
+        var currentLocale = LocalizationSettings.SelectedLocale;
+
+        if (currentLocale.Identifier.Code == "en")
+        {
+            actionDescriptions[0] = "Talk to Nason";
+            actionDescriptions[1] = "Talk to Jenny";
+            actionDescriptions[2] = "Talk to Mina";
+            actionDescriptions[3] = "Open the door";
+            actionDescriptions[4] = "Collect evidence";
+        }
+        else if (currentLocale.Identifier.Code == "ja")
+        {
+            actionDescriptions[0] = "ãƒã‚¤ã‚½ãƒ³ã¨è©±ã™";
+            actionDescriptions[1] = "ã‚¸ã‚§ãƒ‹ãƒ¼ã¨è©±ã™";
+            actionDescriptions[2] = "ãƒŸãƒŠã¨è©±ã™";
+            actionDescriptions[3] = "ãƒ‰ã‚¢ã‚’é–‹ã‘ã‚‹";
+            actionDescriptions[4] = "è¨¼æ‹ ã‚’é›†ã‚ã‚‹";
+        }
+        else if (currentLocale.Identifier.Code == "ko")
+        {
+            actionDescriptions[0] = "ë„¤ì´ìŠ¨ê³¼ ëŒ€í™”í•˜ë‹¤";
+            actionDescriptions[1] = "ì œë‹ˆì™€ ëŒ€í™”í•˜ë‹¤";
+            actionDescriptions[2] = "ë¯¸ë‚˜ì™€ ëŒ€í™”í•˜ë‹¤";
+            actionDescriptions[3] = "ë¬¸ì„ ì—°ë‹¤";
+            actionDescriptions[4] = "ì¦ê±°ë¥¼ ìˆ˜ì§‘í•˜ë‹¤";
+        }        
 
         foreach (var key in keys)
         {
@@ -484,7 +507,7 @@ public class UIManagerSup
         else if (IsNPCLayer(layer))
         {
             keys[0].gameObject.SetActive(true);
-            // NPC¿¡ µû¶ó ¾Ë¸ÂÀº ¼³¸í º¸¿©ÁÖ±â
+            // NPCì— ë”°ë¼ ì•Œë§ì€ ì„¤ëª… ë³´ì—¬ì£¼ê¸°
             string name = other.GetComponent<NPCRole>().currentCharacter.ToString();
             switch (name)
             {

@@ -1,84 +1,121 @@
+ï»¿using System;
 using System.Collections;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using System.Text;
+using UnityEngine;
+using UnityEngine.Localization.Settings;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class IntroManager : MonoBehaviour
 {
-    // °ÔÀÓ ¿ÀºêÁ§Æ® ¹× ÂüÁ¶
+    // í…ŒìŠ¤íŠ¸ ì‹œ Trueë¡œ ì„¤ì •í•  ê²ƒ
+    public bool isTest = false;
+
+    // ê²Œì„ ì˜¤ë¸Œì íŠ¸ ë° ì°¸ì¡°
     public GameObject rainPrefab;
     public IntroPoliceCar introPoliceCar;
 
     [Header("UI")]
-    public Image screen; // ÆäÀÌµå È¿°ú¸¦ À§ÇÑ È­¸é ÀÌ¹ÌÁö
-    public Text[] introTexts; // ÀÎÆ®·Î ´ë»ç ÅØ½ºÆ® ¹è¿­
-    public GameObject loading; // ·Îµù UI ¿ÀºêÁ§Æ®
-    private Text loadingText; // ·Îµù ÆÛ¼¾Æ® Ç¥½Ã ÅØ½ºÆ®
-    public GameObject quality; // Ç°Áú ¼³Á¤ UI
-    private Slider qualitySlider; // Ç°Áú ¼³Á¤ ½½¶óÀÌ´õ    
+    public Image screen; // í˜ì´ë“œ íš¨ê³¼ë¥¼ ìœ„í•œ í™”ë©´ ì´ë¯¸ì§€
+    public Text[] introTexts; // ì¸íŠ¸ë¡œ ëŒ€ì‚¬ í…ìŠ¤íŠ¸ ë°°ì—´
+    public GameObject loading; // ë¡œë”© UI ì˜¤ë¸Œì íŠ¸
+    private Text loadingText; // ë¡œë”© í¼ì„¼íŠ¸ í‘œì‹œ í…ìŠ¤íŠ¸
+    public GameObject language; // ì–¸ì–´ ì„¤ì • UI
+    private Dropdown languageDropdown;  // ì–¸ì–´ ì„¤ì • ë“œë¡­ë‹¤ìš´
+    public GameObject quality; // í’ˆì§ˆ ì„¤ì • UI
+    private Slider qualitySlider; // í’ˆì§ˆ ì„¤ì • ìŠ¬ë¼ì´ë”        
 
     [Header("Managers")]
-    public FadeUtility fadeUtility; // ÆäÀÌµå È¿°ú °ü¸®
-    public IntroSoundManager introSoundManager; // ÀÎÆ®·Î »ç¿îµå °ü¸®
+    public FadeUtility fadeUtility; // í˜ì´ë“œ íš¨ê³¼ ê´€ë¦¬
+    public IntroSoundManager introSoundManager; // ì¸íŠ¸ë¡œ ì‚¬ìš´ë“œ ê´€ë¦¬
 
-    private short textIndex = 0; // ÇöÀç Ãâ·ÂÇÒ ÅØ½ºÆ® ÀÎµ¦½º
-    private int currentSceneIndex; // ÇöÀç ¾ÀÀÇ ÀÎµ¦½º
-    private float[] snapPoints = { 0f, 0.5f, 1f }; // Ç°Áú Á¶Àı ½º³À Æ÷ÀÎÆ®
-
-    // ÇÑ±¹¾î µğ½ºÆĞÃ³ ´ë»ç
-    string[] dispatch = {
-        "Â÷·® 42, »ç°Ç ¹øÈ£ 1375¿¡ ÀÀ´ä ¹Ù¶ø´Ï´Ù.",
-        "1234 ¿¤¸§ ½ºÆ®¸®Æ®¿¡¼­ »ìÀÎ »ç°Ç ¹ß»ı.",
-        "ÇÇÇØÀÚ´Â 30´ë ³²¼º, ÀÌ¸§Àº ¾Ù·±, »ç¸Á¿øÀÎ ºÒ¸í.",
-        "¿ëÀÇÀÚ´Â ÇÇÇØÀÚÀÇ °ÅÁÖÁö¿¡ ÃÊ´ë¹ŞÀº 3¸íÀ¸·Î ÃßÁ¤.",
-        "»ç°Ç ÇöÀåÀ» ¼ö»çÇÏ¿© ¹üÀÎÀ» Ã£¾Æ³»½Ê½Ã¿À!"
-    };
-
-    string officerResponse = "Â÷·® 42, È®ÀÎÇß½À´Ï´Ù. Ãâµ¿ ÁßÀÔ´Ï´Ù.";
-
-    // ¿µ¾î µğ½ºÆĞÃ³ ´ë»ç
-    string[] dispatch2 = {
-        "Unit 42, please respond to call number 1375.",
-        "Homicide reported at 1234 Elm Street.",
-        "The victim is a male in his 30s, named Alan, cause of death unknown.",
-        "Suspects are presumed to be three people invited to the residence.",
-        "Investigate the crime scene and find the perpetrator!"
-    };
-
-    string officerResponse2 = "Unit 42, acknowledged. En route.";
-
+    private bool isLocaleChanging;  // dropdown ë³€ìˆ˜
+    private short textIndex = 0; // í˜„ì¬ ì¶œë ¥í•  í…ìŠ¤íŠ¸ ì¸ë±ìŠ¤
+    private int currentSceneIndex; // í˜„ì¬ ì”¬ì˜ ì¸ë±ìŠ¤
+    private float[] snapPoints = { 0f, 0.5f, 1f }; // í’ˆì§ˆ ì¡°ì ˆ ìŠ¤ëƒ… í¬ì¸íŠ¸
+    
 
     void Start()
     {
-        Application.targetFrameRate = 90; // ÇÁ·¹ÀÓ Á¦ÇÑ
+        Application.targetFrameRate = 90; // í”„ë ˆì„ ì œí•œ
 
-        currentSceneIndex = SceneManager.GetActiveScene().buildIndex; // ÇöÀç ¾À ÀÎµ¦½º ÀúÀå
-        SetTextsPosition(); // ÅØ½ºÆ® À§Ä¡ ¼³Á¤
+        currentSceneIndex = SceneManager.GetActiveScene().buildIndex; // í˜„ì¬ ì”¬ ì¸ë±ìŠ¤ ì €ì¥
+        SetTextsPosition(); // í…ìŠ¤íŠ¸ ìœ„ì¹˜ ì„¤ì •
 
-        // ·Îµù ¹× Ç°Áú ¼³Á¤ UI ÃÊ±âÈ­
+        // ë¡œë”© ë° í’ˆì§ˆ ì„¤ì • UI ì´ˆê¸°í™”
         loadingText = loading.transform.GetChild(loading.transform.childCount - 1).GetComponent<Text>();
-        qualitySlider = quality.transform.GetChild(quality.transform.childCount - 1).GetComponent<Slider>();
+        // ê¸°ì¡´ ì½”ë“œ
+        // qualitySlider = quality.transform.GetChild(quality.transform.childCount - 1).GetComponent<Slider>();
+
+        languageDropdown = language.GetComponentInChildren<Dropdown>(includeInactive: true);
+        // ìˆ˜ì •ëœ ì½”ë“œ: qualityì˜ ëª¨ë“  ìì‹ ì¤‘ Slider ì»´í¬ë„ŒíŠ¸ë¥¼ ê°€ì§„ ì˜¤ë¸Œì íŠ¸ë¥¼ ì°¾ì•„ í• ë‹¹
+        qualitySlider = quality.GetComponentInChildren<Slider>(includeInactive: true);
+
+        ChangeLocale();
+        language.gameObject.SetActive(true);
+        quality.gameObject.SetActive(false);
     }
 
     /// <summary>
-    /// ÀÎÆ®·Î ½ÃÄö½º¸¦ ½ÃÀÛÇÏ´Â ÄÚ·çÆ¾
+    /// ì¸íŠ¸ë¡œ ì‹œí€€ìŠ¤ë¥¼ ì‹œì‘í•˜ëŠ” ì½”ë£¨í‹´
     /// </summary>
     private IEnumerator StartSequence()
     {
-        yield return StartCoroutine(WaitASecond(3f)); // 3ÃÊ°£ ÆäÀÌµå¾Æ¿ô ÈÄ ´ë±â
-        yield return StartCoroutine(ShowIntro()); // ÀÎÆ®·Î ¸Ş½ÃÁö Ãâ·Â
+        yield return StartCoroutine(WaitASecond(3f)); // 3ì´ˆê°„ í˜ì´ë“œì•„ì›ƒ í›„ ëŒ€ê¸°
+        yield return StartCoroutine(ShowIntro()); // ì¸íŠ¸ë¡œ ë©”ì‹œì§€ ì¶œë ¥
     }
 
     /// <summary>
-    /// ÀÎÆ®·Î ÅØ½ºÆ®¸¦ ¼øÂ÷ÀûÀ¸·Î Ãâ·ÂÇÏ´Â ÄÚ·çÆ¾
+    /// ì¸íŠ¸ë¡œ í…ìŠ¤íŠ¸ë¥¼ ìˆœì°¨ì ìœ¼ë¡œ ì¶œë ¥í•˜ëŠ” ì½”ë£¨í‹´
     /// </summary>
     private IEnumerator ShowIntro()
     {
         string initialText = "Dispatcher : ";
+        string[] dispatchs = new string[5];
+        string officerResponse = "";
 
-        // µğ½ºÆĞÃ³ ¸Ş½ÃÁö Ãâ·Â
-        foreach (string message in dispatch)
+        var currentLocale = LocalizationSettings.SelectedLocale;
+
+        // ì–¸ì–´ ì½”ë“œë¡œ í™•ì¸ (ê¶Œì¥)
+        if (currentLocale.Identifier.Code == "en")
+        {
+            dispatchs = new string[] {
+                "Unit 42, please respond to call number 1375.",
+                "Homicide reported at 1234 Elm Street.",
+                "The victim is a male in his 30s, named Alan, cause of death unknown.",
+                "Suspects are presumed to be three people invited to the residence.",
+                "Investigate the crime scene and find the perpetrator!"
+            };
+
+            officerResponse = "Unit 42, acknowledged. En route.";
+        }
+        else if (currentLocale.Identifier.Code == "ja")
+        {
+            dispatchs = new string[] {
+                "42ç•ªè»Šä¸¡ã€äº‹ä»¶ç•ªå·1375ã«å¿œç­”ã—ã¦ãã ã•ã„ã€‚",
+                "1234ã‚¨ãƒ«ãƒ ã‚¹ãƒˆãƒªãƒ¼ãƒˆã§æ®ºäººäº‹ä»¶ãŒç™ºç”Ÿã—ã¾ã—ãŸã€‚",
+                "è¢«å®³è€…ã¯30ä»£ã®ç”·æ€§ã€åå‰ã¯ã‚¢ãƒ©ãƒ³ã€æ­»å› ã¯ä¸æ˜ã§ã™ã€‚",
+                "å®¹ç–‘è€…ã¯è¢«å®³è€…ã®ä½å±…ã«æ‹›ã‹ã‚Œã¦ã„ãŸ3äººã¨æ¨å®šã•ã‚Œã¾ã™ã€‚",
+                "ç¾å ´ã‚’æœæŸ»ã—ã€çŠ¯äººã‚’çªãæ­¢ã‚ã¦ãã ã•ã„ï¼"
+            };
+
+            officerResponse = "42ç•ªè»Šä¸¡ã€ç¢ºèªã—ã¾ã—ãŸã€‚å‡ºå‹•ä¸­ã§ã™ã€‚";
+        }
+        else if (currentLocale.Identifier.Code == "ko")
+        {
+            dispatchs = new string[] {
+                "ì°¨ëŸ‰ 42, ì‚¬ê±´ ë²ˆí˜¸ 1375ì— ì‘ë‹µ ë°”ëë‹ˆë‹¤.",
+                "1234 ì—˜ë¦„ ìŠ¤íŠ¸ë¦¬íŠ¸ì—ì„œ ì‚´ì¸ ì‚¬ê±´ ë°œìƒ.",
+                "í”¼í•´ìëŠ” 30ëŒ€ ë‚¨ì„±, ì´ë¦„ì€ ì•¨ëŸ°, ì‚¬ë§ì›ì¸ ë¶ˆëª….",
+                "ìš©ì˜ìëŠ” í”¼í•´ìì˜ ê±°ì£¼ì§€ì— ì´ˆëŒ€ë°›ì€ 3ëª…ìœ¼ë¡œ ì¶”ì •.",
+                "ì‚¬ê±´ í˜„ì¥ì„ ìˆ˜ì‚¬í•˜ì—¬ ë²”ì¸ì„ ì°¾ì•„ë‚´ì‹­ì‹œì˜¤!"
+            };
+
+            officerResponse = "ì°¨ëŸ‰ 42, í™•ì¸í–ˆìŠµë‹ˆë‹¤. ì¶œë™ ì¤‘ì…ë‹ˆë‹¤.";
+        }
+
+        // ë””ìŠ¤íŒ¨ì²˜ ë©”ì‹œì§€ ì¶œë ¥
+        foreach (string message in dispatchs)
         {
             yield return new WaitForSeconds(3.5f);
             introSoundManager.PlayDispatchSound();
@@ -87,7 +124,7 @@ public class IntroManager : MonoBehaviour
             textIndex++;
         }
 
-        // ¸¶Áö¸· ÀÀ´ä Ãâ·Â
+        // ë§ˆì§€ë§‰ ì‘ë‹µ ì¶œë ¥
         initialText = "Police Officer : ";
         yield return new WaitForSeconds(3.5f);
         introSoundManager.PlayDispatchSound();
@@ -95,7 +132,7 @@ public class IntroManager : MonoBehaviour
         textIndex++;
         yield return new WaitForSeconds(3.5f);
 
-        // È­¸é ÆäÀÌµåÀÎ ¹× ·Îµù UI È°¼ºÈ­
+        // í™”ë©´ í˜ì´ë“œì¸ ë° ë¡œë”© UI í™œì„±í™”
         screen.transform.SetSiblingIndex(screen.transform.parent.childCount - 1);
         yield return StartCoroutine(fadeUtility.FadeIn(screen, 3f));
 
@@ -103,12 +140,12 @@ public class IntroManager : MonoBehaviour
         loading.gameObject.SetActive(true);
         rainPrefab.gameObject.SetActive(false);
 
-        // ´ÙÀ½ ¾ÀÀ¸·Î ÀÌµ¿
+        // ë‹¤ìŒ ì”¬ìœ¼ë¡œ ì´ë™
         yield return StartCoroutine(WaitNextScene());
     }
 
     /// <summary>
-    /// ÇÑ ±ÛÀÚ¾¿ Ãâ·ÂÇÏ´Â ÄÚ·çÆ¾ (Å¸ÀÌÇÎ È¿°ú)
+    /// í•œ ê¸€ìì”© ì¶œë ¥í•˜ëŠ” ì½”ë£¨í‹´ (íƒ€ì´í•‘ íš¨ê³¼)
     /// </summary>
     private IEnumerator ShowIntroDispatch(Text t, string dispatch, string initialText = "")
     {
@@ -124,7 +161,7 @@ public class IntroManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ÁöÁ¤µÈ ½Ã°£ µ¿¾È ´ë±â ÈÄ È­¸é ÆäÀÌµå¾Æ¿ô
+    /// ì§€ì •ëœ ì‹œê°„ ë™ì•ˆ ëŒ€ê¸° í›„ í™”ë©´ í˜ì´ë“œì•„ì›ƒ
     /// </summary>
     private IEnumerator WaitASecond(float second)
     {
@@ -133,14 +170,14 @@ public class IntroManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ´ÙÀ½ ¾ÀÀ» ºñµ¿±â ·ÎµåÇÏ°í ÁøÇàµµ¸¦ Ç¥½ÃÇÏ´Â ÄÚ·çÆ¾
+    /// ë‹¤ìŒ ì”¬ì„ ë¹„ë™ê¸° ë¡œë“œí•˜ê³  ì§„í–‰ë„ë¥¼ í‘œì‹œí•˜ëŠ” ì½”ë£¨í‹´
     /// </summary>
     private IEnumerator WaitNextScene()
     {
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(currentSceneIndex + 1);
         asyncLoad.allowSceneActivation = false;
 
-        float previousProgress = 0f; // ÀÌÀü ÁøÇà·ü ÀúÀå
+        float previousProgress = 0f; // ì´ì „ ì§„í–‰ë¥  ì €ì¥
 
         while (asyncLoad.progress < 0.9f)
         {
@@ -159,7 +196,7 @@ public class IntroManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ÅØ½ºÆ® À§Ä¡¸¦ ÀÏÁ¤ °£°İÀ¸·Î ¹èÄ¡
+    /// í…ìŠ¤íŠ¸ ìœ„ì¹˜ë¥¼ ì¼ì • ê°„ê²©ìœ¼ë¡œ ë°°ì¹˜
     /// </summary>
     private void SetTextsPosition()
     {
@@ -183,20 +220,41 @@ public class IntroManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Ç°Áú ¼³Á¤ ¿Ï·á ÈÄ ÀÎÆ®·Î ½ÃÀÛ
-    /// </summary>
-    public void EndSetQuality()
+    public void EndSetLanguage()
     {
+        language.gameObject.SetActive(false);
+        quality.gameObject.SetActive(true);
+        qualitySlider.value = 0.5f; // ì´ˆê¸°ê°’ì„ ì¤‘ê°„ìœ¼ë¡œ ì„¤ì •
+    }
+
+    public void ResetLanguage()
+    {
+        language.gameObject.SetActive(true);
         quality.gameObject.SetActive(false);
-        introPoliceCar.StartPoliceCar();
-        introPoliceCar.ReadyToSiren();
-        CursorManager.Instance.OffVisualization();
-        StartCoroutine(StartSequence());
     }
 
     /// <summary>
-    /// °ÔÀÓ Á¾·á
+    /// í’ˆì§ˆ ì„¤ì • ì™„ë£Œ í›„ ì¸íŠ¸ë¡œ ì‹œì‘
+    /// </summary>
+    public void EndSetQuality()
+    {
+        if (isTest)
+        {
+            SceneManager.LoadScene(currentSceneIndex + 1); // í…ŒìŠ¤íŠ¸ ëª¨ë“œì—ì„œëŠ” ë°”ë¡œ ë‹¤ìŒ ì”¬ìœ¼ë¡œ ì´ë™
+            return;
+        }
+        else
+        {
+            quality.gameObject.SetActive(false);
+            introPoliceCar.StartPoliceCar();
+            introPoliceCar.ReadyToSiren();
+            CursorManager.Instance.OffVisualization();
+            StartCoroutine(StartSequence());
+        }
+    }
+
+    /// <summary>
+    /// ê²Œì„ ì¢…ë£Œ
     /// </summary>
     public void ExitGame()
     {
@@ -204,11 +262,11 @@ public class IntroManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ½½¶óÀÌ´õ OnValueChanged ÀÌº¥Æ®·Î ½ÇÇà
+    /// ìŠ¬ë¼ì´ë” OnValueChanged ì´ë²¤íŠ¸ë¡œ ì‹¤í–‰
     /// </summary>
     public void OnSliderValueChanged()
     {
-        // °¡Àå °¡±î¿î ½º³À Æ÷ÀÎÆ® Ã£±â
+        // ê°€ì¥ ê°€ê¹Œìš´ ìŠ¤ëƒ… í¬ì¸íŠ¸ ì°¾ê¸°
         float closest = snapPoints[0];
 
         foreach (float point in snapPoints)
@@ -219,30 +277,48 @@ public class IntroManager : MonoBehaviour
             }
         }
 
-        // ½½¶óÀÌ´õ¸¦ °¡Àå °¡±î¿î °ªÀ¸·Î ½º³À ÀÌµ¿
-        if (qualitySlider.value != closest) // Áßº¹ ½ÇÇà ¹æÁö
+        // ìŠ¬ë¼ì´ë”ë¥¼ ê°€ì¥ ê°€ê¹Œìš´ ê°’ìœ¼ë¡œ ìŠ¤ëƒ… ì´ë™
+        if (qualitySlider.value != closest) // ì¤‘ë³µ ì‹¤í–‰ ë°©ì§€
         {
             qualitySlider.value = closest;
         }
 
-        // ½½¶óÀÌ´õ °ª¿¡ µû¶ó Ç°Áú ¼³Á¤ º¯°æ
+        // ìŠ¬ë¼ì´ë” ê°’ì— ë”°ë¼ í’ˆì§ˆ ì„¤ì • ë³€ê²½
         if (closest == 0f)
         {
-            SetQualityLevel(1); // ³·Àº È­Áú
+            SetQualityLevel(1); // ë‚®ì€ í™”ì§ˆ
         }
         else if (closest == 0.5f)
         {
-            SetQualityLevel(3); // Áß°£ È­Áú
+            SetQualityLevel(3); // ì¤‘ê°„ í™”ì§ˆ
         }
         else if (closest == 1f)
         {
-            SetQualityLevel(5); // ³ôÀº È­Áú
+            SetQualityLevel(5); // ë†’ì€ í™”ì§ˆ
         }
     }
 
     private void SetQualityLevel(int level)
     {
         QualitySettings.SetQualityLevel(level, true);
-        Debug.Log($"È­Áú ¼³Á¤ º¯°æµÊ: {QualitySettings.names[level]} (Level {level})");
+        Debug.Log($"í™”ì§ˆ ì„¤ì • ë³€ê²½ë¨: {QualitySettings.names[level]} (Level {level})");
+    }
+
+    public void ChangeLocale()
+    {
+        if (isLocaleChanging)
+            return;
+
+        StartCoroutine(ChangeRoutine(languageDropdown.value));
+    }
+
+    IEnumerator ChangeRoutine(int index)
+    {
+        isLocaleChanging = true;
+
+        yield return LocalizationSettings.InitializationOperation;
+        LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[index];
+
+        isLocaleChanging = false;
     }
 }

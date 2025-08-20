@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using UnityEngine.Localization.Settings;
 
 public class NPCRoleInfoManager
 {
@@ -18,14 +19,30 @@ public class NPCRoleInfoManager
     /// <returns></returns>
     private NPCRoleInfo GetNPCRoleByName(string npcName)
     {
+        var currentLocale = LocalizationSettings.SelectedLocale;
+
         if (JsonManager.npcRoleInfoList != null)
         {
-            foreach (NPCRoleInfo info in JsonManager.npcRoleInfoList.npcRoleInfoList)
+            if (currentLocale.Identifier.Code == "ja")
             {
-                string name = info.role.Substring(0, info.role.IndexOf(','));
-                if (name == npcName)
-                {                    
-                    return info;
+                foreach (NPCRoleInfo info in JsonManager.npcRoleInfoList.npcRoleInfoList)
+                {
+                    string name = info.role.Substring(0, info.role.IndexOf('¡¢'));
+                    if (name == npcName)
+                    {
+                        return info;
+                    }
+                }
+            }
+            else
+            {
+                foreach (NPCRoleInfo info in JsonManager.npcRoleInfoList.npcRoleInfoList)
+                {
+                    string name = info.role.Substring(0, info.role.IndexOf(','));
+                    if (name == npcName)
+                    {
+                        return info;
+                    }
                 }
             }
         }

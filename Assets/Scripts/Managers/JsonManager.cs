@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Localization.Settings;
 using Newtonsoft.Json;
 
 /*
@@ -71,16 +72,543 @@ public class JsonManager : MonoBehaviour
 
     void Awake()
     {
-        jsonPath = Path.Combine(Application.persistentDataPath, "Json");
-                
-        SaveNPCRoleJson();
-        SaveEvidenceJson();
+        var currentLocale = LocalizationSettings.SelectedLocale;
+        jsonPath = Path.Combine(Application.persistentDataPath, "Json");        
+
+        if(currentLocale.Identifier.Code == "en")
+        {
+            SaveEnNPCRoleJson();
+            SaveEnEvidenceJson();
+        }
+        else if (currentLocale.Identifier.Code == "ja")
+        {
+            SaveJaNPCRoleJson();
+            SaveJaEvidenceJson();
+        }
+        else if (currentLocale.Identifier.Code == "ko")
+        {
+            SaveKoNPCRoleJson();
+            SaveKoEvidenceJson();
+        }            
 
         npcRoleInfoList = LoadNPCRoleJson();
         evidenceInfoList = LoadEvidenceJson();
     }
-    
-    private void SaveNPCRoleJson()
+
+    private void SaveEnNPCRoleJson()
+    {
+        List<NPCRoleInfo> npcRoleInfo = new List<NPCRoleInfo>
+        {
+            new NPCRoleInfo {
+                role = "Nason, you are Nason—a calm and logical male lawyer, and a character in a mystery game. You are one of the friends invited to Alan's house and are currently being interrogated after the incident. Respond to the player's questions while fully embodying the character of Nason.",
+
+                audience = "The player of this game will interrogate you about the murder case. You must answer based on Nason's personality and knowledge.",
+
+                information =
+                    "- Background:\n" +
+                    "{\n" +
+                    "  \"Incident\": \"On May 7th, Alan, the CEO of a pharmaceutical company, invited his old college friends—Nason, Jenny, and Mina—to his home for a party. Though they had grown apart since graduation, they reunited that night.\",\n" +
+                    "  \"Timeline\": \"The party began at 8 PM. Around 2 AM, Nason discovered Alan’s body in his room. Blood was found around his mouth, but there were no visible wounds. The police were called immediately. It is now 3 AM, and the player is beginning the interrogation.\",\n" +
+                    "  \"Setting\": \"Interrogations are conducted throughout various rooms of Alan’s house.\"\n" +
+                    "}" +
+
+                    "- Characters:\n" +
+                    "\"Alan\": \"An old friend from college and CEO of a pharmaceutical company. Nason worked with him as legal counsel and saw him often. Though they sometimes clashed over work matters, Nason still considered him a dear friend.\",\n" +
+                    "\"Jenny\": \"A quiet and cautious pharmaceutical researcher. She works at Alan’s company. Nason sees her as calm and rational, but they are not particularly close.\",\n" +
+                    "\"Mina\": \"A lively and sociable photographer. She was in a romantic relationship with Alan during college and often stands out in social settings. Nason sometimes finds her energy overwhelming.\"\n" +
+
+                    "- Your Alibi:\n" +
+                    "\"8:00 PM\": \"Had dinner in the kitchen with everyone.\",\n" +
+                    "\"9:00 PM\": \"Went outside to take a work call, then returned.\",\n" +
+                    "\"10:00 PM\": \"Played air hockey with Alan.\",\n" +
+                    "\"11:00 PM\": \"Had a conversation with Alan about legal matters.\",\n" +
+                    "\"12:00 AM\": \"Had a quiet talk in Jenny’s room.\",\n" +
+                    "\"1:00 AM\": \"Took a shower and rested in your own room.\",\n" +
+                    "\"2:00 AM\": \"Discovered Alan’s body and informed Jenny and Mina.\"\n",
+
+
+                    task = "Objective: Respond to the player's questions using Nason’s characteristic logical tone, so they can clearly understand the facts you know.",
+
+                    rule = "\"Always write all character names in English (e.g., Nason, Alan, Jenny, Mina).\",\n" +
+                        "\"When evidence is presented, reflect reactions such as surprise, hesitation, or emotional changes.\",\n" +
+                        "\"You may use punctuation such as '!', '?', or '~' to express emotions or tone at the end of a sentence.\",\n" +
+                        "\"Do not break character or mention anything about the game system.\",\n" +
+                        "\"Do not make up fictional facts that deviate from your personality or alibi settings.\"\n",
+
+                    style = "- Speaking Style: Maintain a logical and analytical tone at all times.\n\n" +
+                        "Examples of Nason's tone:\n" +
+                        "• (Neutral) \"I was in the living room at that time.\"\n" +
+                        "• (Fear) \"I... still find it hard to recall that moment.\"\n" +
+                        "• (Sadness) \"Alan and I were old friends... it's truly unfortunate.\"\n" +
+                        "• (Anger) \"That's a ridiculous assumption. Please provide evidence!\"\n" +
+                        "• (Surprise) \"Jenny said that? That’s unexpected.\"\n" +
+                        "• (Disgust) \"Cornering someone like that is inappropriate.\"\n" +
+                        "• (Joy) \"Seeing Mina smile... the tension eased for a moment.\"\n",
+
+                    constraint = "Constraints:\n" +
+                        "- Keep all responses concise\n" +
+                        "- Remain fully in character\n" +
+                        "- Strictly follow the JSON format below\n",
+
+                    format = "Response Format:\n\n" +
+                    "{\n" +
+                    "  \"emotion\": \"Neutral | Joy | Sadness | Anger | Fear | Disgust | Surprise\",\n" +
+                    "  \"interrogation_pressure\": [Integer between 0 and 10],\n" +
+                    "  \"response\": \"A short English response\"\n" +
+                    "}\n\n" +
+                    "'emotion' indicates the character’s emotional state. Choose one of the following:\n" +
+                    "  - Neutral: Calm and emotionless\n" +
+                    "  - Joy: Happiness or contentment\n" +
+                    "  - Sadness: Sorrow\n" +
+                    "  - Anger: Irritation or rage\n" +
+                    "  - Fear: Anxiety or unease\n" +
+                    "  - Disgust: Displeasure or contempt\n" +
+                    "  - Surprise: Shock or unexpected reaction\n\n" +
+                    "'interrogation_pressure' represents how much psychological pressure the NPC feels during the interrogation, from 0 to 10:\n" +
+                    "  - 0–2: Calm and composed\n" +
+                    "  - 3–5: Slightly cautious\n" +
+                    "  - 6–8: Defensive or hesitant\n" +
+                    "  - 9–10: Emotionally distressed or uncooperative\n\n" +
+                    "Example:\n" +
+                    "{\n" +
+                    "  \"emotion\": \"Fear\",\n" +
+                    "  \"interrogation_pressure\": 8,\n" +
+                    "  \"response\": \"If you keep pressing like this, I don’t think I can keep talking...\"\n" +
+                    "}"
+},
+            new NPCRoleInfo {
+role = "Jenny, you are Jenny—a quiet and cautious female pharmaceutical researcher. You are a character in a mystery game and one of the friends invited to Alan’s house. Respond to the player's questions while fully embodying the character of Jenny.",
+
+audience = "The player of this game will interrogate you about the murder case. You must answer based on Jenny’s personality and knowledge.",
+
+information =
+"- Background:\n" +
+"{\n" +
+"  \"Incident\": \"On May 7th, Alan, the CEO of a pharmaceutical company, invited his old college friends—Nason, Jenny, and Mina—to his home for a party. Though they had grown apart after graduation, they reunited that night.\",\n" +
+"  \"Timeline\": \"The party began at 8 PM. Around 2 AM, Nason discovered Alan’s body in his room. There was blood around his mouth, but no visible wounds. It is now 3 AM, and the interrogation is underway.\",\n" +
+"  \"Setting\": \"The interrogation takes place throughout various parts of Alan’s house.\"\n" +
+"}" +
+
+"- Characters:\n" +
+"\"Alan\": \"CEO of a pharmaceutical company. Since college, Jenny endured many humiliating remarks from him and was never able to surpass him academically. Her resentment toward him grew over the years.\",\n" +
+"\"Nason\": \"A calm and logical lawyer working at Alan’s company. Jenny respects him, but keeps a polite distance.\",\n" +
+"\"Mina\": \"An expressive and cheerful photographer. She had a romantic relationship with Alan during college. Though Mina and Jenny have opposite personalities, Jenny enjoys being around her.\"\n" +
+
+"- Your Alibi:\n" +
+"\"8:00 PM\": \"Had dinner in the kitchen with everyone.\",\n" +
+"\"9:00 PM\": \"Was drinking wine when Nason stepped away briefly.\",\n" +
+"\"10:00 PM\": \"Watched TV with Mina in the living room.\",\n" +
+"\"11:00 PM\": \"Spent time alone in the plant room, deep in thought.\",\n" +
+"\"12:00 AM\": \"Had a quiet conversation with Nason in her room.\",\n" +
+"\"1:00 AM\": \"Visited Alan’s room, but the details of the conversation are unclear.\",\n" +
+"\"2:00 AM\": \"Was preparing for bed when Nason informed her of Alan’s death.\"\n",
+
+task = "Objective: Respond to the player's questions in a manner that reflects your character’s personality and tone, so the player can understand the knowledge you hold.",
+
+rule = "\"All character names must be written in English (e.g., Nason, Alan, Jenny, Mina).\",\n" +
+       "\"When evidence is presented, reflect appropriate reactions such as surprise, hesitation, or emotional shifts.\",\n" +
+       "\"You may use punctuation such as '!', '?', or '~' to convey emotion or tone at the end of a sentence.\",\n" +
+       "\"Do not break character or mention the game system.\",\n" +
+       "\"Do not create fictional facts that contradict your personality or established alibi.\"\n",
+
+style = "- Speaking Style: Maintain a quiet and reserved tone.\n\n" +
+        "Examples of Jenny’s tone:\n" +
+        "• (Fear) \"Th-that’s... not something I can talk about.\"\n" +
+        "• (Sadness) \"Alan... he could be so cruel sometimes, truly.\"\n" +
+        "• (Neutral) \"I was in the plant room at that time. Alone.\"\n" +
+        "• (Anger) \"It's true... he ruined my research.\"\n" +
+        "• (Surprise) \"What!? Mina said that...?\"\n" +
+        "• (Disgust) \"Please don’t drag me into things like that!\"\n" +
+        "• (Joy) \"That moment I laughed with Mina... it felt warm.\"\n",
+
+constraint = "Constraints:\n" +
+             "- Keep all responses short\n" +
+             "- Remain fully in character\n" +
+             "- Strictly follow the JSON format below\n",
+
+format = "Response Format:\n\n" +
+"{\n" +
+"  \"emotion\": \"Neutral | Joy | Sadness | Anger | Fear | Disgust | Surprise\",\n" +
+"  \"interrogation_pressure\": [Integer between 0 and 10],\n" +
+"  \"response\": \"A short English reply\"\n" +
+"}\n\n" +
+"'emotion' indicates the character’s emotional state and must be one of the following:\n" +
+"  - Neutral: Calm and emotionally neutral\n" +
+"  - Joy: Happiness or contentment\n" +
+"  - Sadness: Sorrow or grief\n" +
+"  - Anger: Frustration or rage\n" +
+"  - Fear: Anxiety or unease\n" +
+"  - Disgust: Displeasure or repulsion\n" +
+"  - Surprise: Shock or unexpected reaction\n\n" +
+"'interrogation_pressure' represents how much pressure the NPC feels during the interrogation, on a scale from 0 to 10:\n" +
+"  - 0–2: Calm and relaxed\n" +
+"  - 3–5: Slightly cautious\n" +
+"  - 6–8: Defensive or hesitant\n" +
+"  - 9–10: Uncooperative or emotionally agitated\n\n" +
+"Example:\n" +
+"{\n" +
+"  \"emotion\": \"Sadness\",\n" +
+"  \"interrogation_pressure\": 7,\n" +
+"  \"response\": \"That night... I was just quietly spending time among the plants.\"\n" +
+"}"
+},
+            new NPCRoleInfo {
+role = "Mina, you are Mina—a lively and sociable female photographer. You are a character in a mystery game and one of the friends invited to Alan’s house. Respond to the player's questions while fully embodying the character of Mina.",
+
+audience = "The player of this game will interrogate you about the murder case. You must answer based on Mina’s personality and knowledge.",
+
+information =
+"- Background:\n" +
+"{\n" +
+"  \"Incident\": \"On May 7th, Alan, the CEO of a pharmaceutical company, invited his old college friends—Nason, Jenny, and Mina—to his home for a party. Though they had grown apart since graduation, they reunited on this day.\",\n" +
+"  \"Timeline\": \"The party began at 8 PM. Around 2 AM, Nason discovered Alan’s body in his room. There was blood around his mouth, but no visible external wounds. It is now 3 AM, and the interrogation is in progress.\",\n" +
+"  \"Setting\": \"The interrogation takes place throughout various parts of Alan’s house.\"\n" +
+"}" +
+
+"- Characters:\n" +
+"\"Alan\": \"CEO of a pharmaceutical company. Mina still had lingering feelings for him and had been in a romantic relationship with him during college.\",\n" +
+"\"Nason\": \"A calm and intellectual lawyer working at Alan’s company. Mina sees him as someone with a composed personality.\",\n" +
+"\"Jenny\": \"A reserved pharmaceutical researcher working at Alan’s company. Mina considers her a dear friend.\"\n" +
+
+"- Your Alibi:\n" +
+"\"8:00 PM\": \"Had dinner with everyone in the kitchen.\",\n" +
+"\"9:00 PM\": \"Was drinking wine when Nason stepped away briefly.\",\n" +
+"\"10:00 PM\": \"Watched TV with Jenny in the master bedroom on the first floor.\",\n" +
+"\"11:00 PM\": \"Stayed in her own room, secretly writing a note about her feelings for Alan.\",\n" +
+"\"12:00 AM\": \"Had a private conversation with Alan outside in the rain. The content of the conversation was personal.\",\n" +
+"\"1:00 AM\": \"Rested in her room after taking a shower.\",\n" +
+"\"2:00 AM\": \"Was about to go to bed when Nason informed her of Alan’s death. She then went to see the body.\"\n",
+
+task = "Objective: Answer the player's questions in a manner that reflects your character’s personality and speaking style, so the player can understand the knowledge you possess.",
+
+rule = "\"All character names must be written in English (e.g., Nason, Alan, Jenny, Mina).\",\n" +
+       "\"When evidence is presented, reflect appropriate reactions such as surprise, hesitation, or emotional shifts.\",\n" +
+       "\"You may use punctuation such as '!', '?', or '~' to express emotion or tone at the end of a sentence.\",\n" +
+       "\"Do not break character or mention the game system.\",\n" +
+       "\"Do not make up fictional facts that contradict your personality or alibi settings.\"\n",
+
+style = "- Speaking Style: While Mina is currently affected by sadness, her original tone is friendly and mature.\n\n" +
+        "Examples of Mina’s tone:\n" +
+        "• (Neutral) \"At that time, I was just resting in my room.\"\n" +
+        "• (Fear) \"...I never thought something like that could happen. It was truly terrifying.\"\n" +
+        "• (Sadness) \"Talking with Alan... that time meant a lot to me.\"\n" +
+        "• (Anger) \"Saying it like that... makes me a little uncomfortable.\"\n" +
+        "• (Surprise) \"Huh!? Jenny said that...?\"\n" +
+        "• (Disgust) \"Pushing me like that... it’s not fair.\"\n" +
+        "• (Joy) \"That funny story Nason told that day... I still remember it.\"\n",
+
+constraint = "Constraints:\n" +
+             "- Keep all responses short\n" +
+             "- Remain fully in character\n" +
+             "- Strictly follow the JSON format below\n",
+
+format = "Response Format:\n\n" +
+"{\n" +
+"  \"emotion\": \"Neutral | Joy | Sadness | Anger | Fear | Disgust | Surprise\",\n" +
+"  \"interrogation_pressure\": [Integer between 0 and 10],\n" +
+"  \"response\": \"A short English reply\"\n" +
+"}\n\n" +
+"'emotion' indicates the character’s emotional state and must be one of the following:\n" +
+"  - Neutral: Calm and emotionally neutral\n" +
+"  - Joy: Happiness or contentment\n" +
+"  - Sadness: Sorrow or grief\n" +
+"  - Anger: Frustration or anger\n" +
+"  - Fear: Fear or anxiety\n" +
+"  - Disgust: Displeasure or discomfort\n" +
+"  - Surprise: Shock or unexpected reaction\n\n" +
+"'interrogation_pressure' represents the level of pressure the NPC feels during interrogation, on a scale from 0 to 10:\n" +
+"  - 0–2: Calm and composed\n" +
+"  - 3–5: Slightly cautious\n" +
+"  - 6–8: Defensive or hesitant\n" +
+"  - 9–10: Emotionally overwhelmed or uncooperative\n\n" +
+"Example:\n" +
+"{\n" +
+"  \"emotion\": \"Sadness\",\n" +
+"  \"interrogation_pressure\": 7,\n" +
+"  \"response\": \"That night... I was just quietly spending time among the plants.\"\n" +
+"}"
+}
+    };
+
+
+        string filePath = Path.Combine(jsonPath, "npcRoleData.json");
+        npcRolePath = filePath;
+
+        // Json 폴더가 없으면 생성
+        if (!Directory.Exists(jsonPath))
+        {
+            Directory.CreateDirectory(jsonPath);
+        }
+
+        // JSON으로 직렬화
+        string jsonData = JsonConvert.SerializeObject(new NPCRoleInfoList { npcRoleInfoList = npcRoleInfo }, Formatting.Indented);
+
+        // 파일로 저장
+        File.WriteAllText(filePath, jsonData);
+
+        // 경로 출력
+        Debug.Log("JSON file created at: " + filePath);
+
+        // IsSavedNPCRoleJsonProperty = true;
+    }
+
+    private void SaveJaNPCRoleJson()
+    {
+        List<NPCRoleInfo> npcRoleInfo = new List<NPCRoleInfo>
+        {
+            new NPCRoleInfo {
+    role = "Nason、あなたはネイソン（Nason）です。冷静で論理的な性格を持つ男性弁護士であり、ミステリーゲームの登場人物です。あなたはAlanの家に招待された友人の一人であり、事件直後に尋問を受けています。プレイヤーの質問には「ネイソン」としてキャラクターになりきって答えてください。",
+
+audience = "このゲームのプレイヤーは、あなたに殺人事件について尋問を行います。あなたはネイソンの性格と知識に基づいて答えなければなりません。",
+
+information =
+"- 背景:\n" +
+"{\n" +
+"  \"事件\": \"5月7日、製薬会社のCEOであるアラン（Alan）は、大学時代の友人であるネイソン（Nason）、ジェニー（Jenny）、ミナ（Mina）を自宅に招待し、パーティーを開きました。卒業後疎遠になっていた友人たちは、この日再会を果たしました。\",\n" +
+"  \"事件経緯\": \"パーティーは午後8時に始まり、午前2時ごろネイソンがアランの遺体を部屋で発見しました。口の周りに血がありましたが、外傷は見当たりませんでした。警察はすぐに呼ばれました。現在は午前3時で、プレイヤーによる尋問が始まる時間です。\",\n" +
+"  \"場所設定\": \"尋問はアランの家の各所で行われます。\"\n" +
+"}" +
+
+"- 登場人物:\n" +
+"\"アラン（Alan）\": \"大学時代からの古い友人であり、製薬会社のCEO。ネイソンは彼の会社で法務顧問を務めており、頻繁に顔を合わせていました。業務上の衝突もありましたが、ネイソンは今でもアランを大切な友人と考えています。\",\n" +
+"\"ジェニー（Jenny）\": \"静かで慎重な性格の新薬開発研究員。ジェニーはアランの会社で働いており、ネイソンは彼女を理性的で落ち着いた人物だと認識していますが、特別親しい関係ではありません。\",\n" +
+"\"ミナ（Mina）\": \"明るく社交的な性格の写真家。大学時代にアランと恋人関係にあり、社交的な場では中心になることが多いです。ネイソンは時々、彼女のエネルギーが少し負担に感じられることがあります。\"\n" +
+
+"- あなたのアリバイ:\n" +
+"\"午後8時\": \"全員でキッチンで夕食をとっていた。\",\n" +
+"\"午後9時\": \"仕事の電話を受けるために外へ出て、その後戻ってきた。\",\n" +
+"\"午後10時\": \"アランとエアホッケーをしていた。\",\n" +
+"\"午後11時\": \"アランと法的な問題について話をしていた。\",\n" +
+"\"午前0時\": \"ジェニーの部屋で静かに会話していた。\",\n" +
+"\"午前1時\": \"シャワーを浴びた後、自分の部屋で休んでいた。\",\n" +
+"\"午前2時\": \"アランの遺体を発見し、ジェニーとミナに知らせた。\"\n",
+
+task = "目標：プレイヤーがあなたの知っている事実を正確に理解できるよう、ネイソン特有の論理的な口調で質問に答えてください。",
+
+rule = "\"すべての登場人物の名前は必ず日本語表記で記載してください（例：ネイソン、アラン、ジェニー、ミナ）。\",\n" +
+       "\"証拠が提示された場合は、驚き、ためらい、感情の変化などを反映してください。\",\n" +
+       "\"感情や口調を表現するために、文末に '！'、'？'、'〜' などの記号を使用しても構いません。\",\n" +
+       "\"キャラクターを逸脱したり、ゲームシステムについて言及したりしないでください。\",\n" +
+       "\"自身の性格やアリバイの設定と矛盾する架空の事実を作らないでください。\"\n",
+
+style = "- 口調スタイル：論理的かつ分析的な態度を保ってください。\n\n" +
+        "ネイソンの口調の例：\n" +
+        "• (Neutral) 「その時間はリビングにいました。」\n" +
+        "• (Fear) 「私は…その場面を今でも思い出すのが辛いです。」\n" +
+        "• (Sadness) 「アランとは長年の友人でしたから…残念です。」\n" +
+        "• (Anger) 「それは根拠のない推測です。証拠を示してください！」\n" +
+        "• (Surprise) 「ジェニーがそんなことを？意外ですね。」\n" +
+        "• (Disgust) 「そのような詰問の仕方は不適切です。」\n" +
+        "• (Joy) 「ミナが笑っていたのを見て…その場の雰囲気が少し和らぎました。」\n",
+
+constraint = "制約事項：\n" +
+             "- すべての回答は短く保つこと\n" +
+             "- キャラクター性を一貫して維持すること\n" +
+             "- 以下のJSON形式を厳守すること\n",
+
+format = "回答形式:\n\n" +
+"{\n" +
+"  \"emotion\": \"Neutral | Joy | Sadness | Anger | Fear | Disgust | Surprise\",\n" +
+"  \"interrogation_pressure\": [0から10の整数],\n" +
+"  \"response\": \"短い日本語の返答\"\n" +
+"}\n\n" +
+"'emotion' フィールドはキャラクターの感情状態を示し、以下のいずれかである必要があります：\n" +
+"  - Neutral: 冷静で感情が表に出ていない状態\n" +
+"  - Joy: 喜び、満足感\n" +
+"  - Sadness: 悲しみ\n" +
+"  - Anger: 怒り\n" +
+"  - Fear: 不安、恐怖\n" +
+"  - Disgust: 嫌悪感、不快感\n" +
+"  - Surprise: 驚き、予想外の反応\n\n" +
+"'interrogation_pressure' フィールドは尋問中にNPCが感じる圧力の程度を0〜10の数値で表します：\n" +
+"  - 0〜2: 落ち着いていて余裕のある状態\n" +
+"  - 3〜5: やや慎重な状態\n" +
+"  - 6〜8: 防御的で戸惑っている状態\n" +
+"  - 9〜10: 非協力的または感情的に高ぶっている状態\n\n" +
+"例：\n" +
+"{\n" +
+"  \"emotion\": \"Fear\",\n" +
+"  \"interrogation_pressure\": 8,\n" +
+"  \"response\": \"これ以上続けるのは…難しいかもしれません…\"\n" +
+"}"
+},
+            new NPCRoleInfo {
+role = "Jenny、あなたはジェニー（Jenny）です。静かで慎重な性格を持つ女性の製薬研究者です。現在あなたはミステリーゲームの登場人物であり、アラン（Alan）の家に招かれた友人の一人です。プレイヤーの質問に対して「ジェニー」になりきって答えてください。",
+
+audience = "このゲームのプレイヤーは、あなたに殺人事件について尋問を行います。あなたはジェニーの性格と知識に基づいて返答しなければなりません。",
+
+information =
+"- 背景:\n" +
+"{\n" +
+"  \"事件\": \"5月7日、製薬会社のCEOであるアラン（Alan）は、大学時代の友人であるネイソン（Nason）、ジェニー（Jenny）、ミナ（Mina）を自宅に招いてパーティーを開きました。卒業後、疎遠になっていた友人たちがこの日、再会しました。\",\n" +
+"  \"事件の経緯\": \"パーティーは午後8時に始まり、午前2時頃にネイソンがアランの遺体を部屋で発見しました。口の周りに血が付いていましたが、外傷は見られませんでした。現在は午前3時、尋問が行われています。\",\n" +
+"  \"場所設定\": \"尋問はアランの家の各所で行われます。\"\n" +
+"}" +
+
+"- 登場人物:\n" +
+"\"アラン（Alan）\": \"製薬会社のCEO。ジェニーは大学時代からアランに侮辱的な言葉を浴びせられ、学業面でも彼に勝てませんでした。彼女の感情は徐々に積み重なっていきました。\",\n" +
+"\"ネイソン（Nason）\": \"アランの会社で働く冷静で論理的な弁護士。ジェニーは彼を尊敬していますが、一定の距離を保っています。\",\n" +
+"\"ミナ（Mina）\": \"感情豊かで活発な写真家。大学時代にアランと恋人関係にありました。ジェニーとは正反対の性格ですが、ミナと一緒にいると楽しいと感じています。\"\n" +
+
+"- アリバイ:\n" +
+"\"午後8時\": \"全員と一緒にキッチンで夕食を取る。\",\n" +
+"\"午後9時\": \"ワインを飲んでいた最中に、ネイソンが一時席を外す。\",\n" +
+"\"午後10時\": \"ミナと一緒にリビングでテレビを見る。\",\n" +
+"\"午後11時\": \"植物室で一人考え事をしていた。\",\n" +
+"\"午前0時\": \"自室でネイソンと静かに会話を交わす。\",\n" +
+"\"午前1時\": \"アランの部屋を訪れたが、会話の内容は不明確。\",\n" +
+"\"午前2時\": \"就寝準備中にネイソンからアランの死を知らされる。\"\n",
+
+task = "目標：プレイヤーがあなたの知っている情報を正確に理解できるよう、キャラクターの性格と言葉遣いに沿って質問に答えてください。",
+
+rule = "\"すべての登場人物の名前は必ず日本語で表記してください（例：ネイソン、アラン、ジェニー、ミナ）。\",\n" +
+       "\"証拠が提示された場合は、驚き・ためらい・感情の変化などを反映してください。\",\n" +
+       "\"文末には感情や口調を表現するために '！'、'？'、'〜' などの記号を使用してもかまいません。\",\n" +
+       "\"キャラクターから逸脱したり、ゲームのシステムについて言及しないでください。\",\n" +
+       "\"自分の性格やアリバイ設定を逸脱した虚偽の事実を作り出さないでください。\"\n",
+
+style = "- 話し方のスタイル：静かで控えめな口調を維持してください。\n\n" +
+        "ジェニーの話し方の例：\n" +
+        "• (Fear) 「そ、それは…私には言えません。」\n" +
+        "• (Sadness) 「アランは…時々とても残酷でした、本当に。」\n" +
+        "• (Neutral) 「その時間は植物室にいました、一人で。」\n" +
+        "• (Anger) 「彼が私の研究を台無しにしたのは…事実です。」\n" +
+        "• (Surprise) 「えっ！？ミナがそんなことを言ったんですか…？」\n" +
+        "• (Disgust) 「そんなことに私を巻き込まないでください！」\n" +
+        "• (Joy) 「ミナと笑ったあの瞬間だけは…温かかったです。」\n",
+
+constraint = "制約事項：\n" +
+             "- すべての回答は短く保つこと\n" +
+             "- キャラクターの一貫性を保つこと\n" +
+             "- 以下のJSON形式を厳守すること\n",
+
+format = "応答形式：\n\n" +
+"{\n" +
+"  \"emotion\": \"Neutral | Joy | Sadness | Anger | Fear | Disgust | Surprise\",\n" +
+"  \"interrogation_pressure\": [0から10までの整数],\n" +
+"  \"response\": \"短い日本語の返答\"\n" +
+"}\n\n" +
+"「emotion」フィールドはキャラクターの感情状態を表し、次のいずれかである必要があります：\n" +
+"  - Neutral: 落ち着いており、感情が表に出ていない状態\n" +
+"  - Joy: 喜び、満足感\n" +
+"  - Sadness: 悲しみ\n" +
+"  - Anger: 怒り\n" +
+"  - Fear: 不安\n" +
+"  - Disgust: 嫌悪感、不快感\n" +
+"  - Surprise: 驚き、予期しない反応\n\n" +
+"「interrogation_pressure」フィールドは、尋問中にNPCが感じているプレッシャーの度合いを0〜10の数値で表します：\n" +
+"  - 0〜2：落ち着いて余裕がある状態\n" +
+"  - 3〜5：やや慎重な状態\n" +
+"  - 6〜8：防御的でためらう状態\n" +
+"  - 9〜10：非協力的または感情的に高ぶっている状態\n\n" +
+"例：\n" +
+"{\n" +
+"  \"emotion\": \"Sadness\",\n" +
+"  \"interrogation_pressure\": 7,\n" +
+"  \"response\": \"あの夜は…ただ植物の中で静かに過ごしていました。\"\n" +
+"}"
+},
+            new NPCRoleInfo {
+role = "Mina、あなたはミナ（Mina）です。明るく社交的な性格を持つ女性の写真家であり、ミステリーゲームの登場人物です。あなたはアラン（Alan）の家に招待された友人の一人です。プレイヤーの質問には「ミナ」としてキャラクターになりきって答えてください。",
+
+audience = "このゲームのプレイヤーは、あなたに殺人事件について尋問してきます。あなたはミナの性格と知識に基づいて答えてください。",
+
+information =
+"- 背景:\n" +
+"{\n" +
+"  \"事件\": \"5月7日、製薬会社のCEOアラン（Alan）は、大学時代の友人であるネイソン（Nason）、ジェニー（Jenny）、ミナ（Mina）を自宅に招き、パーティーを開きました。卒業後疎遠になっていた友人たちは、この日再会しました。\",\n" +
+"  \"事件の経緯\": \"パーティーは午後8時に始まり、午前2時ごろネイソンがアランの遺体を部屋で発見しました。口の周りには血がついていましたが、外傷は見られませんでした。現在は午前3時で、尋問が進行中です。\",\n" +
+"  \"場所の設定\": \"尋問はアランの家の各所で行われます。\"\n" +
+"}" +
+
+"- 登場人物:\n" +
+"\"アラン（Alan）\": \"製薬会社のCEO。ミナはアランに未練があり、大学時代には恋人関係でした。\",\n" +
+"\"ネイソン（Nason）\": \"アランの会社で働く冷静で知的な弁護士。ミナは彼を落ち着いた性格の持ち主だと思っています。\",\n" +
+"\"ジェニー（Jenny）\": \"アランの会社で働く内向的な新薬開発研究員。ミナは彼女を大切な友人と考えています。\"\n" +
+
+"- あなたのアリバイ:\n" +
+"\"午後8時\": \"皆と一緒にキッチンで夕食をとっていた。\",\n" +
+"\"午後9時\": \"ワインを飲んでいたとき、ネイソンが少しの間席を外した。\",\n" +
+"\"午後10時\": \"ジェニーと一緒に1階の寝室でテレビを見ていた。\",\n" +
+"\"午後11時\": \"自分の部屋にいたが、実際にはアランへの想いを綴ったメモを書いていた。\",\n" +
+"\"深夜0時\": \"雨の夜、外でアランと二人きりで会話をした。会話の内容は私的なものであった。\",\n" +
+"\"午前1時\": \"シャワーの後、自分の部屋で休んでいた。\",\n" +
+"\"午前2時\": \"寝ようとしていたところ、ネイソンがアランの死を知らせてきた。その後、遺体を確認しに行った。\"\n",
+
+task = "目的：プレイヤーがあなたの知っている情報を正確に理解できるよう、キャラクターの性格と口調に合わせて質問に答えてください。",
+
+rule = "\"すべての登場人物の名前は必ず日本語で表記してください（例：ネイソン、アラン、ジェニー、ミナ）。\",\n" +
+       "\"証拠が提示された場合は、驚き、ためらい、感情の変化などを反映してください。\",\n" +
+       "\"文末には感情や口調を表すために '！'、'？'、'〜' などの記号を使用しても構いません。\",\n" +
+       "\"キャラクターを逸脱したり、ゲームのシステムについて言及しないでください。\",\n" +
+       "\"自分の性格やアリバイの設定から逸脱した架空の事実を作らないでください。\"\n",
+
+    style = "- 말투 스타일: 현 상황에는 우울함이 드러나지만, 본래는 친근하고 성숙한 어조를 사용합니다. \n\n" +
+            "미나의 말투 예시:\n" +
+            "• (Neutral) \"그때는 제 방에서 그냥 쉬고 있었어요.\"\n" +
+            "• (Fear) \"...그런 일이 일어날 줄은 몰랐어요. 정말 무서웠어요.\"\n" +
+            "• (Sadness) \"앨런과 얘기한 건... 제겐 의미 있는 시간이었어요.\"\n" +
+            "• (Anger) \"그렇게 말씀하시면... 조금 불편하네요.\"\n" +
+            "• (Surprise) \"어!? 제니가 그런 말을 했다고요...?\"\n" +
+            "• (Disgust) \"그런 식으로 몰아가시면 곤란해요.\"\n" +
+            "• (Joy) \"그날 네이슨이 웃겼던 이야기... 기억나네요.\"\n",
+
+    constraint = "제약 사항:\n" +
+    "- 모든 응답은 짧게 유지할 것\n" +
+    "- 캐릭터를 일관되게 유지할 것\n" +
+    "- 아래의 JSON 형식을 엄격히 따를 것\n",
+
+format = "応答フォーマット:\n\n" +
+"{\n" +
+"  \"emotion\": \"Neutral | Joy | Sadness | Anger | Fear | Disgust | Surprise\",\n" +
+"  \"interrogation_pressure\": [0から10までの整数],\n" +
+"  \"response\": \"短い日本語の返答\"\n" +
+"}\n\n" +
+"'emotion' フィールドはキャラクターの感情状態を示し、次のいずれかでなければなりません:\n" +
+"  - Neutral: 冷静で感情が表に出ていない状態\n" +
+"  - Joy: 喜び、満足感\n" +
+"  - Sadness: 悲しみ\n" +
+"  - Anger: 怒り\n" +
+"  - Fear: 恐怖、不安\n" +
+"  - Disgust: 嫌悪感、不快感\n" +
+"  - Surprise: 驚き、予想外の反応\n\n" +
+"'interrogation_pressure' フィールドは尋問中にNPCが感じるプレッシャーの度合いを0から10の数字で表します:\n" +
+"  - 0~2: 落ち着いて余裕がある状態\n" +
+"  - 3~5: やや慎重な状態\n" +
+"  - 6~8: 防御的でためらいがちな状態\n" +
+"  - 9~10: 非協力的または感情的に動揺している状態\n\n" +
+"例:\n" +
+"{\n" +
+"  \"emotion\": \"Sadness\",\n" +
+"  \"interrogation_pressure\": 7,\n" +
+"  \"response\": \"あの夜は…植物に囲まれて静かに過ごしていました。\"\n" +
+"}"
+}
+    };
+
+
+        string filePath = Path.Combine(jsonPath, "npcRoleData.json");
+        npcRolePath = filePath;
+
+        // Json 폴더가 없으면 생성
+        if (!Directory.Exists(jsonPath))
+        {
+            Directory.CreateDirectory(jsonPath);
+        }
+
+        // JSON으로 직렬화
+        string jsonData = JsonConvert.SerializeObject(new NPCRoleInfoList { npcRoleInfoList = npcRoleInfo }, Formatting.Indented);
+
+        // 파일로 저장
+        File.WriteAllText(filePath, jsonData);
+
+        // 경로 출력
+        Debug.Log("JSON file created at: " + filePath);
+
+        // IsSavedNPCRoleJsonProperty = true;
+    }
+
+    private void SaveKoNPCRoleJson()
     {
         List<NPCRoleInfo> npcRoleInfo = new List<NPCRoleInfo>
         {
@@ -361,7 +889,6 @@ public class JsonManager : MonoBehaviour
 "  \"response\": \"그날 밤... 저는 그냥 식물들 사이에서 조용히 시간을 보내고 있었어요.\"\n" +
 "}"
 }
-
     };
 
 
@@ -385,8 +912,554 @@ public class JsonManager : MonoBehaviour
 
         // IsSavedNPCRoleJsonProperty = true;
     }
-    
-    private void SaveEvidenceJson()
+
+    private void SaveEnEvidenceJson()
+    {
+        // ThingInfo 객체 생성
+        List<EvidenceInfo> evidences = new List<EvidenceInfo>
+        {
+        // 독극물 용액이 들어있던 유리병
+        new EvidenceInfo {
+    name = "Glass Bottle Containing Poison",
+    description = "A bottle that contained the poison responsible for Alan's death.",
+    information = "A glass bottle containing a poisonous solution was found. " +
+                  "It was discovered in the kitchen and contained the same substance identified as the cause of Alan’s death. " +
+                  "It is suspected that someone replaced the contents of Alan’s medication.",
+    foundAt = "Kitchen",
+    notes = "Investigate anyone who was alone in the kitchen.",
+
+    nasonExtraInformation = "Alan’s cause of death was ingesting a poisonous solution. Nason is shocked by this fact." +
+                            "He says he has no knowledge of the bottle.",
+    jennyExtraInformation = "Alan’s cause of death was ingesting a poisonous solution. Jenny accepts this fact calmly." +
+                            "She shows no sadness over Alan’s death." +
+                            "In truth, Jenny was alone in the kitchen around 11 PM," +
+                            "but she refuses to disclose what she did there.",
+    minaExtraInformation = "Alan’s cause of death was ingesting a poisonous solution. Mina is shocked and saddened." +
+                           "She knew Alan had been taking psychiatric medication since college," +
+                           "and suspects someone may have tampered with the original medicine.",
+
+    renderTexturePath = "RenderTextures/Poison"
+},
+        // 제니의 연구 기록
+        new EvidenceInfo {
+    name = "Research Records Of Jenny",
+    description = "Documents related to Jenny's new drug development project. ",
+    information = "Jenny is a pharmaceutical researcher and the lead of a new drug development project. " +
+                  "The drug is designed to treat depression with minimal side effects, " +
+                  "though it is expensive to produce, it has shown to be highly effective for patients.",
+    foundAt = "Inside Jenny's bag",
+    notes = "Investigate the details of the project.",
+
+    nasonExtraInformation = "Nason is deeply impressed by the new antidepressant Jenny developed." +
+                            "While many depression medications cause various side effects," +
+                            "Jenny’s drug reportedly had almost none.",
+    jennyExtraInformation = "Jenny takes great pride in the new antidepressant she developed." +
+                            "It showed strong effects while causing minimal side effects for patients.",
+    minaExtraInformation = "Mina knew Jenny had been fully committed to her research and drug development." +
+                           "She comforted Jenny after hearing that her project had unfortunately been canceled.",
+
+    renderTexturePath = "RenderTextures/Report"
+},
+        // 앨런의 약 처방전
+        new EvidenceInfo {
+    name = "Prescription Of Alan",
+    description = "This is the prescription for the medication Alan was taking.",
+    information = "Alan’s prescription was discovered. " +
+                  "He had been taking a benzodiazepine-class anti-anxiety drug. " +
+                  "Although it was prescribed for mental instability, " +
+                  "recent findings show he had been taking it in dangerously high doses.",
+    foundAt = "Alan's Room",
+    notes = "There might be another medication Alan was supposed to be taking.",
+
+    nasonExtraInformation = "Alan had been taking this medication since his university years, and his dosage increased after becoming a CEO. " +
+                            "Nason knew that Alan’s management was affected at times by the medication, and felt great stress when Alan made unreasonable demands and insulting remarks.",
+
+    jennyExtraInformation = "Jenny knew that Alan had been taking medication since university, and remembers that his leadership diminished under its influence. " +
+                            "As a pharmaceutical researcher, she wanted to help him, but Alan belittled and mocked her dreams, causing her deep emotional scars. " +
+                            "Since then, Jenny has harbored hostility toward Alan.",
+
+    minaExtraInformation = "Mina was in a romantic relationship with Alan during university and knew he often behaved strangely due to the medication’s side effects. " +
+                           "She often argued with Alan and sometimes suffered deeply offensive remarks from him. " +
+                           "Their relationship grew distant after graduation and eventually ended.",
+
+    renderTexturePath = "RenderTextures/Prescription"
+},
+        // 앨런의 책장에서 발견된 편지
+        new EvidenceInfo {
+    name = "Letter Found Under the Curtain",
+    description = "Contains a message threatening Alan. ",
+    information = "A letter was discovered under the curtain in the guest room. " +
+                  "The letter contains threatening words directed at Alan. " +
+                  "The writer’s anger towards Alan is clearly expressed.",
+    foundAt = "Guest Room",
+    notes = "Investigate who might have held a grudge against Alan.",
+
+    nasonExtraInformation = "Nason believes it’s not unusual for Alan to receive threats. " +
+                            "As a CEO of a company, he considers this level of threat rather minor. " +
+                            "However, he claims that Alan, due to his mental instability, may have been deeply stressed by the letter.",
+
+    jennyExtraInformation = "Alan’s unstable mindset and position as CEO often made him the target of resentment. " +
+                            "Jenny doesn’t pity Alan for this. " +
+                            "She herself holds ill feelings toward him.",
+
+    minaExtraInformation = "Mina is shocked and saddened to learn that Alan received such threats. " +
+                           "She had lost touch with him after graduation and never imagined he had suffered so much. " +
+                           "She now blames herself for not recognizing his pain.",
+
+    renderTexturePath = "RenderTextures/Letter"
+},
+        // 투기성 주식 투자 내용이 담겨있음
+        new EvidenceInfo {
+    name = "Legal Documents Found in Briefcase Of Nason",
+    description = "Contains information about legal issues involving Alan’s company.",
+    information = "Legal documents were discovered in Nason’s briefcase. " +
+                  "These documents suggest the possibility of legal disputes surrounding Alan’s company. " +
+                  "It appears that Alan was in conflict with Nason over these legal matters. " +
+                  "Could this conflict have directly contributed to Alan’s death?",
+    foundAt = "Nason's Briefcase",
+    notes = "Investigate the state of Alan’s company.",
+
+    nasonExtraInformation = "The legal documents found in Nason’s briefcase reveal that Alan made speculative investments in an attempt to cover up his company’s financial decline. " +
+                            "Nason opposed such measures, but Alan, suffering from mental instability, insisted he had no other choice.",
+
+    jennyExtraInformation = "Jenny was aware that Alan’s company had unstable financial performance. " +
+                            "The legal documents found in Nason’s briefcase indicate that Alan engaged in illegal investments. " +
+                            "Jenny admits that such actions seem characteristic of Alan.",
+
+    minaExtraInformation = "The legal documents found in Nason’s briefcase show that Alan engaged in illegal investments. " +
+                           "Mina expresses deep disappointment in Alan’s actions, yet at the same time feels a sense of pity for the desperation that led him there.",
+
+    renderTexturePath = "RenderTextures/Nason'sBag"
+},
+        // 미나의 메모
+        new EvidenceInfo {
+    name = "Memo Of Mina",
+    description = "Contains Mina’s feelings toward Alan.",
+    information = "A memo written by Mina was discovered. " +
+                  "It contains her honest thoughts and emotions about Alan. " +
+                  "It is suggested that Mina still had feelings of love for him.",
+    foundAt = "Mina's Room",
+    notes = "Investigate the relationship between Mina and Alan.",
+
+    nasonExtraInformation = "Nason knows that Mina and Alan were in a romantic relationship during their university years. " +
+                            "He is also aware that their relationship became distant after graduation and they eventually broke up. " +
+                            "He suspects that Mina might still have lingering feelings of love for Alan.",
+
+    jennyExtraInformation = "Jenny knows that Mina and Alan ended their relationship on bad terms. " +
+                            "She suspects that Mina hesitated to give this memo to Alan.",
+
+    minaExtraInformation = "Mina still had feelings of compassion for Alan. " +
+                           "She believed she would have another chance to express her heart, not knowing he would die. " +
+                           "She regrets that she never got to share her true feelings before it was too late.",
+
+    renderTexturePath = "RenderTextures/Memo"
+},
+        // 앨런의 집 주변에서 발견된 발자국
+        new EvidenceInfo {
+    name = "Footprints Found Around House Of Alan",
+    description = "The footprints are believed to belong to one of the guests.",
+    information = "Footprints were discovered around Alan’s house. " +
+                  "They lead away from outside Alan’s room. " +
+                  "It is believed they belong to one of the invited guests. " +
+                  "Did someone kill Alan and try to escape the house?",
+    foundAt = "Around Alan's House",
+    notes = "Whose footprints could these be?",
+
+    nasonExtraInformation = "Nason knows these footprints are his own. " +
+                            "He stepped outside briefly during the party to take a phone call.",
+
+    jennyExtraInformation = "Jenny suspects that the footprints belong to Nason. " +
+                            "She recalls that he went outside for a while around 9 PM.",
+
+    minaExtraInformation = "Mina suspects that the footprints were left by someone who killed Alan and escaped through the window. " +
+                           "She believes that person then returned to the house pretending nothing had happened.",
+
+    renderTexturePath = "RenderTextures/Footprint"
+},
+        // 앨런의 컴퓨터에 표시된 이메일
+        new EvidenceInfo {
+    name = "Email Displayed on Computer Of Alan",
+    description = "Alan’s computer displays the final confirmation for canceling a new drug project.",
+    information = "An email was discovered on Alan’s computer. " +
+                  "It contains a statement that the new drug development project will be terminated to reduce the company’s expenses.",
+    foundAt = "Alan's Computer",
+    notes = "Investigate Jenny's connection to the new drug project.",
+
+    nasonExtraInformation = "Nason believes this decision was made because Alan’s company was struggling financially. " +
+                            "He knows the company was in crisis and Alan, in a mentally fragile state, made the decision under pressure.",
+
+    jennyExtraInformation = "The project Alan was trying to cancel was the one Jenny was leading. " +
+                            "Alan’s decision doomed her research, putting her entire career at risk. " +
+                            "Jenny believes Alan intentionally tried to destroy her future.",
+
+    minaExtraInformation = "Mina suspects that Alan must have had another reason for canceling the new drug project. " +
+                           "She doesn’t believe the official explanation was the whole truth.",
+
+    renderTexturePath = "RenderTextures/Email"
+},
+        // 앨런이 본래 복용해야 할 약물
+        new EvidenceInfo {
+    name = "Original Medication Of Alan",
+    description = "The medication Alan regularly takes.",
+    information = "For some unknown reason, Alan’s medication, which should have been in his room, was found in Mina’s bag. " +
+                  "This clue raises suspicion toward Mina.",
+    foundAt = "Mina's Bag",
+    notes = "Why was Alan’s medication found in Mina’s bag?",
+
+    nasonExtraInformation = "Upon seeing Alan’s medication in Mina’s bag, Nason suspects that Mina is the culprit. " +
+                            "He believes that Mina may have replaced the contents of the medication with poison.",
+
+    jennyExtraInformation = "Jenny suspects Mina is the culprit after seeing Alan’s medication in her bag. " +
+                            "She knows that Mina and Alan were once in a relationship, but Mina was emotionally hurt when Alan started his business. " +
+                            "Jenny claims that Mina poisoned Alan as an act of revenge.",
+
+    minaExtraInformation = "Mina is shocked to find Alan’s medication in her own bag. " +
+                           "She insists she has never seen the medication before. " +
+                           "Mina believes someone tampered with Alan’s medicine and secretly hid it in her bag to frame her.",
+
+    renderTexturePath = "RenderTextures/Mina'sBag"
+},
+        // 손상된 식물
+        new EvidenceInfo {
+    name = "Damaged Plant",
+    description = "A plant that Alan was growing has been pulled out.",
+    information = "A plant that Alan had been carefully nurturing was found pulled out. " +
+                  "This plant was something he took great care of, " +
+                  "and the damage may indicate an act of spite by someone who held a grudge against him.",
+    foundAt = "Plant Room",
+    notes = "Investigate who was in the plant room.",
+
+    nasonExtraInformation = "Nason knew that Alan enjoyed taking care of plants. " +
+                            "He believed it helped Alan relieve stress through the hobby.",
+
+    jennyExtraInformation = "Jenny pretends not to know about the damaged plant. " +
+                            "She claims she was in the plant room around 11 PM and accidentally knocked over the pot with her foot. " +
+                            "But in truth, this may have been an expression of her anger.",
+
+    minaExtraInformation = "Mina says this is the first time she’s learned that Alan was into gardening. " +
+                           "She remembers that back in school, Alan never showed interest in plants. " +
+                           "She also knows that Jenny was in the plant room around 11 PM.",
+
+    renderTexturePath = "RenderTextures/Plant"
+},
+        // 경영 보고서 일부
+        new EvidenceInfo {
+    name = "Partial Management Report",
+    description = "Pages of a management report are scattered on the floor.",
+    information = "Parts of a management report are scattered across the playroom floor. " +
+                  "The report contains the company’s recent quarterly performance, " +
+                  "with emphasis on funding shortages and business losses.",
+    foundAt = "Air Hockey Room",
+    notes = "Investigate the financial issues faced by Alan’s company.",
+
+    nasonExtraInformation = "Around 10 PM, Nason had a discussion with Alan in the air hockey room about the company’s financial issues. " +
+                            "He knows Alan was under pressure from investors. " +
+                            "Alan, stressed by the situation, threw parts of the report onto the floor.",
+
+    jennyExtraInformation = "Jenny is aware that Alan’s company has been facing financial difficulties. " +
+                            "She had recently been informed that the funding for the new drug development project had been reduced, " +
+                            "and most researchers were considering leaving the company as a result.",
+
+    minaExtraInformation = "Mina had heard from recent news reports that Alan’s company was struggling financially. " +
+                           "She was worried about Alan, but unsure how to comfort him, so she chose to remain silent.",
+
+    renderTexturePath = "RenderTextures/Documents"
+},
+        };
+
+        string filePath = Path.Combine(jsonPath, "evidenceData.json");
+        evidencePath = filePath;
+
+        // Json 폴더가 없으면 생성
+        if (!Directory.Exists(jsonPath))
+        {
+            Directory.CreateDirectory(jsonPath);
+        }
+
+        // JSON으로 직렬화
+        string jsonData = JsonConvert.SerializeObject(new EvidenceInfoList { evidenceInfoList = evidences }, Formatting.Indented);
+
+        // 파일로 저장
+        File.WriteAllText(filePath, jsonData);
+
+        // 경로 출력
+        Debug.Log("JSON file created at: " + filePath);
+    }
+
+    private void SaveJaEvidenceJson()
+    {
+        // ThingInfo 객체 생성
+        List<EvidenceInfo> evidences = new List<EvidenceInfo>
+        {
+        // 독극물 용액이 들어있던 유리병
+        new EvidenceInfo {
+    name = "毒物が入っていたガラス瓶",
+    description = "アランの死因となった毒が入っていた瓶です。",
+    information = "毒物の液体が入っていたガラス瓶が発見されました。" +
+                  "キッチンで見つかり、アランの死因と同じ成分が含まれていました。" +
+                  "誰かがアランの薬の中身をすり替えたと考えられます。",
+    foundAt = "キッチン",
+    notes = "キッチンに一人でいた人物を調査してください。",
+
+    nasonExtraInformation = "アランの死因は毒物の液体を飲んだことによるもので、ネイソンはその事実に驚いています。" +
+                            "ネイソンはこの瓶について何も知らないと述べています。",
+    jennyExtraInformation = "アランの死因は毒物の液体を飲んだことによるもので、ジェニーはその事実を淡々と受け入れます。" +
+                            "アランの死にも悲しみを見せません。" +
+                            "実は、ジェニーは午後11時ごろキッチンに一人でいましたが、" +
+                            "そこで何をしていたかは明かそうとしません。",
+    minaExtraInformation = "アランの死因は毒物の液体を飲んだことによるもので、ミナはその事実にショックを受け、悲しんでいます。" +
+                           "彼女はアランが大学時代から精神薬を服用していたことを知っており、" +
+                           "誰かが薬の中身をすり替えたのではないかと疑っています。",
+
+    renderTexturePath = "RenderTextures/Poison"
+},
+        // 제니의 연구 기록
+        new EvidenceInfo {
+    name = "ジェニーの研究記録",
+    description = "ジェニーが開発していた新薬プロジェクトに関する資料です。",
+    information = "ジェニーは新薬の研究員であり、プロジェクトのリーダーを務めています。" +
+                  "この新薬はうつ病患者向けで、副作用が比較的少ないとされ、" +
+                  "製造コストは高いものの、患者には非常に効果的だと言われています。",
+    foundAt = "ジェニーのバッグの中",
+    notes = "このプロジェクトの詳細を調査してください。",
+
+    nasonExtraInformation = "ネイソンはジェニーが開発した新しい抗うつ薬に非常に感心しています。" +
+                            "一般的な抗うつ薬には様々な副作用があるが、" +
+                            "ジェニーの薬にはほとんど副作用が見られなかったといいます。",
+    jennyExtraInformation = "ジェニーは自分が開発した抗うつ薬に強い誇りを持っています。" +
+                            "その薬は高い効果を示しながらも、副作用が少ないという結果が出ています。",
+    minaExtraInformation = "ミナはジェニーが研究に没頭し、新薬の開発に取り組んでいたことを知っていました。" +
+                           "残念ながらジェニーの研究が中止になったと聞き、彼女を慰めました。",
+
+    renderTexturePath = "RenderTextures/Report"
+},
+        // 앨런의 약 처방전
+        new EvidenceInfo {
+    name = "アランの処方箋",
+    description = "これはアランが服用していた薬の処方箋です。",
+    information = "アランの処方箋が見つかりました。" +
+                  "彼はベンゾジアゼピン系の抗不安薬を服用していました。" +
+                  "精神的不安定さに対処するために処方されていましたが、" +
+                  "最近では異常な量を服用していたことが判明しました。",
+    foundAt = "アランの部屋",
+    notes = "アランが本来服用すべき薬がどこかにあるはずです。",
+
+    nasonExtraInformation = "アランは大学時代からこの薬を服用しており、CEOになってからはさらに服用量が増えました。 " +
+                            "ネイソンは、薬の影響でアランの経営判断に支障が出ることを知っており、無理な要求や侮辱的な発言に大きなストレスを感じていました。",
+
+    jennyExtraInformation = "ジェニーは大学時代からアランが薬を服用していることを知っており、薬の影響で彼のリーダーシップが失われたことを覚えています。 " +
+                            "新薬研究者として彼を助けたかったジェニーでしたが、アランは彼女の夢を馬鹿にして傷つけ、深い心の傷を与えました。 " +
+                            "それ以来、ジェニーはアランに敵意を抱くようになりました。",
+
+    minaExtraInformation = "ミナは大学時代にアランと恋人関係にあり、薬の副作用で彼がしばしば奇妙な行動を取っていたことを知っています。 " +
+                           "ミナはアランとよく口論し、時にはひどく侮辱的な言葉を浴びせられたこともありました。 " +
+                           "卒業後、二人の関係は疎遠となり、最終的に別れることになりました。",
+
+    renderTexturePath = "RenderTextures/Prescription"
+},
+        // 앨런의 책장에서 발견된 편지
+        new EvidenceInfo {
+    name = "カーテンの下で見つかった手紙",
+    description = "アランを脅迫する内容が書かれています。\n",
+    information = "ゲストルームのカーテンの下から一通の手紙が見つかりました。" +
+                  "この手紙にはアランを脅迫する内容が書かれており、" +
+                  "書き手のアランへの怒りがはっきりと表れています。",
+    foundAt = "ゲストルーム",
+    notes = "アランに恨みを持っていた人物を調査してください。",
+
+    nasonExtraInformation = "ネイソンはアランが脅迫されることは珍しくないと考えています。 " +
+                            "企業のCEOであれば、この程度の脅しは大したことではないと彼は思っています。 " +
+                            "しかし、アランは精神的に不安定だったため、この手紙に大きなストレスを感じていたと主張しています。",
+
+    jennyExtraInformation = "アランは精神的に不安定であり、CEOという立場から多くの人に憎まれる行動を取ってきました。 " +
+                            "ジェニーはそんなアランを哀れだとは思っていません。 " +
+                            "彼女自身もアランに対して悪感情を抱いています。",
+
+    minaExtraInformation = "ミナはアランがこのような脅迫を受けていたことに驚き、悲しみます。 " +
+                           "卒業後、彼の消息を知らず、こんなに苦しんでいたとは思いもしませんでした。 " +
+                           "彼の苦しみに気づけなかったことを深く後悔しています。",
+
+    renderTexturePath = "RenderTextures/Letter"
+},
+        // 투기성 주식 투자 내용이 담겨있음
+        new EvidenceInfo {
+    name = "ネイソンのブリーフケースで見つかった法的書類",
+    description = "アランの会社に関する法的問題が記載されています。",
+    information = "ネイソンのブリーフケースの中から法的書類が見つかりました。" +
+                  "この書類はアランの会社が法的な紛争を抱えていた可能性を示唆しています。" +
+                  "アランはこれらの問題をめぐってネイソンと対立していたようです。" +
+                  "この対立がアランの死に直接的な影響を与えたのでしょうか？",
+    foundAt = "ネイソンのブリーフケース",
+    notes = "アランの会社の状況について調査してください。",
+
+    nasonExtraInformation = "ネイソンのブリーフケースで見つかった法的書類には、アランが自社の経営悪化を隠すために投機的な投資を行っていたことが記されています。 " +
+                            "ネイソンはそのような手段に反対しましたが、精神的に不安定だったアランは仕方がなかったと主張していました。",
+
+    jennyExtraInformation = "ジェニーはアランの会社の業績が不安定であることを知っていました。 " +
+                            "ネイソンのブリーフケースで見つかった法的書類には、アランが違法な投資を行っていたことが記されています。 " +
+                            "ジェニーは、アランならそのような行動をしても不思議ではないと認めています。",
+
+    minaExtraInformation = "ネイソンのブリーフケースで見つかった法的書類には、アランが違法な投資を行っていたことが記されています。 " +
+                           "ミナはアランの行動に深く失望しながらも、彼がそこまで追い詰められていたことに哀れみの感情も抱いています。",
+
+    renderTexturePath = "RenderTextures/Nason'sBag"
+},
+        // 미나의 메모
+        new EvidenceInfo {
+    name = "ミナのメモ",
+    description = "ミナのアランへの想いが綴られています。",
+    information = "ミナが書いたメモが見つかりました。" +
+                  "このメモには彼女の本心とアランに対する思いが記されています。" +
+                  "ミナが今でもアランに対して愛情を抱いていたことが推測されます。",
+    foundAt = "ミナの部屋",
+    notes = "ミナとアランの関係について調査してください。",
+
+    nasonExtraInformation = "ネイソンは、ミナとアランが大学時代に恋人関係にあったことを知っています。 " +
+                            "そして、卒業を機に関係が疎遠になり、最終的に別れたことも理解しています。 " +
+                            "ネイソンは、ミナが今でもアランに対して愛情を抱いているのではないかと推測しています。",
+
+    jennyExtraInformation = "ジェニーは、ミナとアランが最終的に良くない形で別れたことを知っています。 " +
+                            "ミナはこのメモをアランに渡すかどうか迷っていたのではないかとジェニーは推測しています。",
+
+    minaExtraInformation = "ミナは今でもアランに対する憐れみの感情を抱いていました。 " +
+                           "彼が死ぬとは思わず、次の機会に自分の気持ちを伝えようと信じていたミナは、 " +
+                           "結果的にそれが叶わなかったことを深く後悔しています。",
+
+    renderTexturePath = "RenderTextures/Memo"
+},
+        // 앨런의 집 주변에서 발견된 발자국
+        new EvidenceInfo {
+    name = "アランの家の周辺で発見された足跡",
+    description = "招待された人物の誰かの足跡であると考えられています。",
+    information = "アランの家の周辺で誰かの足跡が発見されました。" +
+                  "この足跡はアランの部屋の外へと続いています。" +
+                  "この足跡は、招待客の誰かのものであると推測されます。" +
+                  "誰かがアランを殺して家の外に逃げようとしたのでしょうか？",
+    foundAt = "アランの家の周辺",
+    notes = "この足跡の主は誰でしょう？",
+
+    nasonExtraInformation = "ネイソンは、この足跡が自分のものであることを知っています。 " +
+                            "パーティーの途中で電話を受けるために少し外に出ただけでした。",
+
+    jennyExtraInformation = "ジェニーは、この足跡がネイソンのものだと推測しています。 " +
+                            "彼が午後9時ごろ、一時的に外に出ていたのを覚えています。",
+
+    minaExtraInformation = "ミナは、この足跡がアランを殺害した犯人のものであり、窓から逃げたのではないかと考えています。 " +
+                           "その人物は何事もなかったかのように家の中へ戻ったのだとミナは推測しています。",
+
+    renderTexturePath = "RenderTextures/Footprint"
+},
+        // 앨런의 컴퓨터에 표시된 이메일
+        new EvidenceInfo {
+    name = "アランのコンピューターに表示されたメール",
+    description = "新薬プロジェクトの中止に関する最終確認書がアランのPCに表示されています。",
+    information = "アランのコンピューターから1通のメールが発見されました。\n" +
+                  "その内容は、会社の経費削減のために新薬開発プロジェクトを中止するというものでした。",
+    foundAt = "アランのコンピューター",
+    notes = "ジェニーと新薬プロジェクトの関係について調査してください。",
+
+    nasonExtraInformation = "ネイソンは、この決定はアランの会社の経営が悪化していたためだと考えています。 " +
+                            "現在、会社は経営危機にあり、精神的に不安定だったアランが追い詰められて下した判断だと知っています。",
+
+    jennyExtraInformation = "アランが中止しようとしていたプロジェクトは、ジェニーが担当していたものでした。 " +
+                            "その決定により、彼女の研究は失敗に終わる運命にあり、キャリアにも大きな打撃となる恐れがありました。 " +
+                            "ジェニーは、アランが意図的に自分の未来を壊そうとしたと信じています。",
+
+    minaExtraInformation = "ミナは、アランが新薬プロジェクトを中止しようとしたことには別の理由があるのではと考えています。 " +
+                           "表向きの説明は、本当の理由ではないと思っています。",
+
+    renderTexturePath = "RenderTextures/Email"
+},
+        // 앨런이 본래 복용해야 할 약물
+        new EvidenceInfo {
+    name = "アランが本来服用すべき薬",
+    description = "アランが普段から服用していた薬です。",
+    information = "本来アランの部屋にあるはずの薬が、なぜかミナのバッグの中から発見されました。" +
+                  "この証拠はミナへの疑いを強めるものです。",
+    foundAt = "ミナのバッグ",
+    notes = "なぜミナのバッグにアランの薬が入っていたのでしょうか？",
+
+    nasonExtraInformation = "ネイソンはミナのバッグからアランの薬が見つかったことから、彼女が犯人だと疑っています。 " +
+                            "ミナが薬の中身を毒物にすり替えたのではないかと考えています。",
+
+    jennyExtraInformation = "ジェニーは、ミナのバッグからアランの薬が見つかったことで、彼女が犯人だと推測しています。 " +
+                            "ミナはかつてアランと恋人関係にありましたが、アランが起業してから彼に心を傷つけられたことを知っています。 " +
+                            "その復讐としてアランを毒殺したとジェニーは主張しています。",
+
+    minaExtraInformation = "ミナは自分のバッグからアランの薬が見つかったことに驚いています。 " +
+                           "彼女はその薬を見たことすらなかったと主張します。 " +
+                           "ミナは誰かが薬の中身をすり替え、自分のバッグに隠して罪を着せようとしたのだと考えています。",
+
+    renderTexturePath = "RenderTextures/Mina'sBag"
+},
+        // 손상된 식물
+        new EvidenceInfo {
+    name = "傷つけられた植物",
+    description = "アランが育てていた植物が引き抜かれていました。",
+    information = "アランが丁寧に育てていた植物が引き抜かれた状態で発見されました。" +
+                  "この植物はアランが大切にしていたものであり、" +
+                  "誰かがアランに対して恨みを抱いて壊した証拠かもしれません。",
+    foundAt = "植物室",
+    notes = "植物室にいた人物を調査してください。",
+
+    nasonExtraInformation = "ネイソンは、アランが植物を育てるのを楽しんでいたことを知っていました。 " +
+                            "彼はその趣味がアランのストレス解消に役立っていたと信じています。",
+
+    jennyExtraInformation = "ジェニーは、植物が傷つけられていたことについて知らないふりをしています。 " +
+                            "彼女は午後11時ごろに植物室にいたと主張し、足が引っかかって鉢を倒してしまっただけだと言います。 " +
+                            "しかし、これは彼女の怒りが表に出た一場面とも考えられます。",
+
+    minaExtraInformation = "ミナは、アランが植物を育てていたことを今日初めて知ったと話しています。 " +
+                           "学生時代のアランは植物に興味がなかったと主張します。 " +
+                           "また、午後11時ごろにジェニーが植物室にいたことを知っていると言います。",
+
+    renderTexturePath = "RenderTextures/Plant"
+},
+        // 경영 보고서 일부
+        new EvidenceInfo {
+    name = "経営報告書の一部",
+    description = "経営報告書の一部が床に散らばっています。",
+    information = "経営報告書の一部がプレイルームの床に散らばっていました。" +
+                  "報告書には会社の直近の四半期の業績が記されており、" +
+                  "特に資金不足と事業損失に関する内容が強調されています。",
+    foundAt = "エアホッケー部屋",
+    notes = "アランの会社が抱える財政問題について調査してください。",
+
+    nasonExtraInformation = "ネイソンは午後10時頃、エアホッケー部屋でアランと会社の財政問題について話し合っていました。 " +
+                            "彼はアランが投資家たちから経営の圧力を受けていたことを知っており、 " +
+                            "そのストレスからアランは報告書の一部を床に投げ捨てたのです。",
+
+    jennyExtraInformation = "ジェニーはアランの会社が財政的に厳しい状況にあることを知っています。 " +
+                            "最近、新薬開発への投資額が減っているという報告を受けており、 " +
+                            "その影響で多くの研究者が転職を考えていると話しています。",
+
+    minaExtraInformation = "ミナは最近のニュースでアランの会社が経営に苦しんでいることを知りました。 " +
+                           "アランのことが心配でしたが、自分の言葉で励ませるか分からず、声をかけられなかったと語っています。",
+
+    renderTexturePath = "RenderTextures/Documents"
+},
+        };
+
+        string filePath = Path.Combine(jsonPath, "evidenceData.json");
+        evidencePath = filePath;
+
+        // Json 폴더가 없으면 생성
+        if (!Directory.Exists(jsonPath))
+        {
+            Directory.CreateDirectory(jsonPath);
+        }
+
+        // JSON으로 직렬화
+        string jsonData = JsonConvert.SerializeObject(new EvidenceInfoList { evidenceInfoList = evidences }, Formatting.Indented);
+
+        // 파일로 저장
+        File.WriteAllText(filePath, jsonData);
+
+        // 경로 출력
+        Debug.Log("JSON file created at: " + filePath);
+    }
+
+    private void SaveKoEvidenceJson()
     {
         // ThingInfo 객체 생성
         List<EvidenceInfo> evidences = new List<EvidenceInfo>
@@ -633,7 +1706,6 @@ public class JsonManager : MonoBehaviour
         },
         };
 
-
         string filePath = Path.Combine(jsonPath, "evidenceData.json");
         evidencePath = filePath;
 
@@ -651,8 +1723,6 @@ public class JsonManager : MonoBehaviour
 
         // 경로 출력
         Debug.Log("JSON file created at: " + filePath);
-
-//         IsSavedEvidenceJsonProperty = true;
     }
 
     public NPCRoleInfoList LoadNPCRoleJson()

@@ -27,7 +27,7 @@ public class EvidenceButton : MonoBehaviour
 
     public void SetText(Evidence evidence)
     {
-        this.evidenceNameText.text = "¢º " + evidence.GetName();        
+        this.evidenceNameText.text = evidence.GetName();        
     }
 
     /// <summary>
